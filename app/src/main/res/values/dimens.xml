@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Home Screen -->
+    <dimen name="home_card_height">500dp</dimen>
+    <dimen name="home_card_corner_radius">18dp</dimen>
+    <dimen name="home_card_image_corner_bottom">14dp</dimen>
+
+    <dimen name="home_card_padding_horizontal">16dp</dimen>
+    <dimen name="home_card_padding_vertical">12dp</dimen>
+
+    <!-- Navigation -->
+    <dimen name="home_spacing_small">4dp</dimen>
+    <dimen name="home_spacing_medium">8dp</dimen>
+    <dimen name="home_spacing_large">10dp</dimen>
+    <dimen name="home_spacing_xlarge">12dp</dimen>
+    <dimen name="home_spacing_xxlarge">14dp</dimen>
+
+    <!-- Icon Sizes -->
+    <dimen name="home_icon_button_size">38dp</dimen>
+    <dimen name="home_nav_icon_size">48dp</dimen>
+    <dimen name="home_fab_size">52dp</dimen>
+    <dimen name="home_fab_icon_size">28dp</dimen>
+
+    <!-- Bottom Sheet -->
+    <dimen name="home_sheet_peek_height">120dp</dimen>
+    <dimen name="home_sheet_max_height">420dp</dimen>
+    <dimen name="home_sheet_padding_horizontal">20dp</dimen>
+    <dimen name="home_sheet_padding_vertical">4dp</dimen>
+
+
+    <!-- Screen Padding -->
+    <dimen name="home_screen_padding_horizontal">18dp</dimen>
+    <dimen name="home_screen_padding_vertical">10dp</dimen>
+
+    <!-- Drag Handle -->
+    <dimen name="home_drag_handle_width">60dp</dimen>
+    <dimen name="home_drag_handle_height">4dp</dimen>
+    <dimen name="home_drag_handle_corner">2dp</dimen>
+</resources>

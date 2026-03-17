@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Массив ID жанров -->
+    <string-array name="genre_ids">
+        <item>fantasy_mystic</item>
+        <item>sci_fi</item>
+        <item>detective_thriller</item>
+        <item>health_sports</item>
+        <item>romance</item>
+        <item>horror</item>
+        <item>biography</item>
+        <item>travel_geo</item>
+        <item>classic</item>
+        <item>historical</item>
+        <item>comics</item>
+        <item>modern_prose</item>
+        <item>business_career</item>
+        <item>art_creativity</item>
+        <item>humor_satire</item>
+        <item>science_education</item>
+        <item>tech_it</item>
+    </string-array>
+
+    <!-- Массив названий жанров -->
+    <string-array name="genre_name_res_ids">
+        <item>@string/genre_fantasy_mystic</item>
+        <item>@string/genre_sci_fi</item>
+        <item>@string/genre_detective_thriller</item>
+        <item>@string/genre_health_sports</item>
+        <item>@string/genre_romance</item>
+        <item>@string/genre_horror</item>
+        <item>@string/genre_biography</item>
+        <item>@string/genre_travel_geo</item>
+        <item>@string/genre_classic</item>
+        <item>@string/genre_historical</item>
+        <item>@string/genre_comics</item>
+        <item>@string/genre_modern_prose</item>
+        <item>@string/genre_business_career</item>
+        <item>@string/genre_art_creativity</item>
+        <item>@string/genre_humor_satire</item>
+        <item>@string/genre_science_education</item>
+        <item>@string/genre_tech_it</item>
+    </string-array>
+</resources>
