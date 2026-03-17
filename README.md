@@ -59,7 +59,7 @@
 
 ---
 
-## 💻 Технологический стек
+## 💻 Наш технологический стек
 * **Язык:** Kotlin
 * **UI:** Jetpack Compose
 * **Network:** Retrofit 2, OkHttp
