@@ -2,13 +2,10 @@ package com.practicum.vkproject3.ui.auth
 
 import com.practicum.vkproject3.presentation.auth.RegistrationViewModel
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -20,10 +17,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -121,26 +116,6 @@ fun RegistrationScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            HorizontalDivider(modifier = Modifier.weight(1f), color = Color.Gray)
-            Text(
-                text = stringResource(R.string.registration_or_social),
-                modifier = Modifier.padding(horizontal = 8.dp),
-                color = Color.Gray,
-                fontSize = 12.sp
-            )
-            HorizontalDivider(modifier = Modifier.weight(1f), color = Color.Gray)
-        }
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            SocialButton(iconResId = R.drawable.ic_gosuslugi_logo)
-            SocialButton(iconResId = R.drawable.ic_vk_logo)
-        }
-
         Spacer(modifier = Modifier.weight(1f))
 
         Row(modifier = Modifier.padding(bottom = 24.dp)) {
@@ -153,24 +128,6 @@ fun RegistrationScreen(
                 modifier = Modifier.clickable { onNavigateToLogin() }
             )
         }
-    }
-}
-
-@Composable
-fun SocialButton(iconResId: Int) {
-    Box(
-        modifier = Modifier
-            .size(50.dp)
-            .clip(CircleShape)
-            .border(1.dp, Color.Gray, CircleShape)
-            .clickable { },
-        contentAlignment = Alignment.Center
-    ) {
-        Image(
-            painter = painterResource(id = iconResId),
-            contentDescription = null,
-            modifier = Modifier.size(24.dp)
-        )
     }
 }
 

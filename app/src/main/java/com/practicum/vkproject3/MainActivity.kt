@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
@@ -31,6 +32,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 import com.practicum.vkproject3.ui.auth.ForgotPasswordScreen
 import com.practicum.vkproject3.ui.auth.LoginScreen
 import com.practicum.vkproject3.ui.auth.RegistrationScreen
@@ -52,13 +56,19 @@ sealed class BottomNavItem(val route: String, val title: String, val icon: Image
 }
 
 class MainActivity : ComponentActivity() {
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val firebase : DatabaseReference = FirebaseDatabase.getInstance().getReference()
+        val auth = FirebaseAuth.getInstance()
+
         setContent {
             VkProject3Theme {
                 val rootNavController = rememberNavController()
+                val startDestination = if (auth.currentUser != null) "main_app" else "login"
 
-                NavHost(navController = rootNavController, startDestination = "login") {
+                NavHost(navController = rootNavController, startDestination = startDestination) {
                     composable("login") {
                         LoginScreen(
                             onNavigateToRegistration = { rootNavController.navigate("registration") },
@@ -102,7 +112,13 @@ class MainActivity : ComponentActivity() {
                             }
                         })
                     }
-                    composable("main_app") { MainFlowScreen() }
+                    composable("main_app") { 
+                        MainFlowScreen(onLogout = {
+                            rootNavController.navigate("login") {
+                                popUpTo("main_app") { inclusive = true }
+                            }
+                        }) 
+                    }
                 }
             }
         }
@@ -110,7 +126,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MainFlowScreen() {
+fun MainFlowScreen(onLogout: () -> Unit) {
     val navController = rememberNavController()
     val items = listOf(
         BottomNavItem.Books,
@@ -178,7 +194,10 @@ fun MainFlowScreen() {
             }
 
             composable(BottomNavItem.Profile.route) {
-                ProfileScreen(onNavigateToHistory = { navController.navigate("history_screen") })
+                ProfileScreen(
+                    onNavigateToHistory = { navController.navigate("history_screen") },
+                    onLogout = onLogout
+                )
             }
 
             composable("history_screen") {

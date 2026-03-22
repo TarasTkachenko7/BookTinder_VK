@@ -15,6 +15,9 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,16 +30,27 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.practicum.vkproject3.R
+import com.practicum.vkproject3.presentation.profile.ProfileViewModel
 import com.practicum.vkproject3.ui.theme.MainBrown
+import org.koin.androidx.compose.koinViewModel
 
 val BeigeBackground = Color(0xFFFDF8F5)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
-    onNavigateToHistory: () -> Unit = {}
+    onNavigateToHistory: () -> Unit = {},
+    onLogout: () -> Unit = {},
+    viewModel: ProfileViewModel = koinViewModel()
 ) {
+    val state by viewModel.state.collectAsState()
     val scrollState = rememberScrollState()
+
+    LaunchedEffect(state.isLoggedOut) {
+        if (state.isLoggedOut) {
+            onLogout()
+        }
+    }
 
     val figmaGradient = Brush.linearGradient(
         0.0f to Color(0xFFED15B0),
@@ -138,6 +152,16 @@ fun ProfileScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             MenuButton(text = stringResource(R.string.profile_support), backgroundColor = MainBrown)
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                text = "Выйти из профиля",
+                color = Color.Red.copy(alpha = 0.7f),
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier
+                    .clickable { viewModel.logout() }
+                    .padding(16.dp)
+            )
 
             Spacer(modifier = Modifier.height(40.dp))
         }
