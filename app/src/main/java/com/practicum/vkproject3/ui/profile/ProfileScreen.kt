@@ -11,8 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,12 +22,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.practicum.vkproject3.R
 import com.practicum.vkproject3.presentation.profile.ProfileViewModel
 import com.practicum.vkproject3.ui.theme.MainBrown
@@ -39,12 +40,19 @@ val BeigeBackground = Color(0xFFFDF8F5)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
+    onNavigateToEdit: () -> Unit = {},
     onNavigateToHistory: () -> Unit = {},
+    onNavigateToSettings: () -> Unit = {},
+    onNavigateToSubscription: () -> Unit = {},
     onLogout: () -> Unit = {},
     viewModel: ProfileViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
     val scrollState = rememberScrollState()
+
+    LaunchedEffect(Unit) {
+        viewModel.loadData()
+    }
 
     LaunchedEffect(state.isLoggedOut) {
         if (state.isLoggedOut) {
@@ -121,17 +129,26 @@ fun ProfileScreen(
                     .background(Color.White),
                 contentAlignment = Alignment.Center
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.spotty),
-                    contentDescription = stringResource(R.string.content_description_avatar),
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize().clip(CircleShape)
-                )
+                if (state.user?.avatarUrl != null) {
+                    AsyncImage(
+                        model = state.user?.avatarUrl,
+                        contentDescription = stringResource(R.string.content_description_avatar),
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize().clip(CircleShape)
+                    )
+                } else {
+                    Image(
+                        painter = painterResource(id = R.drawable.spotty),
+                        contentDescription = stringResource(R.string.content_description_avatar),
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize().clip(CircleShape)
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = stringResource(R.string.profile_name),
+                text = state.user?.name ?: stringResource(R.string.profile_name),
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.Black
@@ -139,28 +156,31 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            MenuButton(text = stringResource(R.string.profile_edit), backgroundColor = MainBrown)
+            MenuButton(
+                text = stringResource(R.string.profile_edit),
+                icon = Icons.Default.Edit,
+                onClick = onNavigateToEdit
+            )
             Spacer(modifier = Modifier.height(12.dp))
 
-            MenuButton(text = stringResource(R.string.profile_subscription), backgroundBrush = figmaGradient)
+            MenuButton(
+                text = stringResource(R.string.profile_subscription),
+                icon = Icons.Default.StarBorder,
+                onClick = onNavigateToSubscription
+            )
             Spacer(modifier = Modifier.height(12.dp))
 
-            MenuButton(text = stringResource(R.string.profile_history), backgroundColor = MainBrown, onClick = onNavigateToHistory)
+            MenuButton(
+                text = stringResource(R.string.profile_history),
+                icon = Icons.Default.History,
+                onClick = onNavigateToHistory
+            )
             Spacer(modifier = Modifier.height(12.dp))
 
-            MenuButton(text = stringResource(R.string.profile_settings), backgroundColor = MainBrown)
-            Spacer(modifier = Modifier.height(12.dp))
-
-            MenuButton(text = stringResource(R.string.profile_support), backgroundColor = MainBrown)
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text(
-                text = "Выйти из профиля",
-                color = Color.Red.copy(alpha = 0.7f),
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier
-                    .clickable { viewModel.logout() }
-                    .padding(16.dp)
+            MenuButton(
+                text = stringResource(R.string.profile_settings),
+                icon = Icons.Default.Settings,
+                onClick = onNavigateToSettings
             )
 
             Spacer(modifier = Modifier.height(40.dp))
@@ -171,27 +191,33 @@ fun ProfileScreen(
 @Composable
 fun MenuButton(
     text: String,
-    backgroundColor: Color? = null,
-    backgroundBrush: Brush? = null,
+    icon: ImageVector,
+    backgroundColor: Color = MainBrown,
     onClick: () -> Unit = {}
 ) {
-    val backgroundModifier = if (backgroundBrush != null) {
-        Modifier.background(backgroundBrush, shape = RoundedCornerShape(12.dp))
-    } else {
-        Modifier.background(backgroundColor ?: MainBrown, shape = RoundedCornerShape(12.dp))
-    }
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(56.dp)
-            .then(backgroundModifier)
+            .background(backgroundColor, shape = RoundedCornerShape(12.dp))
             .clickable { onClick() }
             .padding(horizontal = 16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = text, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Medium)
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = Color.White,
+            modifier = Modifier.size(24.dp)
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(
+            text = text,
+            color = Color.White,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.weight(1f)
+        )
         Icon(
             imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = null,

@@ -28,7 +28,6 @@ class AuthRepositoryImpl(
                 )
                 database.child(user.uid).setValue(userMap)
 
-                // Отправляем письмо подтверждения сразу после регистрации
                 user.sendEmailVerification().await()
 
                 Result.success(AuthResponse(token = user.uid, message = "Success"))
@@ -77,8 +76,24 @@ class AuthRepositoryImpl(
     }
 
     override suspend fun isEmailVerified(): Boolean {
-        // Перезагружаем данные пользователя, чтобы обновить статус isEmailVerified
+
         auth.currentUser?.reload()?.await()
         return auth.currentUser?.isEmailVerified ?: false
+    }
+
+    override suspend fun deleteAccount(): Result<Unit> {
+        return try {
+            val user = auth.currentUser ?: return Result.failure(Exception("Пользователь не авторизован"))
+            val uid = user.uid
+            
+
+            database.child(uid).removeValue().await()
+
+            user.delete().await()
+            
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }

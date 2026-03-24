@@ -8,13 +8,36 @@ import kotlinx.coroutines.delay
 
 class UserRepositoryImpl(private val context: Context) : UserRepository {
 
+    private val prefs = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+
     override suspend fun getProfile(): UserProfile {
-        delay(2000)
+        delay(500)
+        val name = prefs.getString("user_name", UserSession.userName ?: context.getString(R.string.user_default_name)) ?: ""
+        val avatarUrl = prefs.getString("user_avatar", UserSession.userAvatarUrl)
+        val genres = prefs.getStringSet("user_genres", UserSession.selectedGenres) ?: emptySet()
+        
         return UserProfile(
-            name = context.getString(R.string.user_default_name),
+            name = name,
             email = context.getString(R.string.user_default_email),
-            phone = context.getString(R.string.user_default_phone)
+            phone = context.getString(R.string.user_default_phone),
+            avatarUrl = avatarUrl,
+            favoriteGenres = genres.toList()
         )
+    }
+
+    override suspend fun updateProfile(name: String, genres: List<String>, avatarUrl: String?): Boolean {
+        delay(500)
+        prefs.edit().apply {
+            putString("user_name", name)
+            putString("user_avatar", avatarUrl)
+            putStringSet("user_genres", genres.toSet())
+            apply()
+        }
+
+        UserSession.userName = name
+        UserSession.selectedGenres = genres.toSet()
+        UserSession.userAvatarUrl = avatarUrl
+        return true
     }
 
     override suspend fun restorePassword(email: String): Boolean {

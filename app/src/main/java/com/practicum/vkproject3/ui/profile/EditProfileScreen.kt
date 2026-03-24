@@ -1,0 +1,250 @@
+package com.practicum.vkproject3.ui.profile
+
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import com.practicum.vkproject3.R
+import com.practicum.vkproject3.presentation.profile.ProfileViewModel
+import com.practicum.vkproject3.ui.theme.MainBrown
+import org.koin.androidx.compose.koinViewModel
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@Composable
+fun EditProfileScreen(
+    onBack: () -> Unit,
+    onLogout: () -> Unit,
+    viewModel: ProfileViewModel = koinViewModel()
+) {
+    val state by viewModel.state.collectAsState()
+    var name by remember { mutableStateOf("") }
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    val selectedGenres = remember { mutableStateListOf<String>() }
+    val scrollState = rememberScrollState()
+    var isInitialized by remember { mutableStateOf(false) }
+
+    LaunchedEffect(state.user) {
+        if (state.user != null && !isInitialized) {
+            name = state.user?.name ?: ""
+            selectedGenres.clear()
+            selectedGenres.addAll(state.user?.favoriteGenres ?: emptyList())
+            isInitialized = true
+        }
+    }
+
+    LaunchedEffect(state.isLoggedOut) {
+        if (state.isLoggedOut) {
+            onLogout()
+        }
+    }
+
+    LaunchedEffect(state.isUpdateSuccess) {
+        if (state.isUpdateSuccess) {
+            viewModel.resetUpdateSuccess()
+            onBack()
+        }
+    }
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        selectedImageUri = uri
+    }
+
+    val genres = listOf("Фантастика", "Детектив", "Роман", "Фэнтези", "Триллер", "Приключения", "Классика")
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Редактировать профиль", fontWeight = FontWeight.Bold) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = BeigeBackground)
+            )
+        },
+        containerColor = BeigeBackground
+    ) { padding ->
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(horizontal = 24.dp)
+                    .verticalScroll(scrollState),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Смена аватара
+                Box(
+                    modifier = Modifier
+                        .size(120.dp)
+                        .clip(CircleShape)
+                        .background(Color.LightGray)
+                        .clickable { launcher.launch("image/*") },
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (selectedImageUri != null) {
+                        AsyncImage(
+                            model = selectedImageUri,
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else if (state.user?.avatarUrl != null) {
+                        AsyncImage(
+                            model = state.user?.avatarUrl,
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Image(
+                            painter = painterResource(id = R.drawable.spotty),
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.3f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(Icons.Default.CameraAlt, contentDescription = null, tint = Color.White)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { newValue ->
+                        name = newValue.filter { char ->
+                            char in 'а'..'я' ||
+                                    char in 'А'..'Я' ||
+                                    char == 'ё' ||
+                                    char == 'Ё' ||
+                                    char == ' '
+                        }
+                    },
+                    label = { Text("Ваше имя") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MainBrown,
+                        focusedLabelColor = MainBrown
+                    ),
+                    singleLine = true
+                )
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                // Выбор жанров
+                Text(
+                    text = "Любимые жанры",
+                    modifier = Modifier.align(Alignment.Start),
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 18.sp
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    genres.forEach { genre ->
+                        FilterChip(
+                            selected = selectedGenres.contains(genre),
+                            onClick = {
+                                if (selectedGenres.contains(genre)) selectedGenres.remove(genre)
+                                else selectedGenres.add(genre)
+                            },
+                            label = { Text(genre) },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MainBrown,
+                                selectedLabelColor = Color.White
+                            )
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                Button(
+                    onClick = {
+                        val avatarToSave = selectedImageUri?.toString() ?: state.user?.avatarUrl
+                        viewModel.updateProfile(name, selectedGenres.toList(), avatarToSave)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = MainBrown),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("Сохранить изменения", modifier = Modifier.padding(8.dp))
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                val dullBrown = Color(0xFF9E8E85)
+                OutlinedButton(
+                    onClick = { viewModel.logout() },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = dullBrown),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, dullBrown),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("Выйти из аккаунта", modifier = Modifier.padding(8.dp))
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                TextButton(
+                    onClick = { viewModel.deleteAccount() },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Удалить аккаунт", color = Color.Red.copy(alpha = 0.6f), fontWeight = FontWeight.SemiBold)
+                }
+
+                Spacer(modifier = Modifier.height(40.dp))
+            }
+
+            if (state.isLoading) {
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.2f))
+                        .clickable(enabled = false) {},
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = MainBrown)
+                }
+            }
+        }
+    }
+}

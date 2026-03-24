@@ -44,7 +44,9 @@ import com.practicum.vkproject3.ui.books.CatalogScreen
 import com.practicum.vkproject3.ui.books.FavoritesScreen
 import com.practicum.vkproject3.ui.genres.GenrePickScreen
 import com.practicum.vkproject3.ui.home.HomeScreen
+import com.practicum.vkproject3.ui.profile.EditProfileScreen
 import com.practicum.vkproject3.ui.profile.HistoryScreen
+import com.practicum.vkproject3.ui.profile.PlaceholderScreen
 import com.practicum.vkproject3.ui.profile.ProfileScreen
 import com.practicum.vkproject3.ui.theme.VkProject3Theme
 
@@ -195,13 +197,31 @@ fun MainFlowScreen(onLogout: () -> Unit) {
 
             composable(BottomNavItem.Profile.route) {
                 ProfileScreen(
+                    onNavigateToEdit = { navController.navigate("edit_profile") },
                     onNavigateToHistory = { navController.navigate("history_screen") },
+                    onNavigateToSettings = { navController.navigate("settings_screen") },
+                    onNavigateToSubscription = { navController.navigate("subscription_screen") },
+                    onLogout = onLogout
+                )
+            }
+
+            composable("edit_profile") {
+                EditProfileScreen(
+                    onBack = { navController.popBackStack() },
                     onLogout = onLogout
                 )
             }
 
             composable("history_screen") {
                 HistoryScreen(onBack = { navController.popBackStack() })
+            }
+
+            composable("settings_screen") {
+                PlaceholderScreen(title = "Настройки", onBack = { navController.popBackStack() })
+            }
+
+            composable("subscription_screen") {
+                PlaceholderScreen(title = "Подписка", onBack = { navController.popBackStack() })
             }
 
             composable("favorites_screen") {

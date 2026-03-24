@@ -13,7 +13,8 @@ data class ProfileState(
     val isLoading: Boolean = false,
     val user: UserProfile? = null,
     val error: String? = null,
-    val isLoggedOut: Boolean = false
+    val isLoggedOut: Boolean = false,
+    val isUpdateSuccess: Boolean = false
 )
 
 class ProfileViewModel(
@@ -30,18 +31,50 @@ class ProfileViewModel(
 
     fun loadData() {
         viewModelScope.launch {
-            _state.value = ProfileState(isLoading = true)
+            _state.value = _state.value.copy(isLoading = true)
             try {
                 val profile = repository.getProfile()
-                _state.value = ProfileState(isLoading = false, user = profile)
+                _state.value = _state.value.copy(isLoading = false, user = profile)
             } catch (e: Exception) {
-                _state.value = ProfileState(isLoading = false, error = "Ошибка сети")
+                _state.value = _state.value.copy(isLoading = false, error = "Ошибка сети")
             }
         }
+    }
+
+    fun updateProfile(name: String, genres: List<String>, avatarUrl: String? = null) {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(isLoading = true)
+            try {
+                val success = repository.updateProfile(name, genres, avatarUrl)
+                if (success) {
+                    _state.value = _state.value.copy(isLoading = false, isUpdateSuccess = true)
+                } else {
+                    _state.value = _state.value.copy(isLoading = false, error = "Ошибка обновления")
+                }
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(isLoading = false, error = "Ошибка сети")
+            }
+        }
+    }
+
+    fun resetUpdateSuccess() {
+        _state.value = _state.value.copy(isUpdateSuccess = false)
     }
 
     fun logout() {
         authRepository.logout()
         _state.value = _state.value.copy(isLoggedOut = true)
+    }
+
+    fun deleteAccount() {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(isLoading = true)
+            val result = authRepository.deleteAccount()
+            if (result.isSuccess) {
+                _state.value = _state.value.copy(isLoading = false, isLoggedOut = true)
+            } else {
+                _state.value = _state.value.copy(isLoading = false, error = "Не удалось удалить аккаунт")
+            }
+        }
     }
 }

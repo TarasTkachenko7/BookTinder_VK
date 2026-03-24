@@ -11,4 +11,5 @@ interface AuthRepository {
     fun logout()
     suspend fun sendEmailVerification(): Result<Unit>
     suspend fun isEmailVerified(): Boolean
+    suspend fun deleteAccount(): Result<Unit>
 }
