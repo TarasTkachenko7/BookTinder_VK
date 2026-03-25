@@ -1,7 +1,5 @@
 package com.practicum.vkproject3.presentation.home
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.practicum.vkproject3.data.profile.UserSession
@@ -81,18 +79,8 @@ class HomeViewModel(private val repository: BookRepository) : ViewModel() {
         }
     }
 
-    fun next() {
-        _state.update { st ->
-            if (st.books.isEmpty()) st
-            else st.copy(index = (st.index + 1).coerceAtMost(st.books.lastIndex))
-        }
-    }
-
-    fun prev() {
-        _state.update { st ->
-            if (st.books.isEmpty()) st
-            else st.copy(index = (st.index - 1).coerceAtLeast(0))
-        }
+    fun onPageChanged(newIndex: Int) {
+        _state.update { it.copy(index = newIndex) }
     }
 
     fun toggleFavorite() {

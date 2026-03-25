@@ -45,7 +45,7 @@ import com.practicum.vkproject3.ui.profile.ProfileScreen
 import com.practicum.vkproject3.ui.theme.VkProject3Theme
 
 sealed class BottomNavItem(val route: String, val title: String, val icon: ImageVector) {
-    object Books : BottomNavItem("books_screen", "Лента", Icons.Default.Home)
+    object Books : BottomNavItem("books_screen", "Главная", Icons.Default.Home)
     object Discussions : BottomNavItem("discussions", "Обсуждения", Icons.Default.ChatBubbleOutline)
     object Catalog : BottomNavItem("catalog", "Каталог", Icons.Default.MenuBook)
     object Profile : BottomNavItem("profile_screen", "Профиль", Icons.Default.Person)
@@ -162,7 +162,7 @@ fun MainFlowScreen() {
         ) {
             composable(BottomNavItem.Books.route) {
                 HomeScreen(
-                    onFavoritesClick = { navController.navigate("favorites_screen") }
+                    onBookClick = { bookId -> navController.navigate("book_details/$bookId") }
                 )
             }
 
