@@ -17,7 +17,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.practicum.vkproject3.R
-import com.practicum.vkproject3.ui.profile.BeigeBackground
+import com.practicum.vkproject3.ui.theme.BeigeBackground
 import com.practicum.vkproject3.ui.theme.DarkGreen
 import androidx.compose.ui.res.colorResource
 import org.koin.androidx.compose.koinViewModel

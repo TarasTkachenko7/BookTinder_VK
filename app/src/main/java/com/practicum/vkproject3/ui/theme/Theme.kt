@@ -51,10 +51,10 @@ fun VkProject3Theme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            // Красим статус-бар в наш зеленый
-            window.statusBarColor = DarkGreen.toArgb()
-            // Делаем иконки (часы, уведомления) светлыми, так как фон темный
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
+            // Красим статус-бар под цвет фона
+            window.statusBarColor = BeigeBackground.toArgb()
+            // Делаем иконки (часы, уведомления) темными, так как фон светлый
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = true
         }
     }
 

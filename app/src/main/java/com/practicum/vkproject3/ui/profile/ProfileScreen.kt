@@ -32,10 +32,9 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.practicum.vkproject3.R
 import com.practicum.vkproject3.presentation.profile.ProfileViewModel
+import com.practicum.vkproject3.ui.theme.BeigeBackground
 import com.practicum.vkproject3.ui.theme.MainBrown
 import org.koin.androidx.compose.koinViewModel
-
-val BeigeBackground = Color(0xFFFDF8F5)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

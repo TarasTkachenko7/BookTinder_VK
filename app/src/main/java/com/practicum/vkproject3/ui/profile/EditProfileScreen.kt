@@ -29,6 +29,7 @@ import coil.compose.AsyncImage
 import com.practicum.vkproject3.R
 import com.practicum.vkproject3.presentation.profile.ProfileViewModel
 import com.practicum.vkproject3.ui.theme.MainBrown
+import com.practicum.vkproject3.ui.theme.BeigeBackground
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
