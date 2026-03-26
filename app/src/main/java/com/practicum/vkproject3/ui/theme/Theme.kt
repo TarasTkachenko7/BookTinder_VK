@@ -33,7 +33,6 @@ private val LightColorScheme = lightColorScheme(
 @Composable
 fun VkProject3Theme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Отключаем динамические цвета, чтобы наши кастомные цвета работали везде
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
@@ -51,10 +50,8 @@ fun VkProject3Theme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            // Красим статус-бар в наш зеленый
-            window.statusBarColor = DarkGreen.toArgb()
-            // Делаем иконки (часы, уведомления) светлыми, так как фон темный
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
+            window.statusBarColor = BeigeBackground.toArgb()
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = true
         }
     }
 

@@ -28,10 +28,10 @@ import coil.compose.AsyncImage
 import com.practicum.vkproject3.R
 import com.practicum.vkproject3.domain.model.Book
 import com.practicum.vkproject3.domain.model.mockCatalog
+import com.practicum.vkproject3.ui.theme.BeigeBackground
 
 val DarkGreen = Color(0xFF2C4A42)
 val MainBrown = Color(0xFFC77A58)
-val BeigeBackground = Color(0xFFF9F8F4)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
