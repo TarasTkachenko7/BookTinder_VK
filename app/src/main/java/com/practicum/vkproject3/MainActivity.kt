@@ -3,6 +3,7 @@ package com.practicum.vkproject3
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -48,6 +49,7 @@ import com.practicum.vkproject3.ui.profile.EditProfileScreen
 import com.practicum.vkproject3.ui.profile.HistoryScreen
 import com.practicum.vkproject3.ui.profile.PlaceholderScreen
 import com.practicum.vkproject3.ui.profile.ProfileScreen
+import com.practicum.vkproject3.ui.theme.DarkGreen
 import com.practicum.vkproject3.ui.theme.VkProject3Theme
 
 sealed class BottomNavItem(val route: String, val title: String, val icon: ImageVector) {
@@ -64,7 +66,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val firebase : DatabaseReference = FirebaseDatabase.getInstance().getReference()
         val auth = FirebaseAuth.getInstance()
-
         setContent {
             VkProject3Theme {
                 val rootNavController = rememberNavController()
@@ -139,7 +140,7 @@ fun MainFlowScreen(onLogout: () -> Unit) {
 
     Scaffold(
         bottomBar = {
-            NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
+            NavigationBar(containerColor = DarkGreen) {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = navBackStackEntry?.destination
 
@@ -155,8 +156,11 @@ fun MainFlowScreen(onLogout: () -> Unit) {
                         label = { Text(screen.title) },
                         selected = isSelected,
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = Color(0xFFC77A58),
-                            indicatorColor = Color.Transparent 
+                            selectedIconColor = Color.White,
+                            unselectedIconColor = Color.White.copy(alpha = 0.6f),
+                            selectedTextColor = Color.White,
+                            unselectedTextColor = Color.White.copy(alpha = 0.6f),
+                            indicatorColor = Color.White.copy(alpha = 0.1f)
                         ),
                         onClick = {
                             navController.navigate(screen.route) {

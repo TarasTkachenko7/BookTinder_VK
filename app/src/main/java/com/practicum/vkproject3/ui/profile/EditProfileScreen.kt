@@ -100,7 +100,7 @@ fun EditProfileScreen(
             ) {
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // Смена аватара
+
                 Box(
                     modifier = Modifier
                         .size(120.dp)
@@ -151,6 +151,8 @@ fun EditProfileScreen(
                                     char in 'А'..'Я' ||
                                     char == 'ё' ||
                                     char == 'Ё' ||
+                                    char in 'a'..'z' ||
+                                    char in 'A'..'Z' ||
                                     char == ' '
                         }
                     },
@@ -166,7 +168,7 @@ fun EditProfileScreen(
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // Выбор жанров
+
                 Text(
                     text = "Любимые жанры",
                     modifier = Modifier.align(Alignment.Start),
