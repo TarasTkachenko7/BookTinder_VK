@@ -31,6 +31,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.practicum.vkproject3.presentation.discussions.ChatScreen
 import com.practicum.vkproject3.ui.auth.ForgotPasswordScreen
 import com.practicum.vkproject3.ui.auth.LoginScreen
 import com.practicum.vkproject3.ui.auth.RegistrationScreen
@@ -38,6 +39,7 @@ import com.practicum.vkproject3.ui.auth.VerificationScreen
 import com.practicum.vkproject3.ui.books.BookDetailsScreen
 import com.practicum.vkproject3.ui.books.CatalogScreen
 import com.practicum.vkproject3.ui.books.FavoritesScreen
+import com.practicum.vkproject3.ui.discussions.DiscussionsScreen
 import com.practicum.vkproject3.ui.genres.GenrePickScreen
 import com.practicum.vkproject3.ui.home.HomeScreen
 import com.practicum.vkproject3.ui.profile.HistoryScreen
@@ -199,6 +201,21 @@ fun MainFlowScreen() {
                 val bookId = backStackEntry.arguments?.getString("bookId") ?: ""
                 BookDetailsScreen(bookId = bookId, onBack = { navController.popBackStack() })
             }
+            // 1. Главный экран общения (теперь с постами)
+            composable(BottomNavItem.Discussions.route) {
+                DiscussionsScreen(navController = navController)
+            }
+            composable(
+                route = "discussion_chat/{discussionId}",
+                arguments = listOf(navArgument("discussionId") { type = NavType.IntType })
+            ) { backStackEntry ->
+                val discussionId = backStackEntry.arguments?.getInt("discussionId") ?: 0
+                ChatScreen(
+                    discussionId = discussionId,
+                    onBackClick = { navController.popBackStack() }
+                )
+            }
+
         }
     }
 }
