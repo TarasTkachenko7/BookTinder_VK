@@ -20,6 +20,6 @@ val viewModelModule = module {
 
     viewModel { BookViewModel(get()) }
     viewModel { HomeViewModel(get()) }
-    viewModel { GenrePickViewModel(androidContext()) }
+    viewModel { GenrePickViewModel(androidContext(), get()) }
     viewModel { ProfileViewModel(get(), get()) }
 }

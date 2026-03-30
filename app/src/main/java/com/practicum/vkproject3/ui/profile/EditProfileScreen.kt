@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -31,7 +32,6 @@ import com.practicum.vkproject3.presentation.profile.ProfileViewModel
 import com.practicum.vkproject3.ui.theme.MainBrown
 import com.practicum.vkproject3.ui.theme.BeigeBackground
 import org.koin.androidx.compose.koinViewModel
-
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -46,6 +46,18 @@ fun EditProfileScreen(
     val selectedGenres = remember { mutableStateListOf<String>() }
     val scrollState = rememberScrollState()
     var isInitialized by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
+
+    val genreIds = remember { context.resources.getStringArray(R.array.genre_ids) }
+    val genreNames = remember {
+        val resIds = context.resources.obtainTypedArray(R.array.genre_name_res_ids)
+        val names = Array(genreIds.size) { i -> context.getString(resIds.getResourceId(i, 0)) }
+        resIds.recycle()
+        names
+    }
+
+    var expanded by remember { mutableStateOf(false) }
 
     LaunchedEffect(state.user) {
         if (state.user != null && !isInitialized) {
@@ -75,16 +87,12 @@ fun EditProfileScreen(
         selectedImageUri = uri
     }
 
-    val context = androidx.compose.ui.platform.LocalContext.current
-
     LaunchedEffect(state.error) {
         state.error?.let { errorMessage ->
             android.widget.Toast.makeText(context, errorMessage, android.widget.Toast.LENGTH_LONG).show()
             viewModel.clearError()
         }
     }
-
-    val genres = listOf("Фантастика", "Детектив", "Роман", "Фэнтези", "Триллер", "Приключения", "Классика")
 
     Scaffold(
         topBar = {
@@ -110,7 +118,6 @@ fun EditProfileScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(modifier = Modifier.height(20.dp))
-
 
                 Box(
                     modifier = Modifier
@@ -179,7 +186,6 @@ fun EditProfileScreen(
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-
                 Text(
                     text = "Любимые жанры",
                     modifier = Modifier.align(Alignment.Start),
@@ -188,23 +194,50 @@ fun EditProfileScreen(
                 )
                 Spacer(modifier = Modifier.height(12.dp))
 
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = { expanded = !expanded }
                 ) {
-                    genres.forEach { genre ->
-                        FilterChip(
-                            selected = selectedGenres.contains(genre),
-                            onClick = {
-                                if (selectedGenres.contains(genre)) selectedGenres.remove(genre)
-                                else selectedGenres.add(genre)
-                            },
-                            label = { Text(genre) },
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = MainBrown,
-                                selectedLabelColor = Color.White
-                            )
+                    OutlinedTextField(
+                        value = if (selectedGenres.isEmpty()) "Выберите жанры" else "Выбрано жанров: ${selectedGenres.size}",
+                        onValueChange = {},
+                        readOnly = true,
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                        modifier = Modifier
+                            .menuAnchor()
+                            .fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MainBrown,
+                            focusedLabelColor = MainBrown
                         )
+                    )
+
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        genreIds.forEachIndexed { index, id ->
+                            val isChecked = selectedGenres.contains(id)
+                            DropdownMenuItem(
+                                text = {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Checkbox(
+                                            checked = isChecked,
+                                            onCheckedChange = null,
+                                            colors = CheckboxDefaults.colors(checkedColor = MainBrown)
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(text = genreNames[index])
+                                    }
+                                },
+                                onClick = {
+                                    if (isChecked) selectedGenres.remove(id)
+                                    else selectedGenres.add(id)
+                                },
+                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp)
+                            )
+                        }
                     }
                 }
 

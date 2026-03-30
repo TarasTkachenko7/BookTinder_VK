@@ -30,7 +30,8 @@ data class GenreItem(
 )
 
 class GenrePickViewModel(
-    private val context: Context
+    private val context: Context,
+    private val userGenreManager: UserGenreManager
 ) : ViewModel() {
     private val _state = MutableStateFlow(GenrePickState())
     val state = _state.asStateFlow()
@@ -74,6 +75,15 @@ class GenrePickViewModel(
         }
     }
 
+    fun saveSelectedGenres() {
+        val selectedSet = _state.value.selected
+        UserSession.selectedGenres = selectedSet
+
+        viewModelScope.launch {
+            userGenreManager.saveUserGenres(selectedSet.toList())
+        }
+    }
+
     fun toggleGenre(id: String) {
         _state.update { st ->
             val next = st.selected.toMutableSet()
@@ -82,7 +92,4 @@ class GenrePickViewModel(
         }
     }
 
-    fun saveSelectedGenres() {
-        UserSession.selectedGenres = _state.value.selected
-    }
 }

@@ -68,28 +68,16 @@ fun GenrePickScreen(
         } else {
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                state.genres.forEach { genre ->
-                    val selected = genre.id in state.selected
+                state.genres.forEach { genreItem ->
+                    val genreName = stringResource(id = genreItem.stringResId)
+                    val isSelected = state.selected.contains(genreItem.id)
+
                     FilterChip(
-                        selected = selected,
-                        onClick = { viewModel.toggleGenre(genre.id) },
-                        label = {
-                            Text(
-                                text = stringResource(genre.stringResId),
-                                modifier = Modifier.padding(horizontal = 4.dp)
-                            )
-                        },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = DarkGreen,
-                            selectedLabelColor = Color.White,
-                            containerColor = colorResource(R.color.chip_unselected),
-                            labelColor = Color.Black.copy(alpha = 0.7f)
-                        ),
-                        shape = MaterialTheme.shapes.large,
-                        border = null
+                        selected = isSelected,
+                        onClick = { viewModel.toggleGenre(genreItem.id) },
+                        label = { Text(genreName) }
                     )
                 }
             }
