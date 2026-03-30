@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -26,6 +25,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.practicum.vkproject3.ui.common.UserAvatar
 import com.practicum.vkproject3.presentation.discussions.ReviewPost
 
 @Composable
@@ -49,9 +49,10 @@ fun ReviewPostCard(post: ReviewPost, onClick: () -> Unit) {
                         model = post.bookCoverUrl,
                         contentDescription = post.bookTitle,
                         modifier = Modifier
-                            .size(60.dp)
+                            .width(60.dp)
+                            .height(90.dp)
                             .clip(RoundedCornerShape(8.dp)),
-                        contentScale = ContentScale.Crop
+                        contentScale = ContentScale.FillBounds
                     )
                 } else {
                     Box(
@@ -94,11 +95,10 @@ fun ReviewPostCard(post: ReviewPost, onClick: () -> Unit) {
         ) {
             Column(modifier = Modifier.padding(12.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(20.dp)
-                            .clip(CircleShape)
-                            .background(post.userAvatarColor)
+                    UserAvatar(
+                        nickname = post.userNickname,
+                        avatarUrl = post.userAvatarUrl,
+                        modifier = Modifier.size(42.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(

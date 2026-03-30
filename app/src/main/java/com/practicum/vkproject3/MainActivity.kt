@@ -1,6 +1,7 @@
 package com.practicum.vkproject3
 
 import android.os.Bundle
+import android.net.Uri
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
@@ -301,7 +302,9 @@ fun MainFlowScreen() {
                     navArgument("bookId") { type = NavType.StringType }
                 )
             ) { backStackEntry ->
-                val bookId = backStackEntry.arguments?.getString("bookId") ?: ""
+                val bookId = Uri.decode(
+                    backStackEntry.arguments?.getString("bookId") ?: ""
+                )
 
                 CreateReviewScreen(
                     bookId = bookId,
@@ -310,6 +313,7 @@ fun MainFlowScreen() {
                     onPublishSuccess = { navController.popBackStack() }
                 )
             }
+
 
             composable(
                 route = "discussion_chat/{discussionId}",
@@ -321,9 +325,14 @@ fun MainFlowScreen() {
                     discussionId = discussionId,
                     viewModel = discussionsViewModel,
                     onBackClick = { navController.popBackStack() },
-                    onAddReviewClick = {
-                        discussionsViewModel.resetCreateReviewState()
-                        navController.navigate("create_review")
+                    onAddReviewClick = { bookId ->
+                        val encodedBookId = Uri.encode(bookId)
+                        navController.navigate("create_review/$encodedBookId") {
+                            launchSingleTop = true
+                            popUpTo(BottomNavItem.Discussions.route) {
+                                saveState = true
+                            }
+                        }
                     }
                 )
             }

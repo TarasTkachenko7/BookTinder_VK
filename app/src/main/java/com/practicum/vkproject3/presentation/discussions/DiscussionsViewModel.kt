@@ -1,6 +1,5 @@
 package com.practicum.vkproject3.presentation.discussions
 
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.practicum.vkproject3.domain.books.BookRepository
@@ -21,14 +20,15 @@ data class ReviewPost(
     val userNickname: String,
     val reviewText: String,
     val date: String,
-    val userAvatarColor: Color = Color(0xFFC26E4B)
+    val userAvatarUrl: String? = null
 )
-
 data class ReviewComment(
     val id: Int,
     val postId: Int,
     val text: String,
-    val date: String = "только что"
+    val date: String = "только что",
+    val authorNickname: String = "Пользователь ${(1..1000).random()}",
+    val authorAvatarUrl: String? = null
 )
 
 data class ReviewBookUi(
@@ -111,11 +111,7 @@ class DiscussionsViewModel(
                             "Сильная книга, после которой еще долго думаешь о сюжете и персонажах. Мне очень понравилась."
                         )[index % 3],
                         date = listOf("сегодня", "вчера", "2 дня назад")[index % 3],
-                        userAvatarColor = listOf(
-                            Color(0xFFC26E4B),
-                            Color(0xFF6C8EAD),
-                            Color(0xFF7E9B76)
-                        )[index % 3]
+                        userAvatarUrl = null
                     )
                 }
 
@@ -168,6 +164,7 @@ class DiscussionsViewModel(
 
             try {
                 val book = findBookById(bookId)
+                android.util.Log.d("CreateReview", "bookId=$bookId, found=${book != null}")
 
                 if (book == null) {
                     _createReviewState.update {
@@ -188,6 +185,7 @@ class DiscussionsViewModel(
                     )
                 }
             } catch (e: Exception) {
+                android.util.Log.e("CreateReview", "loadBookForReview error", e)
                 _createReviewState.update {
                     it.copy(
                         isBookLoading = false,
@@ -253,6 +251,16 @@ class DiscussionsViewModel(
             it.copy(
                 isBookLoading = false,
                 selectedBook = book,
+                error = null
+            )
+        }
+    }
+
+    fun clearSelectedBookForReview() {
+        _createReviewState.update {
+            it.copy(
+                isBookLoading = false,
+                selectedBook = null,
                 error = null
             )
         }
@@ -329,7 +337,8 @@ class DiscussionsViewModel(
                 membersCount = 1,
                 userNickname = "you",
                 reviewText = form.reviewText.trim(),
-                date = "только что"
+                date = "только что",
+                userAvatarUrl = null
             )
 
             _uiState.update { currentState ->
@@ -363,7 +372,7 @@ class DiscussionsViewModel(
         return _comments.value[postId].orEmpty()
     }
 
-    fun addComment(postId: Int, text: String) {
+    fun addComment(postId: Int, text: String, authorNickname: String = "current_user") {
         val trimmed = text.trim()
         if (trimmed.isBlank()) return
 
@@ -373,7 +382,10 @@ class DiscussionsViewModel(
         val newComment = ReviewComment(
             id = newCommentId,
             postId = postId,
-            text = trimmed
+            text = trimmed,
+            date = "только что",
+            authorNickname = authorNickname,
+            authorAvatarUrl = null  // Пока null, потом можно добавить аватар текущего пользователя
         )
 
         _comments.update { current ->
