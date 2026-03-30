@@ -66,14 +66,25 @@ class ProfileViewModel(
         _state.value = _state.value.copy(isLoggedOut = true)
     }
 
+    fun clearError() {
+        _state.value = _state.value.copy(error = null)
+    }
     fun deleteAccount() {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true)
-            val result = authRepository.deleteAccount()
-            if (result.isSuccess) {
-                _state.value = _state.value.copy(isLoading = false, isLoggedOut = true)
-            } else {
-                _state.value = _state.value.copy(isLoading = false, error = "Не удалось удалить аккаунт")
+            try {
+                val result = authRepository.deleteAccount()
+                if (result.isSuccess) {
+                    _state.value = _state.value.copy(isLoading = false, isLoggedOut = true)
+                } else {
+                    val firebaseError = result.exceptionOrNull()?.message ?: "Не удалось удалить аккаунт"
+                    _state.value = _state.value.copy(isLoading = false, error = firebaseError)
+                }
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(
+                    isLoading = false,
+                    error = e.message ?: "Ошибка"
+                )
             }
         }
     }

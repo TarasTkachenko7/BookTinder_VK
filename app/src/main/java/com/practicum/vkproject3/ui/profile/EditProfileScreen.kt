@@ -32,6 +32,7 @@ import com.practicum.vkproject3.ui.theme.MainBrown
 import com.practicum.vkproject3.ui.theme.BeigeBackground
 import org.koin.androidx.compose.koinViewModel
 
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun EditProfileScreen(
@@ -72,6 +73,15 @@ fun EditProfileScreen(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         selectedImageUri = uri
+    }
+
+    val context = androidx.compose.ui.platform.LocalContext.current
+
+    LaunchedEffect(state.error) {
+        state.error?.let { errorMessage ->
+            android.widget.Toast.makeText(context, errorMessage, android.widget.Toast.LENGTH_LONG).show()
+            viewModel.clearError()
+        }
     }
 
     val genres = listOf("Фантастика", "Детектив", "Роман", "Фэнтези", "Триллер", "Приключения", "Классика")

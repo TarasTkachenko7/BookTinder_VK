@@ -85,12 +85,17 @@ class AuthRepositoryImpl(
         return try {
             val user = auth.currentUser ?: return Result.failure(Exception("Пользователь не авторизован"))
             val uid = user.uid
-            
 
-            database.child(uid).removeValue().await()
+            val databaseReference = FirebaseDatabase
+                .getInstance("https://booktinder-b0ffb-default-rtdb.europe-west1.firebasedatabase.app")
+                .reference
+
+            databaseReference.child("users").child(uid).removeValue().await()
+
+            databaseReference.child("userGenres").child(uid).removeValue().await()
 
             user.delete().await()
-            
+
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

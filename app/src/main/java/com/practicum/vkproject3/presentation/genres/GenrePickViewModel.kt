@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import com.practicum.vkproject3.data.profile.UserGenreManager
 
 data class GenrePickState(
     val isLoading: Boolean = true,
