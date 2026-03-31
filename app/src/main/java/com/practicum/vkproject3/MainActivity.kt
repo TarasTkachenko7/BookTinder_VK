@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
@@ -146,12 +147,8 @@ fun MainFlowScreen(onLogout: () -> Unit) {
             NavigationBar(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .shadow(elevation = 16.dp, shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
                     .background(Color.White, RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-                    .border(
-                        width = 1.dp,
-                        color = Color(0xFFE5DCD5),
-                        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
-                    )
                     .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)),
                 containerColor = Color.White,
                 tonalElevation = 0.dp
