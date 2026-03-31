@@ -33,7 +33,7 @@ class GenrePickViewModel(
     private val context: Context,
     private val userGenreManager: UserGenreManager
 ) : ViewModel() {
-    private val _state = MutableStateFlow(GenrePickState())
+    private val _state = MutableStateFlow(GenrePickState(selected = UserSession.selectedGenres))
     val state = _state.asStateFlow()
 
     init {
@@ -78,6 +78,9 @@ class GenrePickViewModel(
     fun saveSelectedGenres() {
         val selectedSet = _state.value.selected
         UserSession.selectedGenres = selectedSet
+
+        val prefs = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+        prefs.edit().putStringSet("user_genres", selectedSet).apply()
 
         viewModelScope.launch {
             userGenreManager.saveUserGenres(selectedSet.toList())

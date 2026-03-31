@@ -15,16 +15,25 @@ class UserRepositoryImpl(
 
     override suspend fun getProfile(): UserProfile {
         delay(500)
+
+        val firebaseGenres = genreManager.loadUserGenres()
+        val finalGenres = if (firebaseGenres != null && firebaseGenres.isNotEmpty()) {
+            prefs.edit().putStringSet("user_genres", firebaseGenres.toSet()).apply()
+            UserSession.selectedGenres = firebaseGenres.toSet()
+            firebaseGenres.toSet()
+        } else {
+            prefs.getStringSet("user_genres", UserSession.selectedGenres) ?: emptySet()
+        }
+
         val name = prefs.getString("user_name", UserSession.userName ?: context.getString(R.string.user_default_name)) ?: ""
         val avatarUrl = prefs.getString("user_avatar", UserSession.userAvatarUrl)
-        val genres = prefs.getStringSet("user_genres", UserSession.selectedGenres) ?: emptySet()
 
         return UserProfile(
             name = name,
             email = context.getString(R.string.user_default_email),
             phone = context.getString(R.string.user_default_phone),
             avatarUrl = avatarUrl,
-            favoriteGenres = genres.toList()
+            favoriteGenres = finalGenres.toList()
         )
     }
 
