@@ -21,8 +21,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -48,9 +50,11 @@ fun EditProfileScreen(
     var isInitialized by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
+    val configuration = LocalConfiguration.current
 
-    val genreIds = remember { context.resources.getStringArray(R.array.genre_ids) }
-    val genreNames = remember {
+    val genreIds = stringArrayResource(id = R.array.genre_ids)
+
+    val genreNames = remember(configuration) {
         val resIds = context.resources.obtainTypedArray(R.array.genre_name_res_ids)
         val names = Array(genreIds.size) { i -> context.getString(resIds.getResourceId(i, 0)) }
         resIds.recycle()
@@ -274,7 +278,7 @@ fun EditProfileScreen(
                     onClick = { viewModel.deleteAccount() },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Удалить аккаунт", color = Color.Red.copy(alpha = 0.6f), fontWeight = FontWeight.SemiBold)
+                    Text("Удалить аккаунт", color = Color.LightGray.copy(alpha = 0.6f), fontWeight = FontWeight.SemiBold)
                 }
 
                 Spacer(modifier = Modifier.height(40.dp))
