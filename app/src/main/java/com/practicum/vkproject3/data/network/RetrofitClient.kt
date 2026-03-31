@@ -34,12 +34,15 @@ object RetrofitClient {
         retrofit.create(AuthApi::class.java)
     }
 
-    val openLibraryApi: OpenLibraryApi by lazy {
+    private val openLibraryRetrofit: Retrofit by lazy {
         Retrofit.Builder()
             .baseUrl("https://openlibrary.org/")
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(OpenLibraryApi::class.java)
+    }
+
+    val openLibraryApi: OpenLibraryApi by lazy {
+        openLibraryRetrofit.create(OpenLibraryApi::class.java)
     }
 }

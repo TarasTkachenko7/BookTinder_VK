@@ -5,12 +5,14 @@ import com.practicum.vkproject3.R
 import com.practicum.vkproject3.domain.model.Book
 import com.practicum.vkproject3.data.network.api.OpenLibraryApi
 import com.practicum.vkproject3.domain.books.BookRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class BookRepositoryImpl(
     private val api: OpenLibraryApi,
     private val context: Context
 ) : BookRepository {
-    override suspend fun getBooks(page: Int): Pair<List<Book>, Int> {
+    override suspend fun getBooks(page: Int): Pair<List<Book>, Int> = withContext(Dispatchers.IO) {
         val response = api.searchBooks(query = "language:rus", page = page)
         val books = response.docs.map { doc ->
             Book(
@@ -22,6 +24,6 @@ class BookRepositoryImpl(
                 genre = context.getString(R.string.book_genre_miscellaneous)
             )
         }
-        return Pair(books, response.numFound)
+        Pair(books, response.numFound)
     }
 }
