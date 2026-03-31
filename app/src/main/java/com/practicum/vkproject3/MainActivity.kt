@@ -19,6 +19,7 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -144,15 +145,16 @@ fun MainFlowScreen(onLogout: () -> Unit) {
     Scaffold(
         containerColor = BeigeBackground,
         bottomBar = {
-            NavigationBar(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .shadow(elevation = 16.dp, shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-                    .background(Color.White, RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-                    .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)),
-                containerColor = Color.White,
-                tonalElevation = 0.dp
+            Surface(
+                shadowElevation = 8.dp,
+                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+                color = Color.White
             ) {
+                NavigationBar(
+                    modifier = Modifier.fillMaxWidth(),
+                    containerColor = Color.White,
+                    tonalElevation = 0.dp
+                ) {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = navBackStackEntry?.destination
 
@@ -184,6 +186,7 @@ fun MainFlowScreen(onLogout: () -> Unit) {
                             }
                         }
                     )
+                }
                 }
             }
         }
