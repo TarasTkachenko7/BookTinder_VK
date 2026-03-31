@@ -5,15 +5,20 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -61,7 +66,8 @@ fun EditProfileScreen(
         names
     }
 
-    var expanded by remember { mutableStateOf(false) }
+    var showGenreSheet by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     LaunchedEffect(state.user) {
         if (state.user != null && !isInitialized) {
@@ -100,14 +106,14 @@ fun EditProfileScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Редактировать профиль", fontWeight = FontWeight.Bold) },
+            CenterAlignedTopAppBar(
+                title = { Text("Редактировать профиль", fontWeight = FontWeight.Bold, fontSize = 20.sp) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = BeigeBackground)
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = BeigeBackground)
             )
         },
         containerColor = BeigeBackground
@@ -121,142 +127,155 @@ fun EditProfileScreen(
                     .verticalScroll(scrollState),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
                 Box(
-                    modifier = Modifier
-                        .size(120.dp)
-                        .clip(CircleShape)
-                        .background(Color.LightGray)
-                        .clickable { launcher.launch("image/*") },
+                    modifier = Modifier.size(130.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    if (selectedImageUri != null) {
-                        AsyncImage(
-                            model = selectedImageUri,
-                            contentDescription = null,
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
-                        )
-                    } else if (state.user?.avatarUrl != null) {
-                        AsyncImage(
-                            model = state.user?.avatarUrl,
-                            contentDescription = null,
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
-                        )
-                    } else {
-                        Image(
-                            painter = painterResource(id = R.drawable.spotty),
-                            contentDescription = null,
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
-                        )
-                    }
                     Box(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.3f)),
+                            .size(120.dp)
+                            .clip(CircleShape)
+                            .background(Color.LightGray)
+                    ) {
+                        if (selectedImageUri != null) {
+                            AsyncImage(
+                                model = selectedImageUri,
+                                contentDescription = null,
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else if (state.user?.avatarUrl != null) {
+                            AsyncImage(
+                                model = state.user?.avatarUrl,
+                                contentDescription = null,
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Image(
+                                painter = painterResource(id = R.drawable.spotty),
+                                contentDescription = null,
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        }
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .offset(x = (-4).dp, y = (-4).dp)
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(MainBrown)
+                            .border(2.dp, BeigeBackground, CircleShape)
+                            .clickable { launcher.launch("image/*") },
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(Icons.Default.CameraAlt, contentDescription = null, tint = Color.White)
+                        Icon(Icons.Default.Edit, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
                     }
                 }
 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(40.dp))
 
                 OutlinedTextField(
                     value = name,
                     onValueChange = { newValue ->
                         name = newValue.filter { char ->
-                            char in 'а'..'я' ||
-                                    char in 'А'..'Я' ||
-                                    char == 'ё' ||
-                                    char == 'Ё' ||
-                                    char in 'a'..'z' ||
-                                    char in 'A'..'Z' ||
-                                    char == ' '
+                            char in 'а'..'я' || char in 'А'..'Я' || char == 'ё' || char == 'Ё' || char in 'a'..'z' || char in 'A'..'Z' || char == ' '
                         }
                     },
                     label = { Text("Ваше имя") },
+                    leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(16.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = MainBrown,
-                        focusedLabelColor = MainBrown
+                        focusedLabelColor = MainBrown,
+                        unfocusedBorderColor = Color.Gray.copy(alpha = 0.5f)
                     ),
                     singleLine = true
                 )
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                Text(
-                    text = "Любимые жанры",
-                    modifier = Modifier.align(Alignment.Start),
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 18.sp
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Любимые жанры",
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 18.sp
+                    )
+                    TextButton(onClick = { showGenreSheet = true }) {
+                        Text("Изменить", color = MainBrown, fontWeight = FontWeight.Medium)
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(12.dp))
 
-                ExposedDropdownMenuBox(
-                    expanded = expanded,
-                    onExpandedChange = { expanded = !expanded }
-                ) {
-                    OutlinedTextField(
-                        value = if (selectedGenres.isEmpty()) "Выберите жанры" else "Выбрано жанров: ${selectedGenres.size}",
-                        onValueChange = {},
-                        readOnly = true,
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                        modifier = Modifier
-                            .menuAnchor()
-                            .fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = MainBrown,
-                            focusedLabelColor = MainBrown
-                        )
+                if (selectedGenres.isEmpty()) {
+                    Text(
+                        text = "Вы еще не выбрали жанры",
+                        color = Color.Gray,
+                        modifier = Modifier.align(Alignment.Start)
                     )
-
-                    ExposedDropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
+                } else {
+                    FlowRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        genreIds.forEachIndexed { index, id ->
-                            val isChecked = selectedGenres.contains(id)
-                            DropdownMenuItem(
-                                text = {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Checkbox(
-                                            checked = isChecked,
-                                            onCheckedChange = null,
-                                            colors = CheckboxDefaults.colors(checkedColor = MainBrown)
+                        selectedGenres.forEach { id ->
+                            val index = genreIds.indexOf(id)
+                            if (index != -1) {
+                                Surface(
+                                    shape = RoundedCornerShape(8.dp),
+                                    color = MainBrown.copy(alpha = 0.1f),
+                                    border = androidx.compose.foundation.BorderStroke(1.dp, MainBrown.copy(alpha = 0.3f)),
+                                    modifier = Modifier.clickable { selectedGenres.remove(id) }
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                                    ) {
+                                        Text(
+                                            text = genreNames[index],
+                                            color = MainBrown,
+                                            fontSize = 14.sp
                                         )
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        Text(text = genreNames[index])
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Icon(
+                                            imageVector = Icons.Default.Close,
+                                            contentDescription = null,
+                                            tint = MainBrown,
+                                            modifier = Modifier.size(16.dp)
+                                        )
                                     }
-                                },
-                                onClick = {
-                                    if (isChecked) selectedGenres.remove(id)
-                                    else selectedGenres.add(id)
-                                },
-                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp)
-                            )
+                                }
+                            }
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(48.dp))
 
                 Button(
                     onClick = {
                         val avatarToSave = selectedImageUri?.toString() ?: state.user?.avatarUrl
                         viewModel.updateProfile(name, selectedGenres.toList(), avatarToSave)
                     },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = MainBrown),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(16.dp)
                 ) {
-                    Text("Сохранить изменения", modifier = Modifier.padding(8.dp))
+                    Text("Сохранить изменения", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -264,21 +283,23 @@ fun EditProfileScreen(
                 val dullBrown = Color(0xFF9E8E85)
                 OutlinedButton(
                     onClick = { viewModel.logout() },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = dullBrown),
                     border = androidx.compose.foundation.BorderStroke(1.dp, dullBrown),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(16.dp)
                 ) {
-                    Text("Выйти из аккаунта", modifier = Modifier.padding(8.dp))
+                    Text("Выйти из аккаунта", fontSize = 16.sp, fontWeight = FontWeight.Medium)
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 TextButton(
                     onClick = { viewModel.deleteAccount() },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Удалить аккаунт", color = Color.LightGray.copy(alpha = 0.6f), fontWeight = FontWeight.SemiBold)
+                    Text("Удалить аккаунт", color = Color.Red.copy(alpha = 0.7f), fontWeight = FontWeight.SemiBold)
                 }
 
                 Spacer(modifier = Modifier.height(40.dp))
@@ -293,6 +314,64 @@ fun EditProfileScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator(color = MainBrown)
+                }
+            }
+        }
+
+        if (showGenreSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showGenreSheet = false },
+                sheetState = sheetState,
+                containerColor = BeigeBackground
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp, vertical = 16.dp)
+                ) {
+                    Text(
+                        text = "Выберите жанры",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                    LazyColumn(
+                        modifier = Modifier.fillMaxHeight(0.6f)
+                    ) {
+                        itemsIndexed(genreIds) { index, id ->
+                            val isChecked = selectedGenres.contains(id)
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        if (isChecked) selectedGenres.remove(id)
+                                        else selectedGenres.add(id)
+                                    }
+                                    .padding(vertical = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Checkbox(
+                                    checked = isChecked,
+                                    onCheckedChange = null,
+                                    colors = CheckboxDefaults.colors(checkedColor = MainBrown)
+                                )
+                                Spacer(modifier = Modifier.width(16.dp))
+                                Text(text = genreNames[index], fontSize = 16.sp)
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(
+                        onClick = { showGenreSheet = false },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = MainBrown),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text("Готово")
+                    }
+                    Spacer(modifier = Modifier.height(24.dp))
                 }
             }
         }
