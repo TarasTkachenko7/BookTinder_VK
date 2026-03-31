@@ -107,7 +107,7 @@ fun EditProfileScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Редактировать профиль", fontWeight = FontWeight.Bold, fontSize = 20.sp) },
+                title = { Text("Редактировать", fontWeight = FontWeight.Bold, fontSize = 20.sp) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
@@ -123,12 +123,13 @@ fun EditProfileScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
-                    .padding(horizontal = 24.dp)
-                    .verticalScroll(scrollState),
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
+                // Аватар
                 Box(
                     modifier = Modifier.size(130.dp),
                     contentAlignment = Alignment.Center
@@ -137,7 +138,7 @@ fun EditProfileScreen(
                         modifier = Modifier
                             .size(120.dp)
                             .clip(CircleShape)
-                            .background(Color.LightGray)
+                            .background(Color.White)
                     ) {
                         if (selectedImageUri != null) {
                             AsyncImage(
@@ -168,93 +169,132 @@ fun EditProfileScreen(
                             .align(Alignment.BottomEnd)
                             .offset(x = (-4).dp, y = (-4).dp)
                             .size(40.dp)
-                            .clip(CircleShape)
-                            .background(MainBrown)
-                            .border(2.dp, BeigeBackground, CircleShape)
+                            .background(MainBrown, CircleShape)
+                            .border(3.dp, BeigeBackground, CircleShape)
                             .clickable { launcher.launch("image/*") },
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(Icons.Default.Edit, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
+                        Icon(Icons.Default.Edit, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
                     }
                 }
 
                 Spacer(modifier = Modifier.height(40.dp))
 
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { newValue ->
-                        name = newValue.filter { char ->
-                            char in 'а'..'я' || char in 'А'..'Я' || char == 'ё' || char == 'Ё' || char in 'a'..'z' || char in 'A'..'Z' || char == ' '
-                        }
-                    },
-                    label = { Text("Ваше имя") },
-                    leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
+                // Карточка ввода имени
+                Surface(
                     modifier = Modifier.fillMaxWidth(),
+                    color = Color.White,
                     shape = RoundedCornerShape(16.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MainBrown,
-                        focusedLabelColor = MainBrown,
-                        unfocusedBorderColor = Color.Gray.copy(alpha = 0.5f)
-                    ),
-                    singleLine = true
-                )
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    shadowElevation = 2.dp
                 ) {
-                    Text(
-                        text = "Любимые жанры",
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 18.sp
+                    TextField(
+                        value = name,
+                        onValueChange = { newValue ->
+                            name = newValue.filter { char ->
+                                char in 'а'..'я' || char in 'А'..'Я' || char == 'ё' || char == 'Ё' || char in 'a'..'z' || char in 'A'..'Z' || char == ' '
+                            }
+                        },
+                        label = { Text("Ваше имя", color = Color.Gray) },
+                        leadingIcon = {
+                            Box(
+                                modifier = Modifier
+                                    .padding(start = 8.dp)
+                                    .size(40.dp)
+                                    .background(MainBrown.copy(alpha = 0.1f), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(Icons.Default.Person, contentDescription = null, tint = MainBrown, modifier = Modifier.size(20.dp))
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.White,
+                            unfocusedContainerColor = Color.White,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            cursorColor = MainBrown
+                        ),
+                        singleLine = true
                     )
-                    TextButton(onClick = { showGenreSheet = true }) {
-                        Text("Изменить", color = MainBrown, fontWeight = FontWeight.Medium)
-                    }
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
-                if (selectedGenres.isEmpty()) {
-                    Text(
-                        text = "Вы еще не выбрали жанры",
-                        color = Color.Gray,
-                        modifier = Modifier.align(Alignment.Start)
-                    )
-                } else {
-                    FlowRow(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                // Карточка выбора жанров
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Color.White,
+                    shape = RoundedCornerShape(16.dp),
+                    shadowElevation = 2.dp
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp)
                     ) {
-                        selectedGenres.forEach { id ->
-                            val index = genreIds.indexOf(id)
-                            if (index != -1) {
-                                Surface(
-                                    shape = RoundedCornerShape(8.dp),
-                                    color = MainBrown.copy(alpha = 0.1f),
-                                    border = androidx.compose.foundation.BorderStroke(1.dp, MainBrown.copy(alpha = 0.3f)),
-                                    modifier = Modifier.clickable { selectedGenres.remove(id) }
-                                ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
-                                    ) {
-                                        Text(
-                                            text = genreNames[index],
-                                            color = MainBrown,
-                                            fontSize = 14.sp
-                                        )
-                                        Spacer(modifier = Modifier.width(6.dp))
-                                        Icon(
-                                            imageVector = Icons.Default.Close,
-                                            contentDescription = null,
-                                            tint = MainBrown,
-                                            modifier = Modifier.size(16.dp)
-                                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Любимые жанры",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 18.sp,
+                                color = Color.Black.copy(alpha = 0.85f)
+                            )
+                            Text(
+                                text = "Изменить",
+                                color = MainBrown,
+                                fontWeight = FontWeight.Medium,
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .clickable { showGenreSheet = true }
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        if (selectedGenres.isEmpty()) {
+                            Text(
+                                text = "Вы еще не выбрали жанры",
+                                color = Color.Gray,
+                                fontSize = 15.sp
+                            )
+                        } else {
+                            FlowRow(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                selectedGenres.forEach { id ->
+                                    val index = genreIds.indexOf(id)
+                                    if (index != -1) {
+                                        Surface(
+                                            shape = RoundedCornerShape(10.dp),
+                                            color = MainBrown.copy(alpha = 0.1f),
+                                            modifier = Modifier.clickable { selectedGenres.remove(id) }
+                                        ) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                                            ) {
+                                                Text(
+                                                    text = genreNames[index],
+                                                    color = MainBrown,
+                                                    fontSize = 14.sp,
+                                                    fontWeight = FontWeight.Medium
+                                                )
+                                                Spacer(modifier = Modifier.width(6.dp))
+                                                Icon(
+                                                    imageVector = Icons.Default.Close,
+                                                    contentDescription = null,
+                                                    tint = MainBrown,
+                                                    modifier = Modifier.size(16.dp)
+                                                )
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -273,7 +313,8 @@ fun EditProfileScreen(
                         .fillMaxWidth()
                         .height(56.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = MainBrown),
-                    shape = RoundedCornerShape(16.dp)
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
                 ) {
                     Text("Сохранить изменения", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 }
@@ -343,11 +384,12 @@ fun EditProfileScreen(
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
+                                    .clip(RoundedCornerShape(12.dp))
                                     .clickable {
                                         if (isChecked) selectedGenres.remove(id)
                                         else selectedGenres.add(id)
                                     }
-                                    .padding(vertical = 12.dp),
+                                    .padding(vertical = 12.dp, horizontal = 8.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Checkbox(
@@ -365,11 +407,11 @@ fun EditProfileScreen(
                         onClick = { showGenreSheet = false },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(50.dp),
+                            .height(56.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = MainBrown),
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(16.dp)
                     ) {
-                        Text("Готово")
+                        Text("Готово", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                     }
                     Spacer(modifier = Modifier.height(24.dp))
                 }

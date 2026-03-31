@@ -3,16 +3,18 @@ package com.practicum.vkproject3
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChatBubbleOutline
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -21,10 +23,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
@@ -49,7 +51,8 @@ import com.practicum.vkproject3.ui.profile.EditProfileScreen
 import com.practicum.vkproject3.ui.profile.HistoryScreen
 import com.practicum.vkproject3.ui.profile.PlaceholderScreen
 import com.practicum.vkproject3.ui.profile.ProfileScreen
-import com.practicum.vkproject3.ui.theme.DarkGreen
+import com.practicum.vkproject3.ui.theme.BeigeBackground
+import com.practicum.vkproject3.ui.theme.MainBrown
 import com.practicum.vkproject3.ui.theme.VkProject3Theme
 
 sealed class BottomNavItem(val route: String, val title: String, val icon: ImageVector) {
@@ -60,7 +63,6 @@ sealed class BottomNavItem(val route: String, val title: String, val icon: Image
 }
 
 class MainActivity : ComponentActivity() {
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -111,16 +113,16 @@ class MainActivity : ComponentActivity() {
                         GenrePickScreen(onDone = {
                             rootNavController.navigate("main_app") {
                                 popUpTo("genre_pick")
-                                    { inclusive = true }
+                                { inclusive = true }
                             }
                         })
                     }
-                    composable("main_app") { 
+                    composable("main_app") {
                         MainFlowScreen(onLogout = {
                             rootNavController.navigate("login") {
                                 popUpTo("main_app") { inclusive = true }
                             }
-                        }) 
+                        })
                     }
                 }
             }
@@ -139,8 +141,21 @@ fun MainFlowScreen(onLogout: () -> Unit) {
     )
 
     Scaffold(
+        containerColor = BeigeBackground,
         bottomBar = {
-            NavigationBar(containerColor = DarkGreen) {
+            NavigationBar(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White, RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+                    .border(
+                        width = 1.dp,
+                        color = Color(0xFFE5DCD5),
+                        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+                    )
+                    .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)),
+                containerColor = Color.White,
+                tonalElevation = 0.dp
+            ) {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = navBackStackEntry?.destination
 
@@ -156,11 +171,11 @@ fun MainFlowScreen(onLogout: () -> Unit) {
                         label = { Text(screen.title) },
                         selected = isSelected,
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = Color.White,
-                            unselectedIconColor = Color.White.copy(alpha = 0.6f),
-                            selectedTextColor = Color.White,
-                            unselectedTextColor = Color.White.copy(alpha = 0.6f),
-                            indicatorColor = Color.White.copy(alpha = 0.1f)
+                            selectedIconColor = MainBrown,
+                            unselectedIconColor = Color.Gray.copy(alpha = 0.6f),
+                            selectedTextColor = MainBrown,
+                            unselectedTextColor = Color.Gray.copy(alpha = 0.6f),
+                            indicatorColor = MainBrown.copy(alpha = 0.1f)
                         ),
                         onClick = {
                             navController.navigate(screen.route) {
@@ -168,7 +183,6 @@ fun MainFlowScreen(onLogout: () -> Unit) {
                                     saveState = true
                                 }
                                 launchSingleTop = true
-
                                 restoreState = (screen != BottomNavItem.Catalog)
                             }
                         }
