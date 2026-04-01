@@ -146,7 +146,7 @@ fun MainFlowScreen(onLogout: () -> Unit) {
         containerColor = BeigeBackground,
         bottomBar = {
             Surface(
-                shadowElevation = 8.dp,
+                shadowElevation = 0.dp,
                 shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
                 color = Color.White
             ) {
