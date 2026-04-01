@@ -8,6 +8,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChatBubbleOutline
@@ -19,11 +20,13 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
@@ -143,50 +146,49 @@ fun MainFlowScreen(onLogout: () -> Unit) {
     Scaffold(
         containerColor = BeigeBackground,
         bottomBar = {
-            NavigationBar(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.White, RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-                    .border(
-                        width = 1.dp,
-                        color = Color(0xFFE5DCD5),
-                        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
-                    )
-                    .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)),
-                containerColor = Color.White,
-                tonalElevation = 0.dp
+            Surface(
+                shadowElevation = 0.dp,
+                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+                color = Color.White
             ) {
-                val navBackStackEntry by navController.currentBackStackEntryAsState()
-                val currentDestination = navBackStackEntry?.destination
+                NavigationBar(
+                    modifier = Modifier.fillMaxWidth(),
+                    containerColor = Color.White,
+                    tonalElevation = 0.dp,
+                    windowInsets = WindowInsets(0.dp, 0.dp, 0.dp, 0.dp)
+                ) {
+                    val navBackStackEntry by navController.currentBackStackEntryAsState()
+                    val currentDestination = navBackStackEntry?.destination
 
-                items.forEach { screen ->
-                    val isSelected = if (screen == BottomNavItem.Catalog) {
-                        currentDestination?.route == "catalog"
-                    } else {
-                        currentDestination?.hierarchy?.any { it.route == screen.route } == true
-                    }
-
-                    NavigationBarItem(
-                        icon = { Icon(screen.icon, null, Modifier.size(24.dp)) },
-                        label = { Text(screen.title) },
-                        selected = isSelected,
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = MainBrown,
-                            unselectedIconColor = Color.Gray.copy(alpha = 0.6f),
-                            selectedTextColor = MainBrown,
-                            unselectedTextColor = Color.Gray.copy(alpha = 0.6f),
-                            indicatorColor = MainBrown.copy(alpha = 0.1f)
-                        ),
-                        onClick = {
-                            navController.navigate(screen.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = (screen != BottomNavItem.Catalog)
-                            }
+                    items.forEach { screen ->
+                        val isSelected = if (screen == BottomNavItem.Catalog) {
+                            currentDestination?.route == "catalog"
+                        } else {
+                            currentDestination?.hierarchy?.any { it.route == screen.route } == true
                         }
-                    )
+
+                        NavigationBarItem(
+                            icon = { Icon(screen.icon, null, Modifier.size(26.dp)) },
+                            selected = isSelected,
+                            alwaysShowLabel = false,
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = MainBrown,
+                                unselectedIconColor = Color.Gray.copy(alpha = 0.6f),
+                                selectedTextColor = MainBrown,
+                                unselectedTextColor = Color.Gray.copy(alpha = 0.6f),
+                                indicatorColor = MainBrown.copy(alpha = 0.1f)
+                            ),
+                            onClick = {
+                                navController.navigate(screen.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = (screen != BottomNavItem.Catalog)
+                                }
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -194,7 +196,7 @@ fun MainFlowScreen(onLogout: () -> Unit) {
         NavHost(
             navController = navController,
             startDestination = BottomNavItem.Books.route,
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier
         ) {
             composable(BottomNavItem.Books.route) {
                 HomeScreen(
