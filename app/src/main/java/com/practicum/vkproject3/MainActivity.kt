@@ -13,8 +13,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChatBubbleOutline
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.ChatBubble
+import androidx.compose.material.icons.outlined.ChatBubbleOutline
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -58,11 +63,11 @@ import com.practicum.vkproject3.ui.theme.BeigeBackground
 import com.practicum.vkproject3.ui.theme.MainBrown
 import com.practicum.vkproject3.ui.theme.VkProject3Theme
 
-sealed class BottomNavItem(val route: String, val title: String, val icon: ImageVector) {
-    object Books : BottomNavItem("books_screen", "Лента", Icons.Default.Home)
-    object Discussions : BottomNavItem("discussions", "Обсуждения", Icons.Default.ChatBubbleOutline)
-    object Catalog : BottomNavItem("catalog", "Каталог", Icons.Default.MenuBook)
-    object Profile : BottomNavItem("profile_screen", "Профиль", Icons.Default.Person)
+sealed class BottomNavItem(val route: String, val title: String, val selectedIcon: ImageVector, val unselectedIcon: ImageVector) {
+    object Books : BottomNavItem("books_screen", "Лента", Icons.Filled.Home, Icons.Outlined.Home)
+    object Discussions : BottomNavItem("discussions", "Обсуждения", Icons.Filled.ChatBubble, Icons.Outlined.ChatBubbleOutline)
+    object Catalog : BottomNavItem("catalog", "Каталог", Icons.AutoMirrored.Filled.MenuBook, Icons.AutoMirrored.Outlined.MenuBook)
+    object Profile : BottomNavItem("profile_screen", "Профиль", Icons.Filled.Person, Icons.Outlined.Person)
 }
 
 class MainActivity : ComponentActivity() {
@@ -161,14 +166,16 @@ fun MainFlowScreen(onLogout: () -> Unit) {
                     val currentDestination = navBackStackEntry?.destination
 
                     items.forEach { screen ->
-                        val isSelected = if (screen == BottomNavItem.Catalog) {
-                            currentDestination?.route == "catalog"
-                        } else {
-                            currentDestination?.hierarchy?.any { it.route == screen.route } == true
+                        val currentRoute = currentDestination?.route
+                        val isSelected = when (screen) {
+                            BottomNavItem.Books -> currentRoute == BottomNavItem.Books.route
+                            BottomNavItem.Discussions -> currentRoute == BottomNavItem.Discussions.route
+                            BottomNavItem.Catalog -> currentRoute == BottomNavItem.Catalog.route || currentRoute == "favorites_screen" || currentRoute?.startsWith("book_details") == true
+                            BottomNavItem.Profile -> currentRoute == BottomNavItem.Profile.route || currentRoute == "edit_profile" || currentRoute == "history_screen" || currentRoute == "settings_screen" || currentRoute == "subscription_screen"
                         }
 
                         NavigationBarItem(
-                            icon = { Icon(screen.icon, null, Modifier.size(26.dp)) },
+                            icon = { Icon(if (isSelected) screen.selectedIcon else screen.unselectedIcon, null, Modifier.size(26.dp)) },
                             selected = isSelected,
                             alwaysShowLabel = false,
                             colors = NavigationBarItemDefaults.colors(
@@ -179,12 +186,16 @@ fun MainFlowScreen(onLogout: () -> Unit) {
                                 indicatorColor = MainBrown.copy(alpha = 0.1f)
                             ),
                             onClick = {
-                                navController.navigate(screen.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
+                                if (isSelected) {
+                                    navController.popBackStack(screen.route, inclusive = false)
+                                } else {
+                                    navController.navigate(screen.route) {
+                                        popUpTo(navController.graph.findStartDestination().id) {
+                                            saveState = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
                                     }
-                                    launchSingleTop = true
-                                    restoreState = (screen != BottomNavItem.Catalog)
                                 }
                             }
                         )
