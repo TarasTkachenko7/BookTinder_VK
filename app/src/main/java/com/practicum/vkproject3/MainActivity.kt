@@ -196,7 +196,7 @@ fun MainFlowScreen(onLogout: () -> Unit) {
         NavHost(
             navController = navController,
             startDestination = BottomNavItem.Books.route,
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier
         ) {
             composable(BottomNavItem.Books.route) {
                 HomeScreen(
