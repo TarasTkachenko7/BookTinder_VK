@@ -8,6 +8,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChatBubbleOutline
@@ -153,7 +154,8 @@ fun MainFlowScreen(onLogout: () -> Unit) {
                 NavigationBar(
                     modifier = Modifier.fillMaxWidth(),
                     containerColor = Color.White,
-                    tonalElevation = 0.dp
+                    tonalElevation = 0.dp,
+                    windowInsets = WindowInsets(0.dp, 0.dp, 0.dp, 0.dp)
                 ) {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = navBackStackEntry?.destination
@@ -166,9 +168,9 @@ fun MainFlowScreen(onLogout: () -> Unit) {
                     }
 
                     NavigationBarItem(
-                        icon = { Icon(screen.icon, null, Modifier.size(24.dp)) },
-                        label = { Text(screen.title) },
+                        icon = { Icon(screen.icon, null, Modifier.size(26.dp)) },
                         selected = isSelected,
+                        alwaysShowLabel = false,
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = MainBrown,
                             unselectedIconColor = Color.Gray.copy(alpha = 0.6f),
