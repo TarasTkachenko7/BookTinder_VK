@@ -3,4 +3,5 @@ import com.practicum.vkproject3.domain.model.Book
 
 interface BookRepository {
     suspend fun getBooks(page: Int): Pair<List<Book>, Int>
+    suspend fun getBooksByAiRecommendations(recommendations: List<AiBookRecommendation>): List<Book>
 }

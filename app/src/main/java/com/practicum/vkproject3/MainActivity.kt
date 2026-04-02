@@ -40,6 +40,7 @@ import com.practicum.vkproject3.ui.books.CatalogScreen
 import com.practicum.vkproject3.ui.books.FavoritesScreen
 import com.practicum.vkproject3.ui.genres.GenrePickScreen
 import com.practicum.vkproject3.ui.home.HomeScreen
+import com.practicum.vkproject3.ui.onboarding.OnboardingScreen // <-- ДОБАВИЛИ ИМПОРТ
 import com.practicum.vkproject3.ui.profile.HistoryScreen
 import com.practicum.vkproject3.ui.profile.ProfileScreen
 import com.practicum.vkproject3.ui.theme.VkProject3Theme
@@ -84,9 +85,20 @@ class MainActivity : ComponentActivity() {
                     ) { backStackEntry ->
                         val email = backStackEntry.arguments?.getString("email") ?: ""
                         VerificationScreen(email = email, onBack = { rootNavController.popBackStack() }, onSuccess = {
-                            rootNavController.navigate("genre_pick") { popUpTo("login") { inclusive = true } }
+                            rootNavController.navigate("onboarding") { popUpTo("login") { inclusive = true } }
                         })
                     }
+
+                    composable("onboarding") {
+                        OnboardingScreen(
+                            onFinishOnboarding = {
+                                rootNavController.navigate("genre_pick") {
+                                    popUpTo("onboarding") { inclusive = true }
+                                }
+                            }
+                        )
+                    }
+
                     composable("forgot_password") {
                         ForgotPasswordScreen(onBack =
                             { rootNavController.popBackStack() },
@@ -98,7 +110,7 @@ class MainActivity : ComponentActivity() {
                         GenrePickScreen(onDone = {
                             rootNavController.navigate("main_app") {
                                 popUpTo("genre_pick")
-                                    { inclusive = true }
+                                { inclusive = true }
                             }
                         })
                     }
