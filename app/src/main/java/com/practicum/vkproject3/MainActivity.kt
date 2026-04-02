@@ -185,6 +185,19 @@ fun MainFlowScreen() {
             composable(BottomNavItem.Catalog.route) {
                 CatalogScreen(
                     onNavigateToFavorites = { navController.navigate("favorites_screen") },
+                    onBookClick = { bookId -> navController.navigate("book_details/$bookId") },
+                    onNavigateToGenre = { genre -> navController.navigate("genre_details/$genre") } // <--- ДОБАВЛЕНО
+                )
+            }
+
+            composable(
+                route = "genre_details/{genre}",
+                arguments = listOf(navArgument("genre") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val genre = backStackEntry.arguments?.getString("genre") ?: ""
+                com.practicum.vkproject3.ui.books.GenreDetailsScreen(
+                    genre = genre,
+                    onBack = { navController.popBackStack() },
                     onBookClick = { bookId -> navController.navigate("book_details/$bookId") }
                 )
             }

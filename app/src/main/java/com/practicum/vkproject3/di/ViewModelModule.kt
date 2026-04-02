@@ -5,6 +5,7 @@ import com.practicum.vkproject3.presentation.auth.LoginViewModel
 import com.practicum.vkproject3.presentation.auth.RegistrationViewModel
 import com.practicum.vkproject3.presentation.auth.VerificationViewModel
 import com.practicum.vkproject3.presentation.books.BookViewModel
+import com.practicum.vkproject3.presentation.books.GenreDetailsViewModel
 import com.practicum.vkproject3.presentation.genres.GenrePickViewModel
 import com.practicum.vkproject3.presentation.home.HomeViewModel
 import com.practicum.vkproject3.presentation.profile.ProfileViewModel
@@ -25,4 +26,8 @@ val viewModelModule = module {
     viewModel { GenrePickViewModel(androidContext()) }
 
     viewModel { ProfileViewModel(get()) }
+
+    viewModel { com.practicum.vkproject3.presentation.books.CatalogViewModel(get()) }
+
+    viewModel { parameters -> GenreDetailsViewModel(genre = parameters.get(), repository = get()) }
 }
