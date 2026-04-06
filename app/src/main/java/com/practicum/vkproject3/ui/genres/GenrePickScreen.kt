@@ -65,6 +65,9 @@ fun GenrePickScreen(
         if (state.isLoading) {
             CircularProgressIndicator(color = DarkGreen)
             Spacer(Modifier.height(24.dp))
+        } else if (state.error != null) {
+            Text(text = state.error!!, color = Color.Red)
+            Spacer(Modifier.height(24.dp))
         } else {
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
@@ -78,7 +81,7 @@ fun GenrePickScreen(
                         onClick = { viewModel.toggleGenre(genre.id) },
                         label = {
                             Text(
-                                text = stringResource(genre.stringResId),
+                                text = genre.name,
                                 modifier = Modifier.padding(horizontal = 4.dp)
                             )
                         },

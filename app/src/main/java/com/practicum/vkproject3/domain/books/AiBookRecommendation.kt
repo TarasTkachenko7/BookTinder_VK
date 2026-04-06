@@ -1,14 +1,10 @@
 package com.practicum.vkproject3.domain.books
 
-data class AiBookRecommendation(
-    val title: String,
-    val author: String,
-    val genre: String
-)
+import com.practicum.vkproject3.domain.model.Book
 
 interface GigaChatRepository {
     suspend fun getRecommendations(
         genres: Set<String>,
-        alreadyShownTitles: List<String>
-    ): Result<List<AiBookRecommendation>>
+        alreadyShownIds: List<String>
+    ): Result<List<Book>>
 }

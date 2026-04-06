@@ -23,7 +23,7 @@ val viewModelModule = module {
 
     viewModel { HomeViewModel(get(), get()) }
 
-    viewModel { GenrePickViewModel(androidContext()) }
+    viewModel { GenrePickViewModel(get()) }
 
     viewModel { ProfileViewModel(get()) }
 

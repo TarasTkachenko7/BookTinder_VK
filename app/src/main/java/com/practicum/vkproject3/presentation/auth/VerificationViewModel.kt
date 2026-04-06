@@ -38,7 +38,7 @@ class VerificationViewModel : ViewModel() {
 
             delay(1500)
 
-            if (currentCode == "256983") {
+            if (currentCode == "111111") {
                 _state.update { it.copy(isLoading = false, isVerified = true) }
             } else {
                 _state.update { it.copy(isLoading = false, error = "Неверный код") }

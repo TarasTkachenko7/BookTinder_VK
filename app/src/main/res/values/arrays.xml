@@ -1,44 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Массив ID жанров -->
+    <!-- Массив ID жанров (должны совпадать с полем id в Firebase) -->
     <string-array name="genre_ids">
-        <item>fantasy_mystic</item>
-        <item>sci_fi</item>
-        <item>detective_thriller</item>
-        <item>health_sports</item>
+        <item>fantasy</item>
+        <item>detective</item>
         <item>romance</item>
-        <item>horror</item>
-        <item>biography</item>
-        <item>travel_geo</item>
+        <item>adventure</item>
+        <item>drama</item>
         <item>classic</item>
-        <item>historical</item>
-        <item>comics</item>
-        <item>modern_prose</item>
-        <item>business_career</item>
-        <item>art_creativity</item>
-        <item>humor_satire</item>
-        <item>science_education</item>
-        <item>tech_it</item>
+        <item>horror</item>
+        <item>psychology</item>
+        <item>science</item>
+        <item>business</item>
     </string-array>
 
-    <!-- Массив названий жанров -->
+    <!-- Массив ссылок на названия жанров -->
     <string-array name="genre_name_res_ids">
-        <item>@string/genre_fantasy_mystic</item>
-        <item>@string/genre_sci_fi</item>
-        <item>@string/genre_detective_thriller</item>
-        <item>@string/genre_health_sports</item>
+        <item>@string/genre_fantasy</item>
+        <item>@string/genre_detective</item>
         <item>@string/genre_romance</item>
-        <item>@string/genre_horror</item>
-        <item>@string/genre_biography</item>
-        <item>@string/genre_travel_geo</item>
+        <item>@string/genre_adventure</item>
+        <item>@string/genre_drama</item>
         <item>@string/genre_classic</item>
-        <item>@string/genre_historical</item>
-        <item>@string/genre_comics</item>
-        <item>@string/genre_modern_prose</item>
-        <item>@string/genre_business_career</item>
-        <item>@string/genre_art_creativity</item>
-        <item>@string/genre_humor_satire</item>
-        <item>@string/genre_science_education</item>
-        <item>@string/genre_tech_it</item>
+        <item>@string/genre_horror</item>
+        <item>@string/genre_psychology</item>
+        <item>@string/genre_science</item>
+        <item>@string/genre_business</item>
     </string-array>
 </resources>

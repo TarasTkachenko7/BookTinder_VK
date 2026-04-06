@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "172351439326",
+    "firebase_url": "https://booktinder-b0ffb-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "booktinder-b0ffb",
+    "storage_bucket": "booktinder-b0ffb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:172351439326:android:8e3658f6b414a316701d4f",
+        "android_client_info": {
+          "package_name": "com.practicum.vkproject3"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyByq-V7Z0lLFylgtEoW4t3t-H3vl5xY6xs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

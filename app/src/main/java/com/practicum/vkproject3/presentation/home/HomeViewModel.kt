@@ -25,7 +25,8 @@ data class HomeState(
     val isLoading: Boolean = false,
     val error: String? = null,
     val books: List<HomeBookUi> = emptyList(),
-    val index: Int = 0
+    val index: Int = 0,
+    val isExhausted: Boolean = false
 ) {
     val current: HomeBookUi? get() = books.getOrNull(index)
     val isEmpty: Boolean get() = !isLoading && error == null && books.isEmpty()
@@ -50,22 +51,31 @@ class HomeViewModel(
             _state.update { it.copy(isLoading = true, error = null) }
 
             try {
+                if (_state.value.isExhausted) {
+                    loopExistingBooks()
+                    return@launch
+                }
+
                 val genres = UserSession.selectedGenres.ifEmpty { setOf("Фантастика", "Роман") }
 
-                val alreadyShown = _state.value.books.map { it.title }
+                val alreadyShownIds = _state.value.books.map { it.id }.distinct()
 
-                val aiResult = aiRepository.getRecommendations(genres, alreadyShown)
+                val aiResult = aiRepository.getRecommendations(genres, alreadyShownIds)
 
                 if (aiResult.isSuccess) {
-                    val recommendations = aiResult.getOrNull() ?: emptyList()
-                    val domainBooks = repository.getBooksByAiRecommendations(recommendations)
+                    val domainBooks = aiResult.getOrNull() ?: emptyList()
                     val newUiBooks = domainBooks.map { it.toHomeUi() }
 
-                    _state.update { st ->
-                        st.copy(
-                            isLoading = false,
-                            books = st.books + newUiBooks
-                        )
+                    if (newUiBooks.isNotEmpty()) {
+                        _state.update { st ->
+                            st.copy(
+                                isLoading = false,
+                                books = st.books + newUiBooks
+                            )
+                        }
+                    } else {
+                        _state.update { it.copy(isExhausted = true) }
+                        loopExistingBooks()
                     }
                 } else {
                     _state.update { it.copy(isLoading = false, error = "Ошибка генерации рекомендаций") }
@@ -73,6 +83,17 @@ class HomeViewModel(
             } catch (e: Exception) {
                 _state.update { it.copy(isLoading = false, error = "Проверьте подключение к сети") }
             }
+        }
+    }
+
+    private fun loopExistingBooks() {
+        _state.update { st ->
+            val loopedBooks = st.books.distinctBy { it.id }.shuffled()
+
+            st.copy(
+                isLoading = false,
+                books = st.books + loopedBooks
+            )
         }
     }
 
