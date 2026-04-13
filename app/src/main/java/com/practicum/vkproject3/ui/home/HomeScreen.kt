@@ -91,7 +91,9 @@ fun HomeScreen(
                 Text(text = stringResource(R.string.home_about_book), color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(10.dp))
                 Column(Modifier.verticalScroll(rememberScrollState())) {
-                    val description = getMockDescription(state.current?.id ?: "default")
+                    val description = remember(state.current?.id) {
+                        getMockDescription(state.current?.id ?: "default")
+                    }
                     Text(
                         text = description,
                         textAlign = TextAlign.Center,

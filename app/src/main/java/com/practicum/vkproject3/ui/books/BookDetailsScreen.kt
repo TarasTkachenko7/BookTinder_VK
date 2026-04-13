@@ -1,6 +1,5 @@
 package com.practicum.vkproject3.ui.books
 
-import android.content.res.Resources
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -9,11 +8,15 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,20 +31,21 @@ import coil.compose.AsyncImage
 import com.practicum.vkproject3.R
 import com.practicum.vkproject3.domain.model.Book
 import com.practicum.vkproject3.domain.model.mockCatalog
+import com.practicum.vkproject3.ui.theme.BeigeBackground
 
 val DarkGreen = Color(0xFF2C4A42)
 val MainBrown = Color(0xFFC77A58)
-val BeigeBackground = Color(0xFFF9F8F4)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BookDetailsScreen(
     bookId: String,
-    onBack: () -> Unit
-) {
+    onBack: () -> Unit,
+    onAddReviewClick: (Book) -> Unit
+){
     val context = LocalContext.current
     val resources = context.resources
-    
+
     val book = mockCatalog.find { it.id == bookId }
         ?: Book(
             id = bookId,
@@ -79,9 +83,9 @@ fun BookDetailsScreen(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = resources.getString(R.string.book_details_about_book), 
-                    color = Color.White, 
-                    fontWeight = FontWeight.Bold, 
+                    text = resources.getString(R.string.book_details_about_book),
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
                     fontSize = 16.sp
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -130,13 +134,20 @@ fun BookDetailsScreen(
         },
         containerColor = BeigeBackground
     ) { innerPadding ->
-        Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+
+                // TOP BAR
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -147,30 +158,24 @@ fun BookDetailsScreen(
                     IconButton(onClick = onBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = resources.getString(R.string.book_details_back), 
+                            contentDescription = "Назад",
                             tint = Color.Black
                         )
                     }
+
                     Row {
                         IconButton(onClick = { }) {
-                            Icon(
-                                Icons.Default.FavoriteBorder,
-                                contentDescription = null,
-                                tint = Color.Black
-                            )
+                            Icon(Icons.Default.FavoriteBorder, null, tint = Color.Black)
                         }
-                        IconButton(onClick = {}) {
-                            Icon(
-                                Icons.Default.Notifications,
-                                contentDescription = null,
-                                tint = Color.Black
-                            )
+                        IconButton(onClick = { }) {
+                            Icon(Icons.Default.Notifications, null, tint = Color.Black)
                         }
                     }
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
 
+                // BOOK COVER
                 Card(
                     shape = RoundedCornerShape(20.dp),
                     elevation = CardDefaults.cardElevation(8.dp),
@@ -186,12 +191,17 @@ fun BookDetailsScreen(
                             modifier = Modifier.fillMaxSize()
                         )
                     } else {
-                        Box(Modifier.fillMaxSize().background(Color.Gray))
+                        Box(
+                            Modifier
+                                .fillMaxSize()
+                                .background(Color.Gray)
+                        )
                     }
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
 
+                // INFO CARD
                 Card(
                     colors = CardDefaults.cardColors(containerColor = DarkGreen),
                     shape = RoundedCornerShape(16.dp),
@@ -208,26 +218,34 @@ fun BookDetailsScreen(
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center
                         )
+
                         Text(
                             text = book.author,
                             color = Color.White.copy(alpha = 0.8f),
                             fontSize = 14.sp
                         )
+
                         Spacer(modifier = Modifier.height(8.dp))
+
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            repeat(5) { Icon(
-                                Icons.Default.Star,
-                                null,
-                                tint = Color.White,
-                                modifier = Modifier.size(14.dp))
+                            repeat(5) {
+                                Icon(
+                                    Icons.Default.Star,
+                                    null,
+                                    tint = Color.White,
+                                    modifier = Modifier.size(14.dp)
+                                )
                             }
+
                             Text(
                                 " ${book.rating}",
                                 color = Color.White,
                                 fontSize = 12.sp,
                                 modifier = Modifier.padding(start = 4.dp)
                             )
+
                             Spacer(modifier = Modifier.weight(1f))
+
                             Text(
                                 book.genre,
                                 color = Color.White.copy(alpha = 0.6f),
@@ -240,14 +258,16 @@ fun BookDetailsScreen(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Button(
-                    onClick = { },
+                    onClick = { onAddReviewClick(book) },
                     colors = ButtonDefaults.buttonColors(containerColor = MainBrown),
                     shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.width(200.dp).height(50.dp)
+                    modifier = Modifier
+                        .width(220.dp)
+                        .height(50.dp)
                 ) {
                     Text(
-                        text = resources.getString(R.string.book_details_read), 
-                        fontSize = 18.sp
+                        text = "Написать рецензию",
+                        fontSize = 16.sp
                     )
                 }
             }

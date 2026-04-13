@@ -17,7 +17,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.practicum.vkproject3.R
-import com.practicum.vkproject3.ui.profile.BeigeBackground
+import com.practicum.vkproject3.ui.theme.BeigeBackground
 import com.practicum.vkproject3.ui.theme.DarkGreen
 import androidx.compose.ui.res.colorResource
 import org.koin.androidx.compose.koinViewModel
@@ -71,17 +71,18 @@ fun GenrePickScreen(
         } else {
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                // Используем объект genre напрямую из стейта
                 state.genres.forEach { genre ->
-                    val selected = genre.id in state.selected
+                    val isSelected = state.selected.contains(genre.id)
+
                     FilterChip(
-                        selected = selected,
+                        selected = isSelected,
                         onClick = { viewModel.toggleGenre(genre.id) },
                         label = {
                             Text(
-                                text = genre.name,
+                                text = genre.name, // Берем имя жанра из базы
                                 modifier = Modifier.padding(horizontal = 4.dp)
                             )
                         },

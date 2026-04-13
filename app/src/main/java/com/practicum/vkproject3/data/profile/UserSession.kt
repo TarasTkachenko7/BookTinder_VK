@@ -4,6 +4,8 @@ import androidx.compose.runtime.mutableStateListOf
 import com.practicum.vkproject3.domain.model.Book
 
 object UserSession {
+    var userName: String? = null
+    var userAvatarUrl: String? = null
     var selectedGenres: Set<String> = emptySet()
 
     val favorites = mutableStateListOf<Book>()

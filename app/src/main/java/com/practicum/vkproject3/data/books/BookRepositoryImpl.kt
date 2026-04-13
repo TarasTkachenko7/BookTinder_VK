@@ -2,16 +2,18 @@ package com.practicum.vkproject3.data.books
 
 import android.content.Context
 import android.util.Log
+import com.google.firebase.database.FirebaseDatabase
 import com.practicum.vkproject3.R
-import com.practicum.vkproject3.domain.model.Book
+import com.practicum.vkproject3.data.model.FirebaseBook
 import com.practicum.vkproject3.data.network.api.OpenLibraryApi
 import com.practicum.vkproject3.domain.books.BookRepository
+import com.practicum.vkproject3.domain.model.Book
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import java.net.URLEncoder
 import java.util.UUID
-import com.google.firebase.database.FirebaseDatabase
-import kotlinx.coroutines.tasks.await
-import com.practicum.vkproject3.data.model.FirebaseBook
 
 class BookRepositoryImpl(
     private val api: OpenLibraryApi,
@@ -26,7 +28,7 @@ class BookRepositoryImpl(
         "Драма" to "drama"
     )
 
-    override suspend fun getBooks(page: Int): Pair<List<Book>, Int> {
+    override suspend fun getBooks(page: Int): Pair<List<Book>, Int> = withContext(Dispatchers.IO) {
         val response = api.searchBooks(query = "language:rus", page = page)
         val books = response.docs.map { doc ->
             Book(
@@ -38,7 +40,7 @@ class BookRepositoryImpl(
                 genre = context.getString(R.string.book_genre_miscellaneous)
             )
         }
-        return Pair(books, response.numFound)
+        Pair(books, response.numFound)
     }
 
     override suspend fun getCatalogBooksByGenres(genres: List<String>, limit: Int): Map<String, List<Book>> {

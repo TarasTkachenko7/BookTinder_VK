@@ -13,3 +13,4 @@ val MainBrown = Color(0xFFC56E4A)
 
 val DarkGreen = Color(0xFF2D4F42)
 val ErrorRed = Color(0xFFD91F2D)
+val BeigeBackground = Color(0xFFFDF8F5)
