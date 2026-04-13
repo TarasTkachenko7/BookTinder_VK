@@ -3,23 +3,34 @@ package com.practicum.vkproject3
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material.icons.filled.ChatBubbleOutline
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
+import androidx.compose.material.icons.filled.ChatBubble
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.outlined.ChatBubbleOutline
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
@@ -31,6 +42,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 import com.practicum.vkproject3.presentation.discussions.ChatScreen
 import com.practicum.vkproject3.presentation.discussions.CreateReviewScreen
 import com.practicum.vkproject3.presentation.discussions.DiscussionsScreen
@@ -44,29 +58,34 @@ import com.practicum.vkproject3.ui.books.CatalogScreen
 import com.practicum.vkproject3.ui.books.FavoritesScreen
 import com.practicum.vkproject3.ui.genres.GenrePickScreen
 import com.practicum.vkproject3.ui.home.HomeScreen
+import com.practicum.vkproject3.ui.profile.EditProfileScreen
 import com.practicum.vkproject3.ui.profile.HistoryScreen
+import com.practicum.vkproject3.ui.profile.PlaceholderScreen
 import com.practicum.vkproject3.ui.profile.ProfileScreen
+import com.practicum.vkproject3.ui.theme.BeigeBackground
+import com.practicum.vkproject3.ui.theme.MainBrown
 import com.practicum.vkproject3.ui.theme.VkProject3Theme
 import org.koin.androidx.compose.koinViewModel
 
-sealed class BottomNavItem(val route: String, val title: String, val icon: ImageVector) {
-    object Books : BottomNavItem("books_screen", "Лента", Icons.Default.Home)
-    object Discussions : BottomNavItem("discussions", "Обсуждения", Icons.Default.ChatBubbleOutline)
-    object Catalog : BottomNavItem("catalog", "Каталог", Icons.AutoMirrored.Filled.MenuBook)
-    object Profile : BottomNavItem("profile_screen", "Профиль", Icons.Default.Person)
+sealed class BottomNavItem(val route: String, val title: String, val selectedIcon: ImageVector, val unselectedIcon: ImageVector) {
+    object Books : BottomNavItem("books_screen", "Лента", Icons.Filled.Home, Icons.Outlined.Home)
+    object Discussions : BottomNavItem("discussions", "Обсуждения", Icons.Filled.ChatBubble, Icons.Outlined.ChatBubbleOutline)
+    object Catalog : BottomNavItem("catalog", "Каталог", Icons.AutoMirrored.Filled.MenuBook, Icons.AutoMirrored.Outlined.MenuBook)
+    object Profile : BottomNavItem("profile_screen", "Профиль", Icons.Filled.Person, Icons.Outlined.Person)
 }
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val firebase : DatabaseReference = FirebaseDatabase.getInstance().getReference()
+        val auth = FirebaseAuth.getInstance()
         setContent {
             VkProject3Theme {
                 val rootNavController = rememberNavController()
+                val startDestination = if (auth.currentUser != null) "main_app" else "login"
 
-                NavHost(
-                    navController = rootNavController,
-                    startDestination = "login"
-                ) {
+                NavHost(navController = rootNavController, startDestination = startDestination) {
                     composable("login") {
                         LoginScreen(
                             onNavigateToRegistration = {
@@ -123,17 +142,19 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable("genre_pick") {
-                        GenrePickScreen(
-                            onDone = {
-                                rootNavController.navigate("main_app") {
-                                    popUpTo("genre_pick") { inclusive = true }
-                                }
+                        GenrePickScreen(onDone = {
+                            rootNavController.navigate("main_app") {
+                                popUpTo("genre_pick") { inclusive = true }
                             }
-                        )
+                        })
                     }
 
                     composable("main_app") {
-                        MainFlowScreen()
+                        MainFlowScreen(onLogout = {
+                            rootNavController.navigate("login") {
+                                popUpTo("main_app") { inclusive = true }
+                            }
+                        })
                     }
                 }
             }
@@ -142,7 +163,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MainFlowScreen() {
+fun MainFlowScreen(onLogout: () -> Unit) {
     val navController = rememberNavController()
     val discussionsViewModel: DiscussionsViewModel = koinViewModel()
 
@@ -154,44 +175,57 @@ fun MainFlowScreen() {
     )
 
     Scaffold(
+        containerColor = BeigeBackground,
         bottomBar = {
-            NavigationBar(
-                containerColor = MaterialTheme.colorScheme.surface
+            Surface(
+                shadowElevation = 0.dp,
+                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+                color = Color.White
             ) {
-                val navBackStackEntry by navController.currentBackStackEntryAsState()
-                val currentDestination = navBackStackEntry?.destination
+                NavigationBar(
+                    modifier = Modifier.fillMaxWidth(),
+                    containerColor = Color.White,
+                    tonalElevation = 0.dp,
+                    windowInsets = WindowInsets(0.dp, 0.dp, 0.dp, 0.dp)
+                ) {
+                    val navBackStackEntry by navController.currentBackStackEntryAsState()
+                    val currentDestination = navBackStackEntry?.destination
 
-                items.forEach { screen ->
-                    val isSelected = if (screen == BottomNavItem.Catalog) {
-                        currentDestination?.route == "catalog"
-                    } else {
-                        currentDestination?.hierarchy?.any { it.route == screen.route } == true
-                    }
-
-                    NavigationBarItem(
-                        icon = {
-                            Icon(
-                                imageVector = screen.icon,
-                                contentDescription = null,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        },
-                        label = { Text(screen.title) },
-                        selected = isSelected,
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = Color(0xFFC77A58),
-                            indicatorColor = Color.Transparent
-                        ),
-                        onClick = {
-                            navController.navigate(screen.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = screen != BottomNavItem.Catalog
-                            }
+                    items.forEach { screen ->
+                        val currentRoute = currentDestination?.route
+                        val isSelected = when (screen) {
+                            BottomNavItem.Books -> currentRoute == BottomNavItem.Books.route
+                            BottomNavItem.Discussions -> currentRoute == BottomNavItem.Discussions.route
+                            BottomNavItem.Catalog -> currentRoute == BottomNavItem.Catalog.route || currentRoute == "favorites_screen" || currentRoute?.startsWith("book_details") == true
+                            BottomNavItem.Profile -> currentRoute == BottomNavItem.Profile.route || currentRoute == "edit_profile" || currentRoute == "history_screen" || currentRoute == "settings_screen" || currentRoute == "subscription_screen"
                         }
-                    )
+
+                        NavigationBarItem(
+                            icon = { Icon(if (isSelected) screen.selectedIcon else screen.unselectedIcon, null, Modifier.size(26.dp)) },
+                            selected = isSelected,
+                            alwaysShowLabel = false,
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = MainBrown,
+                                unselectedIconColor = Color.Gray.copy(alpha = 0.6f),
+                                selectedTextColor = MainBrown,
+                                unselectedTextColor = Color.Gray.copy(alpha = 0.6f),
+                                indicatorColor = MainBrown.copy(alpha = 0.1f)
+                            ),
+                            onClick = {
+                                if (isSelected) {
+                                    navController.popBackStack(screen.route, inclusive = false)
+                                } else {
+                                    navController.navigate(screen.route) {
+                                        popUpTo(navController.graph.findStartDestination().id) {
+                                            saveState = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                }
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -199,7 +233,7 @@ fun MainFlowScreen() {
         NavHost(
             navController = navController,
             startDestination = BottomNavItem.Books.route,
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier
         ) {
             composable(BottomNavItem.Books.route) {
                 HomeScreen(
@@ -222,9 +256,18 @@ fun MainFlowScreen() {
 
             composable(BottomNavItem.Profile.route) {
                 ProfileScreen(
-                    onNavigateToHistory = {
-                        navController.navigate("history_screen")
-                    }
+                    onNavigateToEdit = { navController.navigate("edit_profile") },
+                    onNavigateToHistory = { navController.navigate("history_screen") },
+                    onNavigateToSettings = { navController.navigate("settings_screen") },
+                    onNavigateToSubscription = { navController.navigate("subscription_screen") },
+                    onLogout = onLogout
+                )
+            }
+
+            composable("edit_profile") {
+                EditProfileScreen(
+                    onBack = { navController.popBackStack() },
+                    onLogout = onLogout
                 )
             }
 
@@ -232,6 +275,14 @@ fun MainFlowScreen() {
                 HistoryScreen(
                     onBack = { navController.popBackStack() }
                 )
+            }
+
+            composable("settings_screen") {
+                PlaceholderScreen(title = "Настройки", onBack = { navController.popBackStack() })
+            }
+
+            composable("subscription_screen") {
+                PlaceholderScreen(title = "Подписка", onBack = { navController.popBackStack() })
             }
 
             composable("favorites_screen") {

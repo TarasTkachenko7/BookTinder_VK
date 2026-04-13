@@ -2,6 +2,7 @@ package com.practicum.vkproject3.di
 
 import com.practicum.vkproject3.data.auth.AuthRepositoryImpl
 import com.practicum.vkproject3.data.books.BookRepositoryImpl
+import com.practicum.vkproject3.data.profile.UserGenreManager
 import com.practicum.vkproject3.data.profile.UserRepositoryImpl
 import com.practicum.vkproject3.domain.auth.AuthRepository
 import com.practicum.vkproject3.domain.books.BookRepository
@@ -10,7 +11,9 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
 val dataModule = module {
+    single { UserGenreManager() }
+
     single<AuthRepository> { AuthRepositoryImpl(get()) }
     single<BookRepository> { BookRepositoryImpl(get(), androidContext()) }
-    single<UserRepository> { UserRepositoryImpl(androidContext()) }
+    single<UserRepository> { UserRepositoryImpl(androidContext(), get()) }
 }

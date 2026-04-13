@@ -20,7 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.practicum.vkproject3.R
-import com.practicum.vkproject3.ui.profile.BeigeBackground
+import com.practicum.vkproject3.ui.theme.BeigeBackground
 import com.practicum.vkproject3.ui.theme.DarkGreen
 import org.koin.androidx.compose.koinViewModel
 

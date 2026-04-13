@@ -1,16 +1,12 @@
 package com.practicum.vkproject3.ui.auth
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.MarkEmailRead
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import com.practicum.vkproject3.presentation.auth.VerificationViewModel
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -23,7 +19,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.practicum.vkproject3.R
-import com.practicum.vkproject3.ui.profile.BeigeBackground
+import com.practicum.vkproject3.presentation.auth.VerificationViewModel
+import com.practicum.vkproject3.ui.theme.BeigeBackground
 import com.practicum.vkproject3.ui.theme.DarkGreen
 import org.koin.androidx.compose.koinViewModel
 
@@ -44,13 +41,13 @@ fun VerificationScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text(stringResource(R.string.verification_title), fontWeight = FontWeight.Bold) },
+                title = { Text("Подтверждение", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                     }
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent)
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = BeigeBackground)
             )
         },
         containerColor = BeigeBackground
@@ -63,30 +60,50 @@ fun VerificationScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = stringResource(R.string.verification_text),
-                textAlign = TextAlign.Center, fontSize = 16.sp
+            Icon(
+                imageVector = Icons.Default.MarkEmailRead,
+                contentDescription = null,
+                modifier = Modifier.size(100.dp),
+                tint = DarkGreen
             )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                text = "Мы отправили ссылку для подтверждения на вашу почту:",
+                textAlign = TextAlign.Center,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Medium
+            )
+            
             Text(
                 text = email,
                 color = Color(0xFFC26E4B),
-                fontWeight = FontWeight.Bold, fontSize = 16.sp
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                modifier = Modifier.padding(vertical = 8.dp)
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
-
-            BookTinderTextField(
-                value = state.code,
-                onValueChange = { viewModel.onCodeChange(it) },
-                placeholder = stringResource(R.string.placeholder_code),
-                leadingIcon = Icons.Default.CheckCircle,
-                errorMessage = state.error
+            Text(
+                text = "Пожалуйста, перейдите по ссылке в письме, чтобы продолжить.",
+                textAlign = TextAlign.Center,
+                fontSize = 14.sp,
+                color = Color.Gray
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(40.dp))
+
+            if (state.error != null) {
+                Text(
+                    text = state.error!!,
+                    color = Color.Red,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+            }
 
             Button(
-                onClick = { viewModel.verify() },
+                onClick = { viewModel.checkVerification() },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = DarkGreen),
                 shape = RoundedCornerShape(12.dp),
@@ -95,8 +112,17 @@ fun VerificationScreen(
                 if (state.isLoading) {
                     CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
                 } else {
-                    Text(stringResource(R.string.verification_button), fontSize = 18.sp)
+                    Text("Я подтвердил почту", fontSize = 18.sp)
                 }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            TextButton(onClick = { viewModel.resendEmail() }) {
+                Text(
+                    text = if (state.isResent) "Письмо отправлено повторно" else "Отправить письмо еще раз",
+                    color = DarkGreen
+                )
             }
         }
     }
