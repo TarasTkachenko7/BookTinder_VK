@@ -21,8 +21,8 @@ val viewModelModule = module {
     viewModel { ForgotPasswordViewModel(get()) }
 
     viewModel { BookViewModel(get()) }
-    viewModel { HomeViewModel(get()) }
-    viewModel { GenrePickViewModel(androidContext(), get()) }
+    viewModel { HomeViewModel(get(), get()) }
+    viewModel { GenrePickViewModel(get(), androidContext(), get()) }
     viewModel { ProfileViewModel(get(), get()) }
 
     viewModel { DiscussionsViewModel(get()) }

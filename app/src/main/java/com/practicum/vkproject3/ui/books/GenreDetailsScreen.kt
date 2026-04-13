@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.practicum.vkproject3.domain.model.Book
 import com.practicum.vkproject3.presentation.books.GenreDetailsViewModel
-import com.practicum.vkproject3.ui.profile.BeigeBackground
+import com.practicum.vkproject3.ui.theme.BeigeBackground
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 

@@ -13,7 +13,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.practicum.vkproject3.ui.books.SearchBarSection
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,11 +43,6 @@ fun DiscussionsScreen(
                 .padding(innerPadding)
                 .padding(top = 16.dp)
         ) {
-            SearchBarSection(
-                searchQuery = searchQuery,
-                onSearchQueryChange = { searchQuery = it },
-                onLikeClick = onNavigateToFavorites
-            )
 
             Spacer(modifier = Modifier.height(8.dp))
 
