@@ -9,11 +9,19 @@ import com.practicum.vkproject3.domain.books.BookRepository
 import com.practicum.vkproject3.domain.profile.UserRepository
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
+import com.practicum.vkproject3.domain.books.GigaChatRepository
+import com.practicum.vkproject3.data.books.GigaChatRepositoryImpl
+import com.practicum.vkproject3.data.genres.GenreRepositoryImpl
+import com.practicum.vkproject3.domain.genres.GenreRepository
 
 val dataModule = module {
     single { UserGenreManager() }
 
     single<AuthRepository> { AuthRepositoryImpl(get()) }
     single<BookRepository> { BookRepositoryImpl(get(), androidContext()) }
+    
     single<UserRepository> { UserRepositoryImpl(androidContext(), get()) }
+
+    single<GigaChatRepository> { GigaChatRepositoryImpl(get()) }
+    single<GenreRepository> { GenreRepositoryImpl() }
 }

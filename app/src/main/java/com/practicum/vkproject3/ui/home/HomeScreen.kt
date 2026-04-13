@@ -125,7 +125,7 @@ fun HomeScreen(
                         Text(stringResource(R.string.error_book_load))
                         Spacer(Modifier.height(12.dp))
                         Button(
-                            onClick = viewModel::load,
+                            onClick = viewModel::loadAiBooks,
                             colors = ButtonDefaults.buttonColors(containerColor = orangeBrown)
                         ) { Text(stringResource(R.string.home_retry)) }
                     }

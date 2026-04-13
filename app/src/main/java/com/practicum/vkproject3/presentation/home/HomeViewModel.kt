@@ -1,13 +1,11 @@
 package com.practicum.vkproject3.presentation.home
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.practicum.vkproject3.data.profile.UserSession
 import com.practicum.vkproject3.domain.books.BookRepository
+import com.practicum.vkproject3.domain.books.GigaChatRepository
 import com.practicum.vkproject3.domain.model.Book
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -27,64 +25,89 @@ data class HomeState(
     val isLoading: Boolean = false,
     val error: String? = null,
     val books: List<HomeBookUi> = emptyList(),
-    val index: Int = 0
+    val index: Int = 0,
+    val isExhausted: Boolean = false
 ) {
     val current: HomeBookUi? get() = books.getOrNull(index)
     val isEmpty: Boolean get() = !isLoading && error == null && books.isEmpty()
 }
 
-class HomeViewModel(private val repository: BookRepository) : ViewModel() {
-
+class HomeViewModel(
+    private val repository: BookRepository,
+    private val aiRepository: GigaChatRepository
+) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeState(isLoading = true))
     val state = _state.asStateFlow()
 
-    private var currentPage = 1
-
     init {
-        load()
+        loadAiBooks()
     }
 
-    fun load() {
+    fun loadAiBooks() {
+        if (_state.value.isLoading && _state.value.books.isNotEmpty()) return
+
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
 
-            delay(2000)
-
             try {
-                val (newBooks, _) = repository.getBooks(currentPage)
+                if (_state.value.isExhausted) {
+                    loopExistingBooks()
+                    return@launch
+                }
 
-                val selectedGenreIds = UserSession.selectedGenres.toList()
-                val genreIdsToUse = if (selectedGenreIds.isNotEmpty()) {
-                    selectedGenreIds
+                val genres = UserSession.selectedGenres.ifEmpty { setOf("Фантастика", "Роман") }
+
+                val alreadyShownIds = _state.value.books.map { it.id }.distinct()
+
+                val aiResult = aiRepository.getRecommendations(genres, alreadyShownIds)
+
+                if (aiResult.isSuccess) {
+                    val domainBooks = aiResult.getOrNull() ?: emptyList()
+                    val newUiBooks = domainBooks.map { it.toHomeUi() }
+
+                    if (newUiBooks.isNotEmpty()) {
+                        _state.update { st ->
+                            st.copy(
+                                isLoading = false,
+                                books = st.books + newUiBooks
+                            )
+                        }
+                    } else {
+                        _state.update { it.copy(isExhausted = true) }
+                        loopExistingBooks()
+                    }
                 } else {
-                    listOf("unknown")
+                    _state.update { it.copy(isLoading = false, error = "Ошибка генерации рекомендаций") }
                 }
-
-                val uiBooks = newBooks.mapIndexed { i, b ->
-                    val genreId = genreIdsToUse[i % genreIdsToUse.size]
-                    b.toHomeUi(genreId)
-                }
-
-                _state.update { st ->
-                    st.copy(
-                        isLoading = false,
-                        books = uiBooks,
-                        index = 0
-                    )
-                }
-
-                currentPage++
             } catch (e: Exception) {
-                _state.update { it.copy(isLoading = false, error = "ERROR_LOAD") }
+                _state.update { it.copy(isLoading = false, error = "Проверьте подключение к сети") }
             }
+        }
+    }
+
+    private fun loopExistingBooks() {
+        _state.update { st ->
+            val loopedBooks = st.books.distinctBy { it.id }.shuffled()
+
+            st.copy(
+                isLoading = false,
+                books = st.books + loopedBooks
+            )
         }
     }
 
     fun next() {
         _state.update { st ->
-            if (st.books.isEmpty()) st
-            else st.copy(index = (st.index + 1).coerceAtMost(st.books.lastIndex))
+            if (st.books.isEmpty()) return@update st
+
+            val newIndex = (st.index + 1).coerceAtMost(st.books.lastIndex)
+
+            if (newIndex >= st.books.lastIndex - 3 && !st.isLoading) {
+                loadAiBooks()
+            }
+
+            st.copy(index = newIndex)
         }
     }
 
@@ -117,19 +140,18 @@ class HomeViewModel(private val repository: BookRepository) : ViewModel() {
         }
     }
 
-    private fun Book.toHomeUi(genreId: String): HomeBookUi {
+    private fun Book.toHomeUi(): HomeBookUi {
         val displayRating = if (rating > 0) rating.toFloat() else {
-            ((id.hashCode().toUInt().toLong() % 21) / 10f + 3.0f).coerceIn(1f, 5f)
+            ((id.hashCode().toUInt().toLong() % 21) / 10f + 3.0f)
         }
-
         return HomeBookUi(
             id = id,
             title = title,
             author = author,
             coverUrl = imageUrl,
-            genreId = genreId,
+            genreId = genre,
             rating = displayRating,
-            isFavorite = false
+            isFavorite = UserSession.isFavorite(id)
         )
     }
 }

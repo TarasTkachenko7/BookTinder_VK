@@ -58,6 +58,7 @@ import com.practicum.vkproject3.ui.books.CatalogScreen
 import com.practicum.vkproject3.ui.books.FavoritesScreen
 import com.practicum.vkproject3.ui.genres.GenrePickScreen
 import com.practicum.vkproject3.ui.home.HomeScreen
+import com.practicum.vkproject3.ui.onboarding.OnboardingScreen
 import com.practicum.vkproject3.ui.profile.EditProfileScreen
 import com.practicum.vkproject3.ui.profile.HistoryScreen
 import com.practicum.vkproject3.ui.profile.PlaceholderScreen
@@ -120,13 +121,22 @@ class MainActivity : ComponentActivity() {
                         )
                     ) { backStackEntry ->
                         val email = backStackEntry.arguments?.getString("email") ?: ""
-
                         VerificationScreen(
                             email = email,
                             onBack = { rootNavController.popBackStack() },
                             onSuccess = {
+                                rootNavController.navigate("onboarding") { 
+                                    popUpTo("login") { inclusive = true } 
+                                }
+                            }
+                        )
+                    }
+
+                    composable("onboarding") {
+                        OnboardingScreen(
+                            onFinishOnboarding = {
                                 rootNavController.navigate("genre_pick") {
-                                    popUpTo("login") { inclusive = true }
+                                    popUpTo("onboarding") { inclusive = true }
                                 }
                             }
                         )
@@ -142,11 +152,13 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable("genre_pick") {
-                        GenrePickScreen(onDone = {
-                            rootNavController.navigate("main_app") {
-                                popUpTo("genre_pick") { inclusive = true }
+                        GenrePickScreen(
+                            onDone = {
+                                rootNavController.navigate("main_app") {
+                                    popUpTo("genre_pick") { inclusive = true }
+                                }
                             }
-                        })
+                        )
                     }
 
                     composable("main_app") {
@@ -245,12 +257,27 @@ fun MainFlowScreen(onLogout: () -> Unit) {
 
             composable(BottomNavItem.Catalog.route) {
                 CatalogScreen(
-                    onNavigateToFavorites = {
-                        navController.navigate("favorites_screen")
+                    onNavigateToFavorites = { 
+                        navController.navigate("favorites_screen") 
                     },
-                    onBookClick = { bookId ->
-                        navController.navigate("book_details/$bookId")
+                    onBookClick = { bookId -> 
+                        navController.navigate("book_details/$bookId") 
+                    },
+                    onNavigateToGenre = { genre -> 
+                        navController.navigate("genre_details/$genre") 
                     }
+                )
+            }
+
+            composable(
+                route = "genre_details/{genre}",
+                arguments = listOf(navArgument("genre") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val genre = backStackEntry.arguments?.getString("genre") ?: ""
+                com.practicum.vkproject3.ui.books.GenreDetailsScreen(
+                    genre = genre,
+                    onBack = { navController.popBackStack() },
+                    onBookClick = { bookId -> navController.navigate("book_details/$bookId") }
                 )
             }
 
@@ -331,7 +358,6 @@ fun MainFlowScreen(onLogout: () -> Unit) {
                                 4.0f
                             }
                         )
-
                         navController.navigate("create_review/${selectedBook.id}")
                     }
                 )

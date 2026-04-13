@@ -35,7 +35,7 @@ class VerificationViewModel(
 
     fun resendEmail() {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
+            _state.update { it.copy(isLoading = true, error = null) }
             val result = authRepository.sendEmailVerification()
             if (result.isSuccess) {
                 _state.update { it.copy(isLoading = false, isResent = true) }

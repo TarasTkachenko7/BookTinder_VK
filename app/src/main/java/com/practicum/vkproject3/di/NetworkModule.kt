@@ -6,4 +6,5 @@ import org.koin.dsl.module
 val networkModule = module {
     single { RetrofitClient.authApi }
     single { RetrofitClient.openLibraryApi }
+    single { RetrofitClient.gigaChatApi }
 }

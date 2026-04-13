@@ -25,23 +25,17 @@
     <string name="error_genre_load">Ошибка загрузки жанров</string>
     <string name="error_book_load">Ошибка загрузки книг</string>
 
-    <string name="genre_fantasy_mystic">Фэнтези и мистика</string>
-    <string name="genre_sci_fi">Научная фантастика</string>
-    <string name="genre_detective_thriller">Детективы и триллеры</string>
-    <string name="genre_health_sports">Здоровье и спорт</string>
-    <string name="genre_romance">Романы</string>
-    <string name="genre_horror">Ужасы</string>
-    <string name="genre_biography">Биография</string>
-    <string name="genre_travel_geo">Путешествия и география</string>
+    <!-- Жанры из вашей БД -->
+    <string name="genre_fantasy">Фантастика</string>
+    <string name="genre_detective">Детектив</string>
+    <string name="genre_romance">Роман</string>
+    <string name="genre_adventure">Приключения</string>
+    <string name="genre_drama">Драма</string>
     <string name="genre_classic">Классика</string>
-    <string name="genre_historical">Историческая литература</string>
-    <string name="genre_comics">Комиксы</string>
-    <string name="genre_modern_prose">Современная проза</string>
-    <string name="genre_business_career">Бизнес и карьера</string>
-    <string name="genre_art_creativity">Искусство и творчество</string>
-    <string name="genre_humor_satire">Юмор и сатира</string>
-    <string name="genre_science_education">Научпоп и образование</string>
-    <string name="genre_tech_it">Технологии и IT</string>
+    <string name="genre_horror">Ужасы</string>
+    <string name="genre_psychology">Психология</string>
+    <string name="genre_science">Научпоп</string>
+    <string name="genre_business">Бизнес</string>
 
     <string name="book_no_title">Без названия</string>
     <string name="book_no_author">Автор не указан</string>

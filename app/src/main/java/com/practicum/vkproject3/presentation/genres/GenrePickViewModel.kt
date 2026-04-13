@@ -2,34 +2,27 @@ package com.practicum.vkproject3.presentation.genres
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import com.practicum.vkproject3.R
+import com.practicum.vkproject3.data.profile.UserGenreManager
 import com.practicum.vkproject3.data.profile.UserSession
-import kotlinx.coroutines.delay
+import com.practicum.vkproject3.domain.genres.GenreRepository
+import com.practicum.vkproject3.domain.model.Genre
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import com.practicum.vkproject3.data.profile.UserGenreManager
 
 data class GenrePickState(
     val isLoading: Boolean = true,
-    val genres: List<GenreItem> = emptyList(),
+    val genres: List<Genre> = emptyList(),
     val selected: Set<String> = emptySet(),
     val error: String? = null
 ) {
     val canSubmit: Boolean get() = selected.isNotEmpty() && !isLoading
 }
 
-data class GenreItem(
-    val id: String,
-    val stringResId: Int
-)
-
 class GenrePickViewModel(
+    private val repository: GenreRepository,
     private val context: Context,
     private val userGenreManager: UserGenreManager
 ) : ViewModel() {
@@ -43,32 +36,21 @@ class GenrePickViewModel(
     fun loadGenres() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
-            delay(2000)
 
             try {
-                val genreIds = context.resources.getStringArray(R.array.genre_ids)
-
-                val nameResIds = context.resources.obtainTypedArray(R.array.genre_name_res_ids)
-
-                val genres = try {
-                    genreIds.mapIndexed { index, id ->
-                        GenreItem(id, nameResIds.getResourceId(index, 0))
-                    }
-                } finally {
-                    nameResIds.recycle()
-                }
+                val genresFromDb = repository.getAllGenres()
 
                 _state.update {
                     it.copy(
                         isLoading = false,
-                        genres = genres
+                        genres = genresFromDb
                     )
                 }
             } catch (e: Exception) {
                 _state.update {
                     it.copy(
                         isLoading = false,
-                        error = context.getString(R.string.error_genre_load)
+                        error = "Не удалось загрузить жанры"
                     )
                 }
             }
@@ -76,14 +58,20 @@ class GenrePickViewModel(
     }
 
     fun saveSelectedGenres() {
-        val selectedSet = _state.value.selected
-        UserSession.selectedGenres = selectedSet
+        val selectedNames = _state.value.genres
+            .filter { it.id in _state.value.selected }
+            .map { it.name }
+            .toSet()
+
+        val finalSet = if (selectedNames.isNotEmpty()) selectedNames else _state.value.selected
+
+        UserSession.selectedGenres = finalSet
 
         val prefs = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-        prefs.edit().putStringSet("user_genres", selectedSet).apply()
+        prefs.edit().putStringSet("user_genres", finalSet).apply()
 
         viewModelScope.launch {
-            userGenreManager.saveUserGenres(selectedSet.toList())
+            userGenreManager.saveUserGenres(finalSet.toList())
         }
     }
 
@@ -94,5 +82,4 @@ class GenrePickViewModel(
             st.copy(selected = next)
         }
     }
-
 }
