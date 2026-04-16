@@ -3,4 +3,8 @@ import com.practicum.vkproject3.domain.model.Book
 
 interface BookRepository {
     suspend fun getBooks(page: Int): Pair<List<Book>, Int>
+    suspend fun getBookDetails(
+        bookId: String,
+        editionId: String
+    ): Book
 }

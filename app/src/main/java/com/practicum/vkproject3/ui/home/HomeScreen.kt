@@ -45,7 +45,7 @@ import org.koin.androidx.compose.koinViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    onBookClick: (String) -> Unit,
+    onBookClick: (String, String) -> Unit,
     onNotificationsClick: () -> Unit = {},
     viewModel: HomeViewModel = koinViewModel()
 ) {
@@ -65,8 +65,9 @@ fun HomeScreen(
     val scale by animateFloatAsState(
         targetValue = if (isHeartVisible) 1.5f else 0f,
         animationSpec =  spring(dampingRatio = Spring.DampingRatioMediumBouncy),
-        label = "HeartScale"
+        label = stringResource(R.string.book_details_favorite_label)
     )
+
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
         containerColor = beigeBackground,
@@ -163,8 +164,9 @@ fun HomeScreen(
                                         .height(500.dp)
                                         .combinedClickable(
                                             onClick = {
-                                                val encodedId = book.id.replace("/", "%2F")
-                                                onBookClick(encodedId)
+                                                val bookId = book.id
+                                                val editionId = book.editionId
+                                                onBookClick(bookId, editionId)
                                             },
                                             onDoubleClick = {
                                                 viewModel.toggleFavorite()
@@ -183,11 +185,11 @@ fun HomeScreen(
                                         ) {
                                             AsyncImage(
                                                 model = book.coverUrl,
-                                                contentDescription = null,
+                                                contentDescription = stringResource(R.string.home_book_cover),
                                                 modifier = Modifier
-                                                    .fillMaxSize()
+                                                    .fillMaxHeight()
                                                     .clip(RoundedCornerShape(bottomStart = 14.dp, bottomEnd = 14.dp)),
-                                                contentScale = ContentScale.Crop
+                                                contentScale = ContentScale.FillBounds
                                             )
 
                                             if(scale > 0.1f){

@@ -6,7 +6,12 @@ data class Book(
     val author: String,
     val rating: Double,
     val genre: String,
-    val imageUrl: String
+    val imageUrl: String,
+    val edition_id: String? = null,
+    val description: String? = null,
+    val pages: Int? = null,
+    val publishedDate: String? = null,
+    val languages: List<String>? = null
 )
 
 val mockCatalog = listOf(

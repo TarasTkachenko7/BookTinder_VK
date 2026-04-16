@@ -1,256 +1,455 @@
 package com.practicum.vkproject3.ui.books
 
-import android.content.res.Resources
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.practicum.vkproject3.R
 import com.practicum.vkproject3.domain.model.Book
-import com.practicum.vkproject3.domain.model.mockCatalog
+import com.practicum.vkproject3.presentation.books.BookDetailsUiState
+import com.practicum.vkproject3.presentation.books.BookDetailsViewModel
+import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 val DarkGreen = Color(0xFF2C4A42)
 val MainBrown = Color(0xFFC77A58)
 val BeigeBackground = Color(0xFFF9F8F4)
 
+val TextBrown = Color(0xFF605454)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BookDetailsScreen(
-    bookId: String,
-    onBack: () -> Unit
+bookId: String,
+editionId: String,
+onBack: () -> Unit,
+viewModel: BookDetailsViewModel = koinViewModel()
 ) {
-    val context = LocalContext.current
-    val resources = context.resources
-    
-    val book = mockCatalog.find { it.id == bookId }
-        ?: Book(
-            id = bookId,
-            title = resources.getString(R.string.book_details_not_found),
-            author = resources.getString(R.string.book_details_unknown_author),
-            rating = 0.0,
-            genre = resources.getString(R.string.book_details_no_genre),
-            imageUrl = ""
-        )
+    LaunchedEffect(bookId, editionId) {
+        viewModel.loadDetails(bookId, editionId)
+    }
 
-    val scaffoldState = rememberBottomSheetScaffoldState(
-        bottomSheetState = rememberStandardBottomSheetState(
-            initialValue = SheetValue.PartiallyExpanded,
-            skipHiddenState = true
-        )
-    )
+    val uriHandler = LocalUriHandler.current
+    val uiState by viewModel.uiState.collectAsState()
 
-    BottomSheetScaffold(
-        scaffoldState = scaffoldState,
-        sheetPeekHeight = 60.dp,
-        sheetContainerColor = DarkGreen,
-        sheetContentColor = Color.White,
-        sheetShape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-        sheetDragHandle = {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(top = 8.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .width(40.dp)
-                        .height(4.dp)
-                        .clip(RoundedCornerShape(2.dp))
-                        .background(MainBrown)
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = resources.getString(R.string.book_details_about_book), 
-                    color = Color.White, 
-                    fontWeight = FontWeight.Bold, 
-                    fontSize = 16.sp
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-        },
-        sheetContent = {
-            Column(
-                modifier = Modifier
+    Scaffold(
+        topBar = {
+            Row(
+                Modifier
                     .fillMaxWidth()
-                    .heightIn(max = 500.dp)
-                    .padding(horizontal = 24.dp)
-                    .padding(bottom = 24.dp)
-                    .verticalScroll(rememberScrollState())
+                    .background(BeigeBackground),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment= Alignment.CenterVertically
             ) {
-                Text(
-                    text = resources.getString(R.string.book_details_about_author),
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = resources.getString(R.string.book_details_author_bio, book.author),
-                    fontSize = 14.sp,
-                    color = Color.White.copy(alpha = 0.8f),
-                    textAlign = TextAlign.Center
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Text(
-                    text = resources.getString(R.string.book_details_plot),
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = resources.getString(R.string.book_details_plot_description),
-                    fontSize = 14.sp,
-                    color = Color.White.copy(alpha = 0.8f),
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.height(40.dp))
-            }
-        },
-        containerColor = BeigeBackground
-    ) { innerPadding ->
-        Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                IconButton(
+                    onClick = onBack,
+                    modifier = Modifier.padding(16.dp)
                 ) {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = resources.getString(R.string.book_details_back), 
-                            tint = Color.Black
-                        )
-                    }
-                    Row {
-                        IconButton(onClick = { }) {
-                            Icon(
-                                Icons.Default.FavoriteBorder,
-                                contentDescription = null,
-                                tint = Color.Black
-                            )
-                        }
-                        IconButton(onClick = {}) {
-                            Icon(
-                                Icons.Default.Notifications,
-                                contentDescription = null,
-                                tint = Color.Black
-                            )
-                        }
-                    }
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = stringResource(R.string.book_details_back_arrow),
+                        tint = Color.Black
+                    )
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Card(
-                    shape = RoundedCornerShape(20.dp),
-                    elevation = CardDefaults.cardElevation(8.dp),
-                    modifier = Modifier
-                        .width(240.dp)
-                        .height(360.dp)
-                ) {
-                    if (book.imageUrl.isNotEmpty()) {
-                        AsyncImage(
-                            model = book.imageUrl,
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    } else {
-                        Box(Modifier.fillMaxSize().background(Color.Gray))
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = DarkGreen),
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = book.title,
-                            color = Color.White,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center
-                        )
-                        Text(
-                            text = book.author,
-                            color = Color.White.copy(alpha = 0.8f),
-                            fontSize = 14.sp
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            repeat(5) { Icon(
-                                Icons.Default.Star,
-                                null,
-                                tint = Color.White,
-                                modifier = Modifier.size(14.dp))
-                            }
-                            Text(
-                                " ${book.rating}",
-                                color = Color.White,
-                                fontSize = 12.sp,
-                                modifier = Modifier.padding(start = 4.dp)
-                            )
-                            Spacer(modifier = Modifier.weight(1f))
-                            Text(
-                                book.genre,
-                                color = Color.White.copy(alpha = 0.6f),
-                                fontSize = 12.sp
-                            )
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Button(
+                IconButton(
                     onClick = { },
-                    colors = ButtonDefaults.buttonColors(containerColor = MainBrown),
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.width(200.dp).height(50.dp)
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .background(
+                            color = colorResource(R.color.icon_gray).copy(alpha = 0.9f),
+                            shape = CircleShape
+                        )
+                        .size(38.dp)
                 ) {
-                    Text(
-                        text = resources.getString(R.string.book_details_read), 
-                        fontSize = 18.sp
+                    Icon(
+                        Icons.Default.Notifications,
+                        contentDescription = stringResource(R.string.home_notifications_description),
+                        tint = colorResource(R.color.text_black).copy(alpha = 0.75f)
                     )
                 }
             }
+        }
+    ) { padding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(BeigeBackground)
+                .padding(padding),
+            contentAlignment = Alignment.Center
+        ) {
+            when (val state = uiState) {
+                is BookDetailsUiState.Loading -> {
+                    CircularProgressIndicator()
+                }
+
+                is BookDetailsUiState.Success -> {
+                    val book = state.book
+                    val externalUrl = stringResource(R.string.book_details_external_url) + bookId
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(440.dp)
+                        ){
+                            AsyncImage(
+                                model = book.imageUrl,
+                                contentDescription = stringResource(R.string.book_details_blurred),
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .blur(radius = 15.dp)
+                                    .alpha(0.85f)
+                            )
+
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(
+                                        Brush.verticalGradient(
+                                            0.0f to BeigeBackground,
+                                            0.15f to BeigeBackground.copy(alpha = 0.2f),
+                                            0.4f to Color.Transparent,
+                                            0.6f to Color.Transparent,
+                                            0.85f to BeigeBackground.copy(alpha = 0.2f),
+                                            1.0f to BeigeBackground
+                                        )
+                                    )
+                            )
+
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(
+                                        Brush.horizontalGradient(
+                                            0.0f to BeigeBackground,
+                                            0.15f to BeigeBackground.copy(alpha = 0.2f),
+                                            0.4f to Color.Transparent,
+                                            0.6f to Color.Transparent,
+                                            0.85f to BeigeBackground.copy(alpha = 0.2f),
+                                            1.0f to BeigeBackground
+                                        )
+                                    )
+                            )
+
+                            AsyncImage(
+                                model = book.imageUrl,
+                                contentDescription = stringResource(R.string.book_details_cover),
+                                modifier = Modifier
+                                    .height(310.dp)
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .align(Alignment.Center),
+                                contentScale = ContentScale.Fit
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        var isFavorite by remember { mutableStateOf(false) }
+                        BookActionButtons(
+                            isFavorite = isFavorite,
+                            onFavoriteClick = {isFavorite = !isFavorite},
+                            onReadClick = { uriHandler.openUri(externalUrl) }
+                        )
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        val pagerState = rememberPagerState(pageCount = { 2 })
+                        val coroutineScope = rememberCoroutineScope()
+
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(48.dp),
+                            shape = CircleShape,
+                            color = DarkGreen
+                        ) {
+                            TabRow(
+                                selectedTabIndex = pagerState.currentPage,
+                                containerColor = Color.Transparent,
+                                contentColor = Color.White,
+                                indicator = { tabPositions ->
+                                    if (pagerState.currentPage < tabPositions.size) {
+                                        TabRowDefaults.SecondaryIndicator(
+                                            Modifier
+                                                .tabIndicatorOffset(tabPositions[pagerState.currentPage])
+                                                .padding(horizontal = 24.dp)
+                                                .clip(CircleShape),
+                                            color = MainBrown,
+                                            height = 3.dp
+                                        )
+                                    }
+                                },
+                                divider = {}
+                            ) {
+                                Tab(
+                                    selected = pagerState.currentPage == 0,
+                                    onClick = { coroutineScope.launch { pagerState.animateScrollToPage(0) } },
+                                    text = { Text(stringResource(R.string.book_details_about_book), fontWeight = FontWeight.Bold) }
+                                )
+                                Tab(
+                                    selected = pagerState.currentPage == 1,
+                                    onClick = { coroutineScope.launch { pagerState.animateScrollToPage(1) } },
+                                    text = { Text(stringResource(R.string.book_details_comments), fontWeight = FontWeight.Bold) }
+                                )
+                            }
+                        }
+
+                        Spacer(Modifier.height(24.dp))
+
+                        HorizontalPager(
+                            state = pagerState,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(min = 500.dp)
+                                .background(BeigeBackground),
+                            verticalAlignment = Alignment.Top
+                        ) { page ->
+                            if (page == 0) {
+                                AboutBookContent(book)
+                            } else {
+                                CommentsTabContent()
+                            }
+                        }
+                    }
+                }
+
+                is BookDetailsUiState.Error -> {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("Ошибка: ${state.message}", color = Color.Red)
+                        Button(onClick = { viewModel.loadDetails(bookId, editionId) }, colors = ButtonDefaults.buttonColors(containerColor = MainBrown)) {
+                            Text(stringResource(R.string.book_details_repeat))
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun AboutBookContent(book: Book) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(20.dp)
+    ) {
+        ElevatedCard(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.elevatedCardColors(
+                containerColor = BeigeBackground
+            ),
+            elevation = CardDefaults.elevatedCardElevation(
+                defaultElevation = 6.dp
+            )
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.Top
+            ) {
+                InfoItemDetail(stringResource(R.string.book_details_genre), book.genre, Modifier.weight(1f))
+                InfoItemDetail(stringResource(R.string.book_details_year), book.publishedDate ?: "-", Modifier.weight(1f))
+                InfoItemDetail(stringResource(R.string.book_details_pages), book.pages?.toString() ?: "-", Modifier.weight(1f))
+                InfoItemDetail(stringResource(R.string.book_details_language), book.languages?.joinToString("/").toString(), Modifier.weight(1f))
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Row(
+            modifier = Modifier
+                .background(Color.Transparent)
+                .border(width = 1.dp, color = DarkGreen, shape = RoundedCornerShape(8.dp))
+                .padding(horizontal = 12.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ){
+            Icon(
+                painter = painterResource(R.drawable.author_ic),
+                contentDescription = stringResource(R.string.book_details_author_ic),
+                tint = Color.Black,
+                modifier = Modifier.size(20.dp)
+            )
+
+            Text(
+                text = book.author,
+                fontSize = 16.sp,
+                color = Color.Black,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(text = stringResource(R.string.book_details_description), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = DarkGreen)
+        Text(
+            text = book.description ?: stringResource(R.string.book_details_description_empty),
+            fontSize = 14.sp,
+            lineHeight = 20.sp,
+            textAlign = TextAlign.Justify,
+            color = TextBrown
+        )
+    }
+}
+
+@Composable
+fun InfoItemDetail(
+    label: String,
+    value: String,
+    modifier: Modifier
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = label,
+            fontSize = 16.sp,
+            color = DarkGreen,
+            fontWeight = FontWeight.Bold
+        )
+
+        Text(
+            text = value,
+            fontSize = 13.sp,
+            fontFamily = FontFamily.SansSerif,
+            color = TextBrown,
+            textAlign = TextAlign.Center,
+            maxLines = 3,
+            lineHeight = 14.sp,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+
+@Composable
+fun BookActionButtons(
+    modifier: Modifier = Modifier,
+    isFavorite: Boolean,
+    onFavoriteClick: () -> Unit,
+    onReadClick: () -> Unit
+) {
+    val scale by animateFloatAsState(
+        targetValue = if (isFavorite) 1.2f else 1f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
+        label = stringResource(R.string.book_details_favorite_label)
+    )
+
+    val heartColor by animateColorAsState(
+        targetValue = if (isFavorite) MainBrown else Color.Black,
+        label = stringResource(R.string.book_details_heart_label)
+    )
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Button(
+            onClick = onFavoriteClick,
+            modifier = Modifier.weight(1f),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.White,
+                contentColor = Color.Black
+            ),
+            elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp),
+            shape = RoundedCornerShape(12.dp),
+            contentPadding = PaddingValues(vertical = 12.dp)
+        ) {
+            Icon(
+                imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Default.FavoriteBorder,
+                contentDescription = stringResource(R.string.book_details_favorite_label),
+                modifier = Modifier
+                    .size(20.dp)
+                    .graphicsLayer(scaleX = scale, scaleY = scale),
+                tint = heartColor
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(stringResource(R.string.book_details_to_favorites), fontSize = 14.sp, fontWeight = FontWeight.Medium)
+        }
+
+        Button(
+            onClick = onReadClick,
+            modifier = Modifier.weight(1f),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MainBrown,
+                contentColor = Color.White
+            ),
+            elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp),
+            shape = RoundedCornerShape(12.dp),
+            contentPadding = PaddingValues(vertical = 12.dp)
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.auto_stories),
+                contentDescription = stringResource(R.string.book_details_open_book_ic),
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(stringResource(R.string.book_details_read), fontSize = 14.sp, fontWeight = FontWeight.Medium)
         }
     }
 }

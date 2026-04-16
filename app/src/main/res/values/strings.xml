@@ -18,6 +18,7 @@
     <string name="home_click_for_more">Нажмите для подробностей</string>
     <string name="error_generic">Ошибка</string>
     <string name="home_collapse">Свернуть</string>
+    <string name="home_book_cover">Обложка книги</string>
 
     <string name="genre_pick_title">Давайте настроим\nвашу ленту!</string>
     <string name="genre_pick_subtitle">Выберите жанры,\nкоторые вам по душе</string>
@@ -55,12 +56,35 @@
     <string name="book_details_unknown_author">Неизвестный автор</string>
     <string name="book_details_no_genre">Нет жанра</string>
     <string name="book_details_about_book">О книге</string>
+    <string name="book_details_comments">Комментарии</string>
+    <string name="book_details_genre">Жанр</string>
+    <string name="book_details_year">Год</string>
+    <string name="book_details_pages">Страниц</string>
+    <string name="book_details_language">Язык</string>
+    <string name="book_details_description">Описание</string>
+    <string name="book_details_description_empty">Описание отсутствует</string>
+    <string name="book_details_favorite_label">Иконка сердца</string>
+    <string name="book_details_heart_label">Цвет сердца</string>
+    <string name="book_details_open_book_ic">Иконка открытой книги</string>>
     <string name="book_details_about_author">Об авторе</string>
     <string name="book_details_author_bio">%1$s — известный писатель...</string>
     <string name="book_details_plot">Сюжет</string>
     <string name="book_details_plot_description">Захватывающая история о...</string>
     <string name="book_details_back">Back</string>
     <string name="book_details_read">Читать</string>
+    <string name="book_details_external_url">https://openlibrary.org</string>
+    <string name="book_details_blurred">Размытая обложка книги</string>
+    <string name="book_details_cover">Обложка книги</string>
+    <string name="book_details_write_comment">Написать комментарии...</string>
+    <string name="book_details_you">Вы</string>
+    <string name="book_details_answer">Ответить</string>
+    <string name="book_details_complaint">жалоба</string>
+    <string name="book_details_back_arrow">Иконка назад</string>
+    <string name="book_details_repeat">Повторить</string>
+    <string name="book_details_author_ic">Иконка автора</string>
+    <string name="book_details_to_favorites">В избранное</string>
+    <string name="book_details_send_arrow">Иконца отправки сообщения</string>
+    <string name="book_details_comment_line">Линия ответа на комментарий</string>
 
     <string name="catalog_all">Все</string>
     <string name="catalog_fantasy">Фэнтези</string>

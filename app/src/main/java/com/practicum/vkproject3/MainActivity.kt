@@ -162,7 +162,11 @@ fun MainFlowScreen() {
         ) {
             composable(BottomNavItem.Books.route) {
                 HomeScreen(
-                    onBookClick = { bookId -> navController.navigate("book_details/$bookId") }
+                    onBookClick = { bookId, editionId ->
+                        val encodedBookId = bookId.replace("/", "%2F")
+                        val encodedEditionId = editionId?.replace("/", "%2F") ?: "none"
+                        navController.navigate("book_details/$encodedBookId/$encodedEditionId")
+                    }
                 )
             }
 
@@ -193,11 +197,16 @@ fun MainFlowScreen() {
             }
 
             composable(
-                route = "book_details/{bookId}",
-                arguments = listOf(navArgument("bookId") { type = NavType.StringType })
+                route = "book_details/{bookId}/{editionId}",
+                arguments = listOf(
+                    navArgument("bookId") { type = NavType.StringType },
+                    navArgument("editionId") { type = NavType.StringType }
+                )
             ) { backStackEntry ->
-                val bookId = backStackEntry.arguments?.getString("bookId") ?: ""
-                BookDetailsScreen(bookId = bookId, onBack = { navController.popBackStack() })
+                val bookId = backStackEntry.arguments?.getString("bookId")?.replace("%2F", "/") ?: ""
+                val editionId = backStackEntry.arguments?.getString("editionId")?.replace("%2F", "/") ?: ""
+
+                BookDetailsScreen(bookId = bookId, editionId = editionId, onBack = { navController.popBackStack() })
             }
         }
     }

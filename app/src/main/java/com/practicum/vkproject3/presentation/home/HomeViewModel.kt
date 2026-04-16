@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 
 data class HomeBookUi(
     val id: String,
+    val editionId: String,
     val title: String,
     val author: String,
     val coverUrl: String,
@@ -112,6 +113,7 @@ class HomeViewModel(private val repository: BookRepository) : ViewModel() {
 
         return HomeBookUi(
             id = id,
+            editionId = edition_id.toString(),
             title = title,
             author = author,
             coverUrl = imageUrl,

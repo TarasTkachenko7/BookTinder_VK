@@ -4,6 +4,7 @@ import com.practicum.vkproject3.presentation.auth.ForgotPasswordViewModel
 import com.practicum.vkproject3.presentation.auth.LoginViewModel
 import com.practicum.vkproject3.presentation.auth.RegistrationViewModel
 import com.practicum.vkproject3.presentation.auth.VerificationViewModel
+import com.practicum.vkproject3.presentation.books.BookDetailsViewModel
 import com.practicum.vkproject3.presentation.books.BookViewModel
 import com.practicum.vkproject3.presentation.genres.GenrePickViewModel
 import com.practicum.vkproject3.presentation.home.HomeViewModel
@@ -22,4 +23,5 @@ val viewModelModule = module {
     viewModel { HomeViewModel(get()) }
     viewModel { GenrePickViewModel(androidContext()) }
     viewModel { ProfileViewModel(get()) }
+    viewModel { BookDetailsViewModel(get()) }
 }
