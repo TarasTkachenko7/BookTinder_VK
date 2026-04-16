@@ -209,7 +209,7 @@ fun MainFlowScreen(onLogout: () -> Unit) {
                             BottomNavItem.Books -> currentRoute == BottomNavItem.Books.route
                             BottomNavItem.Discussions -> currentRoute == BottomNavItem.Discussions.route
                             BottomNavItem.Catalog -> currentRoute == BottomNavItem.Catalog.route || currentRoute == "favorites_screen" || currentRoute?.startsWith("book_details") == true
-                            BottomNavItem.Profile -> currentRoute == BottomNavItem.Profile.route || currentRoute == "edit_profile" || currentRoute == "history_screen" || currentRoute == "settings_screen" || currentRoute == "subscription_screen"
+                            BottomNavItem.Profile -> currentRoute == BottomNavItem.Profile.route || currentRoute == "edit_profile" || currentRoute == "history_screen" || currentRoute == "settings_screen" || currentRoute == "subscription_screen" || currentRoute == "profile_favorite_books"
                         }
 
                         NavigationBarItem(
@@ -287,6 +287,7 @@ fun MainFlowScreen(onLogout: () -> Unit) {
                     onNavigateToHistory = { navController.navigate("history_screen") },
                     onNavigateToSettings = { navController.navigate("settings_screen") },
                     onNavigateToSubscription = { navController.navigate("subscription_screen") },
+                    onNavigateToFavoriteBooks = { navController.navigate("profile_favorite_books") }, // <-- ДОБАВИЛИ НАВИГАЦИЮ
                     onLogout = onLogout
                 )
             }
@@ -318,6 +319,12 @@ fun MainFlowScreen(onLogout: () -> Unit) {
                     onBookClick = { bookId ->
                         navController.navigate("book_details/$bookId")
                     }
+                )
+            }
+            composable("profile_favorite_books") {
+                PlaceholderScreen(
+                    title = "Любимые книги",
+                    onBack = { navController.popBackStack() }
                 )
             }
 

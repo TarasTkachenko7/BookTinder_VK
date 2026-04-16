@@ -43,6 +43,7 @@ fun ProfileScreen(
     onNavigateToHistory: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
     onNavigateToSubscription: () -> Unit = {},
+    onNavigateToFavoriteBooks: () -> Unit = {},
     onLogout: () -> Unit = {},
     viewModel: ProfileViewModel = koinViewModel()
 ) {
@@ -70,13 +71,6 @@ fun ProfileScreen(
             TopAppBar(
                 title = { Text("Профиль", fontWeight = FontWeight.Bold, fontSize = 22.sp) },
                 actions = {
-                    IconButton(onClick = { }) {
-                        Icon(
-                            imageVector = Icons.Default.FavoriteBorder,
-                            contentDescription = null,
-                            tint = Color.Black.copy(alpha = 0.7f)
-                        )
-                    }
                     IconButton(onClick = { }) {
                         Icon(
                             imageVector = Icons.Default.NotificationsNone,
@@ -157,6 +151,13 @@ fun ProfileScreen(
                     text = stringResource(R.string.profile_edit),
                     icon = Icons.Default.Edit,
                     onClick = onNavigateToEdit
+                )
+
+                MenuButton(
+                    text = "Любимые книги",
+                    icon = Icons.Default.FavoriteBorder,
+                    iconTint = Color(0xFFE91E63),
+                    onClick = onNavigateToFavoriteBooks
                 )
 
                 MenuButton(
