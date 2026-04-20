@@ -1,5 +1,6 @@
 package com.practicum.vkproject3.ui.home
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -32,8 +33,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -58,7 +59,10 @@ fun HomeScreen(
     val orangeBrown = colorResource(R.color.orange_brown)
     val iconGray = colorResource(R.color.icon_gray)
     val textBlack = colorResource(R.color.text_black)
-    val sheetPeekHeight = dimensionResource(R.dimen.home_sheet_peek_height)
+
+    val baseSheetPeekHeight = 200.dp
+    val currentPeekHeight = if (state.current == null) 0.dp else baseSheetPeekHeight
+
     val scaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = rememberStandardBottomSheetState(initialValue = SheetValue.PartiallyExpanded, skipHiddenState = true)
     )
@@ -67,22 +71,24 @@ fun HomeScreen(
         scaffoldState = scaffoldState,
         containerColor = beigeBackground,
         sheetContainerColor = DarkGreen,
-        sheetPeekHeight = sheetPeekHeight,
+        sheetPeekHeight = currentPeekHeight,
         sheetDragHandle = {
-            Box(
-                Modifier
-                    .padding(top = 8.dp)
-                    .width(60.dp)
-                    .height(4.dp)
-                    .clip(RoundedCornerShape(2.dp))
-                    .background(orangeBrown)
-            )
+            if (currentPeekHeight > 0.dp) {
+                Box(
+                    Modifier
+                        .padding(top = 8.dp)
+                        .width(60.dp)
+                        .height(4.dp)
+                        .clip(RoundedCornerShape(2.dp))
+                        .background(orangeBrown)
+                )
+            }
         },
         sheetContent = {
             Column(
                 Modifier
                     .fillMaxWidth()
-                    .heightIn(min = sheetPeekHeight)
+                    .heightIn(min = currentPeekHeight)
                     .fillMaxHeight(0.85f)
                     .padding(horizontal = 20.dp, vertical = 4.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -91,9 +97,7 @@ fun HomeScreen(
                 Text(text = stringResource(R.string.home_about_book), color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(10.dp))
                 Column(Modifier.verticalScroll(rememberScrollState())) {
-                    val description = remember(state.current?.id) {
-                        getMockDescription(state.current?.id ?: "default")
-                    }
+                    val description = state.current?.description ?: "Описание отсутствует."
                     Text(
                         text = description,
                         textAlign = TextAlign.Center,
@@ -105,188 +109,268 @@ fun HomeScreen(
             }
         }
     ) { innerPadding ->
-        Box(Modifier.fillMaxSize().padding(innerPadding).padding(horizontal = 18.dp, vertical = 10.dp)) {
-            when {
-                state.isLoading -> {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            CircularProgressIndicator(color = DarkGreen)
-                            Spacer(Modifier.height(12.dp))
-                            Text(stringResource(R.string.home_loading))
+        Box(
+            Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .statusBarsPadding()
+                .padding(horizontal = 18.dp, vertical = 10.dp)
+        ) {
+            Column(Modifier.fillMaxSize()) {
+
+                Row(
+                    Modifier.fillMaxWidth(),
+                    Arrangement.SpaceBetween,
+                    Alignment.CenterVertically
+                ) {
+                    RoundIconButton(
+                        Icons.Default.Info,
+                        iconGray,
+                        textBlack,
+                        stringResource(R.string.home_info_description),
+                        onClick = {
+                            onInfoClick()
+                            showOnboarding = true
                         }
+                    )
+                    Row {
+                        RoundIconButton(
+                            icon = Icons.Default.FavoriteBorder,
+                            backgroundColor = iconGray,
+                            iconColor = textBlack,
+                            contentDescription = stringResource(R.string.home_favorites_description),
+                            onClick = onFavoritesClick
+                        )
+                        Spacer(Modifier.width(10.dp))
+                        RoundIconButton(
+                            Icons.Default.Notifications,
+                            iconGray,
+                            textBlack,
+                            stringResource(R.string.home_notifications_description),
+                            onNotificationsClick
+                        )
                     }
                 }
-                state.error != null -> {
-                    Column(
-                        Modifier.fillMaxSize(),
-                        Arrangement.Center,
-                        Alignment.CenterHorizontally
-                    ) {
-                        Text(stringResource(R.string.error_book_load))
-                        Spacer(Modifier.height(12.dp))
-                        Button(
-                            onClick = viewModel::loadAiBooks,
-                            colors = ButtonDefaults.buttonColors(containerColor = orangeBrown)
-                        ) { Text(stringResource(R.string.home_retry)) }
-                    }
-                }
-                state.isEmpty -> {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(stringResource(R.string.home_no_books)) }
-                }
-                else -> {
-                    val book = state.current!!
-                    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Row(
-                            Modifier.fillMaxWidth(),
-                            Arrangement.SpaceBetween,
-                            Alignment.CenterVertically
-                        ) {
-                            RoundIconButton(
-                                Icons.Default.Info,
-                                iconGray,
-                                textBlack,
-                                stringResource(R.string.home_info_description),
-                                onClick = {
-                                    onInfoClick()
-                                    showOnboarding = true
+                Spacer(Modifier.height(14.dp))
+
+                Box(Modifier.weight(1f).fillMaxWidth()) {
+                    when {
+                        state.isLoading && state.books.isEmpty() -> {
+                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    CircularProgressIndicator(color = DarkGreen)
+                                    Spacer(Modifier.height(12.dp))
+                                    Text(stringResource(R.string.home_loading))
                                 }
-                            )
-                            Row {
-                                RoundIconButton(
-                                    icon = Icons.Default.FavoriteBorder,
-                                    backgroundColor = iconGray,
-                                    iconColor = textBlack,
-                                    contentDescription = stringResource(R.string.home_favorites_description),
-                                    onClick = onFavoritesClick
-                                )
-                                Spacer(Modifier.width(10.dp))
-                                RoundIconButton(
-                                    Icons.Default.Notifications,
-                                    iconGray,
-                                    textBlack,
-                                    stringResource(R.string.home_notifications_description),
-                                    onNotificationsClick
-                                )
                             }
                         }
-                        Spacer(Modifier.height(14.dp))
-
-                        Card(
-                            Modifier
-                                .fillMaxWidth(0.75f)
-                                .height(500.dp),
-                            RoundedCornerShape(18.dp),
-                            CardDefaults.cardColors(containerColor = DarkGreen)
-                        ) {
-                            Column(Modifier.fillMaxSize()) {
-                                Box(
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .weight(1f)
-                                ) {
-                                    AsyncImage(
-                                        model = book.coverUrl,
-                                        contentDescription = null,
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .clip(RoundedCornerShape(bottomStart = 14.dp, bottomEnd = 14.dp)),
-                                        contentScale = ContentScale.Crop
-                                    )
+                        state.error != null && state.books.isEmpty() -> {
+                            Column(
+                                Modifier.fillMaxSize(),
+                                Arrangement.Center,
+                                Alignment.CenterHorizontally
+                            ) {
+                                Text(stringResource(R.string.error_book_load))
+                                Spacer(Modifier.height(12.dp))
+                                Button(
+                                    onClick = viewModel::loadAiBooks,
+                                    colors = ButtonDefaults.buttonColors(containerColor = orangeBrown)
+                                ) { Text(stringResource(R.string.home_retry)) }
+                            }
+                        }
+                        state.isEmpty -> {
+                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(stringResource(R.string.home_no_books)) }
+                        }
+                        state.current == null -> {
+                            if (state.isLoading) {
+                                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        CircularProgressIndicator(color = DarkGreen)
+                                        Spacer(Modifier.height(12.dp))
+                                        Text(stringResource(R.string.home_loading))
+                                    }
                                 }
-
+                            } else if (state.error != null) {
                                 Column(
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                                    Modifier.fillMaxSize(),
+                                    Arrangement.Center,
+                                    Alignment.CenterHorizontally
+                                ) {
+                                    Text("Ошибка при загрузке новых рекомендаций")
+                                    Spacer(Modifier.height(12.dp))
+                                    Button(
+                                        onClick = viewModel::loadAiBooks,
+                                        colors = ButtonDefaults.buttonColors(containerColor = orangeBrown)
+                                    ) { Text(stringResource(R.string.home_retry)) }
+                                }
+                            } else if (state.isExhausted) {
+                                val randomQuote = remember { bookQuotes.random() }
+                                Column(
+                                    modifier = Modifier.fillMaxSize().padding(16.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center
                                 ) {
                                     Text(
-                                        text = book.title,
-                                        color = Color.White,
+                                        text = "На сегодня всё!",
+                                        fontSize = 28.sp,
                                         fontWeight = FontWeight.Bold,
-                                        fontSize = 16.sp,
-                                        maxLines = 2,
-                                        overflow = TextOverflow.Ellipsis,
-                                        lineHeight = 20.sp
+                                        color = textBlack,
+                                        textAlign = TextAlign.Center
                                     )
-
+                                    Spacer(modifier = Modifier.height(16.dp))
                                     Text(
-                                        text = book.author,
-                                        color = Color.White.copy(alpha = 0.85f),
-                                        fontSize = 14.sp,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                        modifier = Modifier.padding(top = 4.dp)
+                                        text = "Мы подберем для вас новую партию рекомендаций, как только в библиотеке появятся обновления.",
+                                        fontSize = 16.sp,
+                                        color = textBlack.copy(alpha = 0.7f),
+                                        textAlign = TextAlign.Center,
+                                        lineHeight = 22.sp
                                     )
-
-                                    Row(
-                                        Modifier
-                                            .fillMaxWidth()
-                                            .padding(top = 8.dp),
-                                        Arrangement.SpaceBetween,
-                                        Alignment.CenterVertically
+                                    Spacer(modifier = Modifier.height(32.dp))
+                                    Card(
+                                        colors = CardDefaults.cardColors(containerColor = beigeBackground.copy(alpha = 0.5f)),
+                                        border = BorderStroke(1.dp, orangeBrown.copy(alpha = 0.3f)),
+                                        shape = RoundedCornerShape(12.dp)
                                     ) {
                                         Text(
-                                            text = stringResource(R.string.home_rating_format, book.rating),
-                                            color = Color.White.copy(alpha = 0.9f),
-                                            fontSize = 13.sp,
-                                            fontWeight = FontWeight.Medium
+                                            text = randomQuote,
+                                            modifier = Modifier.padding(16.dp),
+                                            fontSize = 14.sp,
+                                            fontStyle = FontStyle.Italic,
+                                            color = textBlack.copy(alpha = 0.8f),
+                                            textAlign = TextAlign.Center
                                         )
-
-                                        Text(
-                                            text = genreNameById(book.genreId),
-                                            color = Color.White.copy(alpha = 0.9f),
-                                            fontSize = 13.sp,
-                                            fontWeight = FontWeight.Medium,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
+                                    }
+                                    Spacer(modifier = Modifier.height(48.dp))
+                                    Button(
+                                        onClick = viewModel::prev,
+                                        colors = ButtonDefaults.buttonColors(containerColor = orangeBrown)
+                                    ) {
+                                        Text("Вернуться к предыдущей", color = Color.White)
                                     }
                                 }
                             }
                         }
+                        else -> {
+                            val book = state.current!!
+                            Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+                                Card(
+                                    Modifier
+                                        .fillMaxWidth(0.75f)
+                                        .height(500.dp), // ИСПРАВЛЕНИЕ: Вернул фиксированную высоту, чтобы обложка не растягивалась
+                                    RoundedCornerShape(18.dp),
+                                    CardDefaults.cardColors(containerColor = DarkGreen)
+                                ) {
+                                    Column(Modifier.fillMaxSize()) {
+                                        Box(
+                                            Modifier
+                                                .fillMaxWidth()
+                                                .weight(1f)
+                                        ) {
+                                            AsyncImage(
+                                                model = book.coverUrl,
+                                                contentDescription = null,
+                                                modifier = Modifier
+                                                    .fillMaxSize()
+                                                    .clip(RoundedCornerShape(bottomStart = 14.dp, bottomEnd = 14.dp)),
+                                                contentScale = ContentScale.Crop
+                                            )
+                                        }
 
-                        Spacer(Modifier.height(14.dp))
+                                        Column(
+                                            Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 16.dp, vertical = 12.dp)
+                                        ) {
+                                            Text(
+                                                text = book.title,
+                                                color = Color.White,
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 16.sp,
+                                                maxLines = 2,
+                                                overflow = TextOverflow.Ellipsis,
+                                                lineHeight = 20.sp
+                                            )
 
-                        Row(
-                            Modifier.fillMaxWidth(),
-                            Arrangement.Center,
-                            Alignment.CenterVertically
-                        ) {
-                            IconButton(
-                                onClick = viewModel::prev,
-                                Modifier.size(48.dp)
-                            ) {
-                                Icon(
-                                    Icons.AutoMirrored.Filled.ArrowBack,
-                                    stringResource(R.string.home_prev_book)
-                                )
-                            }
+                                            Text(
+                                                text = book.author,
+                                                color = Color.White.copy(alpha = 0.85f),
+                                                fontSize = 14.sp,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis,
+                                                modifier = Modifier.padding(top = 4.dp)
+                                            )
 
-                            Spacer(Modifier.width(8.dp))
+                                            Row(
+                                                Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(top = 8.dp),
+                                                Arrangement.SpaceBetween,
+                                                Alignment.CenterVertically
+                                            ) {
+                                                Text(
+                                                    text = stringResource(R.string.home_rating_format, book.rating),
+                                                    color = Color.White.copy(alpha = 0.9f),
+                                                    fontSize = 13.sp,
+                                                    fontWeight = FontWeight.Medium
+                                                )
 
-                            FloatingActionButton(
-                                onClick = viewModel::toggleFavorite,
-                                containerColor = orangeBrown,
-                                shape = CircleShape,
-                                modifier = Modifier.size(52.dp)
-                            ) {
-                                Icon(
-                                    imageVector = if (book.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                                    contentDescription = stringResource(R.string.home_toggle_favorite),
-                                    tint = Color.White
-                                )
-                            }
+                                                Text(
+                                                    text = genreNameById(book.genreId),
+                                                    color = Color.White.copy(alpha = 0.9f),
+                                                    fontSize = 13.sp,
+                                                    fontWeight = FontWeight.Medium,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
 
-                            Spacer(Modifier.width(8.dp))
+                                Spacer(Modifier.height(14.dp))
 
-                            IconButton(
-                                onClick = viewModel::next,
-                                Modifier.size(48.dp)
-                            ) {
-                                Icon(
-                                    Icons.AutoMirrored.Filled.ArrowForward,
-                                    stringResource(R.string.home_next_book)
-                                )
+                                Row(
+                                    Modifier.fillMaxWidth(),
+                                    Arrangement.Center,
+                                    Alignment.CenterVertically
+                                ) {
+                                    IconButton(
+                                        onClick = viewModel::prev,
+                                        Modifier.size(48.dp)
+                                    ) {
+                                        Icon(
+                                            Icons.AutoMirrored.Filled.ArrowBack,
+                                            stringResource(R.string.home_prev_book)
+                                        )
+                                    }
+
+                                    Spacer(Modifier.width(8.dp))
+
+                                    FloatingActionButton(
+                                        onClick = viewModel::toggleFavorite,
+                                        containerColor = orangeBrown,
+                                        shape = CircleShape,
+                                        modifier = Modifier.size(52.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = if (book.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                            contentDescription = stringResource(R.string.home_toggle_favorite),
+                                            tint = Color.White
+                                        )
+                                    }
+
+                                    Spacer(Modifier.width(8.dp))
+
+                                    IconButton(
+                                        onClick = viewModel::next,
+                                        Modifier.size(48.dp)
+                                    ) {
+                                        Icon(
+                                            Icons.AutoMirrored.Filled.ArrowForward,
+                                            stringResource(R.string.home_next_book)
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
@@ -466,20 +550,10 @@ private fun genreNameById(genreId: String): String {
     }
 }
 
-private val mockDescriptions = listOf(
-    "Увлекательная история, полная неожиданных поворотов сюжета и ярких персонажей. Отличный выбор для приятного вечера с книгой.",
-    "Глубокий и философский роман, который заставляет задуматься о важных жизненных вопросах и оставляет долгое послевкусие.",
-    "Напряженный триллер, где каждая страница держит в напряжении, а финал оказывается совершенно непредсказуемым.",
-    "Легкая и романтичная история о любви, дружбе и поиске себя в большом городе. Идеально для поднятия настроения.",
-    "Классическое произведение, которое не теряет своей актуальности с годами. Обязательно к прочтению каждому.",
-    "Завораживающий мир фэнтези, полный магии, загадок и древних легенд. Погрузитесь в него с головой.",
-    "Пронзительная драма о человеческих судьбах, потерях и надежде. Эта книга не оставит вас равнодушным.",
-    "Динамичный детектив с запутанным сюжетом и харизматичным главным героем, который шаг за шагом распутывает клубок тайн.",
-    "Вдохновляющая биография выдающегося человека, чья жизнь и достижения служат примером для многих.",
-    "Сборник трогательных и смешных рассказов о простых людях и их повседневных радостях и горестях."
+private val bookQuotes = listOf(
+    "«Комната без книг — всё равно, что тело без души.»\n— Марк Туллий Цицерон",
+    "«Чтение — это один из истоков мышления и умственного развития.»\n— В. А. Сухомлинский",
+    "«Книги — это корабли мысли, странствующие по волнам времени и бережно несущие свой драгоценный груз...»\n— Фрэнсис Бэкон",
+    "«Парадокс чтения: оно уводит нас от реальности, чтобы наполнить реальность смыслом.»\n— Дэниел Пеннак",
+    "«Человек, который не читает хороших книг, не имеет преимуществ перед человеком, который не умеет читать.»\n— Марк Твен"
 )
-
-fun getMockDescription(bookId: String): String {
-    val index = kotlin.math.abs(bookId.hashCode()) % mockDescriptions.size
-    return mockDescriptions[index]
-}

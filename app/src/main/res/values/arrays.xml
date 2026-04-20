@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Массив ID жанров (должны совпадать с полем id в Firebase) -->
     <string-array name="genre_ids">
         <item>fantasy</item>
         <item>detective</item>
@@ -14,7 +13,6 @@
         <item>business</item>
     </string-array>
 
-    <!-- Массив ссылок на названия жанров -->
     <string-array name="genre_name_res_ids">
         <item>@string/genre_fantasy</item>
         <item>@string/genre_detective</item>

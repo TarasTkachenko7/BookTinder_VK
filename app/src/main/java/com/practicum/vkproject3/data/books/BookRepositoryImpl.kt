@@ -20,6 +20,8 @@ class BookRepositoryImpl(
     private val context: Context
 ) : BookRepository {
 
+    private val memoryCache = mutableMapOf<String, Book>()
+
     private val genreMapping = mapOf(
         "Фантастика" to "science fiction",
         "Детектив" to "mystery",
@@ -31,14 +33,17 @@ class BookRepositoryImpl(
     override suspend fun getBooks(page: Int): Pair<List<Book>, Int> = withContext(Dispatchers.IO) {
         val response = api.searchBooks(query = "language:rus", page = page)
         val books = response.docs.map { doc ->
-            Book(
+            val book = Book(
                 id = doc.key ?: "",
                 title = doc.title ?: context.getString(R.string.book_no_title),
                 author = doc.authorNames?.firstOrNull() ?: context.getString(R.string.book_no_author),
                 imageUrl = doc.coverI?.let { "https://covers.openlibrary.org/b/id/$it-L.jpg" } ?: "",
                 rating = 0.0,
-                genre = context.getString(R.string.book_genre_miscellaneous)
+                genre = context.getString(R.string.book_genre_miscellaneous),
+                description = ""
             )
+            memoryCache[book.id] = book
+            book
         }
         Pair(books, response.numFound)
     }
@@ -49,14 +54,17 @@ class BookRepositoryImpl(
             try {
                 val response = api.searchBooks(query = genre, page = 1, limit = limit)
                 val books = response.docs.map { doc ->
-                    Book(
+                    val book = Book(
                         id = doc.key ?: UUID.randomUUID().toString(),
                         title = doc.title ?: context.getString(R.string.book_no_title),
                         author = doc.authorNames?.firstOrNull() ?: context.getString(R.string.book_no_author),
                         imageUrl = doc.coverI?.let { "https://covers.openlibrary.org/b/id/$it-M.jpg" } ?: "",
                         rating = ((doc.key?.hashCode()?.toUInt()?.toLong() ?: 0L) % 21) / 10.0 + 3.0,
-                        genre = genre
+                        genre = genre,
+                        description = ""
                     )
+                    memoryCache[book.id] = book // Сохраняем в кеш
+                    book
                 }
                 if (books.isNotEmpty()) {
                     result[genre] = books
@@ -77,14 +85,17 @@ class BookRepositoryImpl(
                 val titleStr = doc.title ?: context.getString(R.string.book_no_title)
                 val encodedTitle = URLEncoder.encode(titleStr, "UTF-8")
                 val fallbackCoverUrl = "https://ui-avatars.com/api/?name=$encodedTitle&background=2C3E34&color=fff&size=512&font-size=0.3"
-                Book(
+                val book = Book(
                     id = doc.key ?: UUID.randomUUID().toString(),
                     title = titleStr,
                     author = doc.authorNames?.firstOrNull() ?: context.getString(R.string.book_no_author),
                     imageUrl = doc.coverI?.let { "https://covers.openlibrary.org/b/id/$it-M.jpg" } ?: fallbackCoverUrl,
                     rating = ((doc.key?.hashCode()?.toUInt()?.toLong() ?: 0L) % 21) / 10.0 + 3.0,
-                    genre = genre
+                    genre = genre,
+                    description = ""
                 )
+                memoryCache[book.id] = book
+                book
             }
         } catch (e: Exception) {
             Log.e("GenreDetails", "Ошибка загрузки жанра $genre: ${e.message}")
@@ -110,5 +121,55 @@ class BookRepositoryImpl(
             Log.e("FirebaseData", "Ошибка загрузки книг: ${e.message}")
             emptyList()
         }
+    }
+
+    override suspend fun getBookById(id: String): Book? = withContext(Dispatchers.IO) {
+        memoryCache[id]?.let { return@withContext it }
+
+        try {
+            val firebaseBooks = getAllBooksFromDatabase()
+            val fBook = firebaseBooks.find { it.id == id }
+
+            if (fBook != null) {
+                return@withContext Book(
+                    id = fBook.id ?: id,
+                    title = fBook.title ?: context.getString(R.string.book_no_title),
+                    author = fBook.author ?: context.getString(R.string.book_no_author),
+                    imageUrl = fBook.imageUrl ?: "",
+                    rating = fBook.rating?.toString()?.toDoubleOrNull() ?: 0.0,
+                    genre = fBook.genreId ?: "Неизвестный жанр",
+                    description = fBook.description ?: "Описание отсутствует."
+                )
+            }
+        } catch (e: Exception) {
+            Log.e("BookRepository", "Ошибка при поиске в Firebase: ${e.message}")
+        }
+
+        try {
+            val cleanId = id.substringAfterLast("/")
+            val response = api.searchBooks(query = cleanId, page = 1, limit = 5)
+
+            val doc = response.docs.find { it.key == id || it.key?.contains(cleanId) == true }
+
+            if (doc != null) {
+                val titleStr = doc.title ?: context.getString(R.string.book_no_title)
+                val encodedTitle = URLEncoder.encode(titleStr, "UTF-8")
+                val fallbackCoverUrl = "https://ui-avatars.com/api/?name=$encodedTitle&background=2C3E34&color=fff&size=512&font-size=0.3"
+
+                return@withContext Book(
+                    id = doc.key ?: id,
+                    title = titleStr,
+                    author = doc.authorNames?.firstOrNull() ?: context.getString(R.string.book_no_author),
+                    imageUrl = doc.coverI?.let { "https://covers.openlibrary.org/b/id/$it-L.jpg" } ?: fallbackCoverUrl,
+                    rating = ((doc.key?.hashCode()?.toUInt()?.toLong() ?: 0L) % 21) / 10.0 + 3.0,
+                    genre = "Разное",
+                    description = "Описание отсутствует."
+                )
+            }
+        } catch (e: Exception) {
+            Log.e("BookRepository", "Ошибка при поиске в OpenLibrary: ${e.message}")
+        }
+
+        return@withContext null
     }
 }

@@ -18,7 +18,8 @@ data class HomeBookUi(
     val coverUrl: String,
     val genreId: String,
     val rating: Float,
-    val isFavorite: Boolean
+    val isFavorite: Boolean,
+    val description: String
 )
 
 data class HomeState(
@@ -48,16 +49,12 @@ class HomeViewModel(
         if (_state.value.isLoading && _state.value.books.isNotEmpty()) return
 
         viewModelScope.launch {
+            if (_state.value.isExhausted) return@launch
+
             _state.update { it.copy(isLoading = true, error = null) }
 
             try {
-                if (_state.value.isExhausted) {
-                    loopExistingBooks()
-                    return@launch
-                }
-
                 val genres = UserSession.selectedGenres.ifEmpty { setOf("Фантастика", "Роман") }
-
                 val alreadyShownIds = _state.value.books.map { it.id }.distinct()
 
                 val aiResult = aiRepository.getRecommendations(genres, alreadyShownIds)
@@ -74,8 +71,7 @@ class HomeViewModel(
                             )
                         }
                     } else {
-                        _state.update { it.copy(isExhausted = true) }
-                        loopExistingBooks()
+                        _state.update { it.copy(isLoading = false, isExhausted = true) }
                     }
                 } else {
                     _state.update { it.copy(isLoading = false, error = "Ошибка генерации рекомендаций") }
@@ -86,24 +82,13 @@ class HomeViewModel(
         }
     }
 
-    private fun loopExistingBooks() {
-        _state.update { st ->
-            val loopedBooks = st.books.distinctBy { it.id }.shuffled()
-
-            st.copy(
-                isLoading = false,
-                books = st.books + loopedBooks
-            )
-        }
-    }
-
     fun next() {
         _state.update { st ->
             if (st.books.isEmpty()) return@update st
 
-            val newIndex = (st.index + 1).coerceAtMost(st.books.lastIndex)
+            val newIndex = minOf(st.index + 1, st.books.size)
 
-            if (newIndex >= st.books.lastIndex - 3 && !st.isLoading) {
+            if (newIndex >= st.books.size - 3 && !st.isLoading && !st.isExhausted) {
                 loadAiBooks()
             }
 
@@ -128,7 +113,8 @@ class HomeViewModel(
                 author = cur.author,
                 imageUrl = cur.coverUrl,
                 rating = cur.rating.toDouble(),
-                genre = cur.genreId
+                genre = cur.genreId,
+                description = cur.description
             )
 
             UserSession.toggleFavorite(domainBook)
@@ -151,7 +137,8 @@ class HomeViewModel(
             coverUrl = imageUrl,
             genreId = genre,
             rating = displayRating,
-            isFavorite = UserSession.isFavorite(id)
+            isFavorite = UserSession.isFavorite(id),
+            description = this.description ?: "Описание отсутствует."
         )
     }
 }

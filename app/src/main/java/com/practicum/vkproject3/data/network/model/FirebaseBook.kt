@@ -18,7 +18,8 @@ data class FirebaseBook(
             author = author,
             imageUrl = imageUrl,
             rating = rating,
-            genre = genreName
+            genre = genreName,
+            description = description
         )
     }
 }

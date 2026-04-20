@@ -1,5 +1,6 @@
 package com.practicum.vkproject3
 
+import android.net.Uri // <-- ДОБАВИЛИ ИМПОРТ ДЛЯ КОДИРОВАНИЯ
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -125,8 +126,8 @@ class MainActivity : ComponentActivity() {
                             email = email,
                             onBack = { rootNavController.popBackStack() },
                             onSuccess = {
-                                rootNavController.navigate("onboarding") { 
-                                    popUpTo("login") { inclusive = true } 
+                                rootNavController.navigate("onboarding") {
+                                    popUpTo("login") { inclusive = true }
                                 }
                             }
                         )
@@ -257,14 +258,14 @@ fun MainFlowScreen(onLogout: () -> Unit) {
 
             composable(BottomNavItem.Catalog.route) {
                 CatalogScreen(
-                    onNavigateToFavorites = { 
-                        navController.navigate("favorites_screen") 
+                    onNavigateToFavorites = {
+                        navController.navigate("favorites_screen")
                     },
-                    onBookClick = { bookId -> 
-                        navController.navigate("book_details/$bookId") 
+                    onBookClick = { bookId ->
+                        navController.navigate("book_details/${Uri.encode(bookId)}")
                     },
-                    onNavigateToGenre = { genre -> 
-                        navController.navigate("genre_details/$genre") 
+                    onNavigateToGenre = { genre ->
+                        navController.navigate("genre_details/$genre")
                     }
                 )
             }
@@ -277,7 +278,7 @@ fun MainFlowScreen(onLogout: () -> Unit) {
                 com.practicum.vkproject3.ui.books.GenreDetailsScreen(
                     genre = genre,
                     onBack = { navController.popBackStack() },
-                    onBookClick = { bookId -> navController.navigate("book_details/$bookId") }
+                    onBookClick = { bookId -> navController.navigate("book_details/${Uri.encode(bookId)}") }
                 )
             }
 
@@ -287,7 +288,7 @@ fun MainFlowScreen(onLogout: () -> Unit) {
                     onNavigateToHistory = { navController.navigate("history_screen") },
                     onNavigateToSettings = { navController.navigate("settings_screen") },
                     onNavigateToSubscription = { navController.navigate("subscription_screen") },
-                    onNavigateToFavoriteBooks = { navController.navigate("profile_favorite_books") }, // <-- ДОБАВИЛИ НАВИГАЦИЮ
+                    onNavigateToFavoriteBooks = { navController.navigate("profile_favorite_books") },
                     onLogout = onLogout
                 )
             }
@@ -316,11 +317,13 @@ fun MainFlowScreen(onLogout: () -> Unit) {
             composable("favorites_screen") {
                 FavoritesScreen(
                     onBack = { navController.popBackStack() },
+                    // ИСПРАВЛЕНИЕ: Кодируем bookId
                     onBookClick = { bookId ->
-                        navController.navigate("book_details/$bookId")
+                        navController.navigate("book_details/${Uri.encode(bookId)}")
                     }
                 )
             }
+
             composable("profile_favorite_books") {
                 PlaceholderScreen(
                     title = "Любимые книги",
@@ -348,7 +351,8 @@ fun MainFlowScreen(onLogout: () -> Unit) {
                     navArgument("bookId") { type = NavType.StringType }
                 )
             ) { backStackEntry ->
-                val bookId = backStackEntry.arguments?.getString("bookId") ?: ""
+                val rawBookId = backStackEntry.arguments?.getString("bookId") ?: ""
+                val bookId = Uri.decode(rawBookId)
 
                 BookDetailsScreen(
                     bookId = bookId,
@@ -365,7 +369,7 @@ fun MainFlowScreen(onLogout: () -> Unit) {
                                 4.0f
                             }
                         )
-                        navController.navigate("create_review/${selectedBook.id}")
+                        navController.navigate("create_review/${Uri.encode(selectedBook.id)}")
                     }
                 )
             }
@@ -385,7 +389,8 @@ fun MainFlowScreen(onLogout: () -> Unit) {
                     navArgument("bookId") { type = NavType.StringType }
                 )
             ) { backStackEntry ->
-                val bookId = backStackEntry.arguments?.getString("bookId") ?: ""
+                val rawBookId = backStackEntry.arguments?.getString("bookId") ?: ""
+                val bookId = Uri.decode(rawBookId)
 
                 CreateReviewScreen(
                     bookId = bookId,

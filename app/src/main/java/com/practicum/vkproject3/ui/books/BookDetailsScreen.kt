@@ -11,12 +11,7 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,8 +25,9 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.practicum.vkproject3.R
 import com.practicum.vkproject3.domain.model.Book
-import com.practicum.vkproject3.domain.model.mockCatalog
 import com.practicum.vkproject3.ui.theme.BeigeBackground
+import com.practicum.vkproject3.presentation.books.BookDetailsViewModel
+import org.koin.androidx.compose.koinViewModel
 
 val DarkGreen = Color(0xFF2C4A42)
 val MainBrown = Color(0xFFC77A58)
@@ -41,20 +37,38 @@ val MainBrown = Color(0xFFC77A58)
 fun BookDetailsScreen(
     bookId: String,
     onBack: () -> Unit,
-    onAddReviewClick: (Book) -> Unit
-){
+    onAddReviewClick: (Book) -> Unit,
+    viewModel: BookDetailsViewModel = koinViewModel()
+) {
     val context = LocalContext.current
     val resources = context.resources
 
-    val book = mockCatalog.find { it.id == bookId }
-        ?: Book(
-            id = bookId,
-            title = resources.getString(R.string.book_details_not_found),
-            author = resources.getString(R.string.book_details_unknown_author),
-            rating = 0.0,
-            genre = resources.getString(R.string.book_details_no_genre),
-            imageUrl = ""
-        )
+    LaunchedEffect(bookId) {
+        viewModel.loadBook(bookId)
+    }
+
+    val state by viewModel.state.collectAsState()
+
+    if (state.isLoading) {
+        Box(Modifier.fillMaxSize().background(BeigeBackground), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(color = DarkGreen)
+        }
+        return
+    }
+
+    val book = state.book
+    if (book == null) {
+        Box(Modifier.fillMaxSize().background(BeigeBackground), contentAlignment = Alignment.Center) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("Книга не найдена", fontSize = 18.sp, color = Color.Black)
+                Spacer(Modifier.height(16.dp))
+                Button(onClick = onBack, colors = ButtonDefaults.buttonColors(containerColor = MainBrown)) {
+                    Text("Вернуться назад", color = Color.White)
+                }
+            }
+        }
+        return
+    }
 
     val scaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = rememberStandardBottomSheetState(
@@ -123,8 +137,11 @@ fun BookDetailsScreen(
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
                 Spacer(modifier = Modifier.height(8.dp))
+
+                // Подтягиваем РЕАЛЬНОЕ описание книги, если оно есть
+                val descriptionText = book.description ?: resources.getString(R.string.book_details_plot_description)
                 Text(
-                    text = resources.getString(R.string.book_details_plot_description),
+                    text = descriptionText,
                     fontSize = 14.sp,
                     color = Color.White.copy(alpha = 0.8f),
                     textAlign = TextAlign.Center
@@ -147,7 +164,6 @@ fun BookDetailsScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-                // TOP BAR
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -175,7 +191,6 @@ fun BookDetailsScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // BOOK COVER
                 Card(
                     shape = RoundedCornerShape(20.dp),
                     elevation = CardDefaults.cardElevation(8.dp),
@@ -201,7 +216,6 @@ fun BookDetailsScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // INFO CARD
                 Card(
                     colors = CardDefaults.cardColors(containerColor = DarkGreen),
                     shape = RoundedCornerShape(16.dp),

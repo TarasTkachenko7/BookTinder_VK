@@ -4,6 +4,7 @@ import com.practicum.vkproject3.presentation.auth.ForgotPasswordViewModel
 import com.practicum.vkproject3.presentation.auth.LoginViewModel
 import com.practicum.vkproject3.presentation.auth.RegistrationViewModel
 import com.practicum.vkproject3.presentation.auth.VerificationViewModel
+import com.practicum.vkproject3.presentation.books.BookDetailsViewModel
 import com.practicum.vkproject3.presentation.books.BookViewModel
 import com.practicum.vkproject3.presentation.books.GenreDetailsViewModel
 import com.practicum.vkproject3.presentation.discussions.DiscussionsViewModel
@@ -29,4 +30,5 @@ val viewModelModule = module {
 
     viewModel { com.practicum.vkproject3.presentation.books.CatalogViewModel(get()) }
     viewModel { parameters -> GenreDetailsViewModel(genre = parameters.get(), repository = get()) }
+    viewModel { BookDetailsViewModel(get()) }
 }

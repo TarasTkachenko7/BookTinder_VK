@@ -210,13 +210,27 @@ fun BookCardContent(book: Book) {
 
         Spacer(modifier = Modifier.weight(1f))
 
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                Icons.Default.Star, null,
-                tint = Color.White,
-                modifier = Modifier.size(12.dp)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    Icons.Default.Star, null,
+                    tint = Color.White,
+                    modifier = Modifier.size(12.dp)
+                )
+                Text(" ${book.rating}", color = Color.White, fontSize = 11.sp)
+            }
+
+            Text(
+                text = book.genre,
+                color = Color.White.copy(alpha = 0.6f),
+                fontSize = 11.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
-            Text(" ${book.rating}", color = Color.White, fontSize = 11.sp)
         }
     }
 }
