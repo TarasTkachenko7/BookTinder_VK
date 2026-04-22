@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 
 data class HomeBookUi(
     val id: String,
+    val editionId: String,
     val title: String,
     val author: String,
     val coverUrl: String,
@@ -40,6 +41,8 @@ class HomeViewModel(
 
     private val _state = MutableStateFlow(HomeState(isLoading = true))
     val state = _state.asStateFlow()
+
+    private var currentPage = 1
 
     init {
         loadAiBooks()
@@ -82,6 +85,8 @@ class HomeViewModel(
         }
     }
 
+    fun onPageChanged(newIndex: Int) {
+        _state.update { it.copy(index = newIndex) }
     fun next() {
         _state.update { st ->
             if (st.books.isEmpty()) return@update st
@@ -132,6 +137,7 @@ class HomeViewModel(
         }
         return HomeBookUi(
             id = id,
+            editionId = edition_id.toString(),
             title = title,
             author = author,
             coverUrl = imageUrl,

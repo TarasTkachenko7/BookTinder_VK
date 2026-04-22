@@ -1,5 +1,6 @@
 package com.practicum.vkproject3.presentation.books
 
+import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.practicum.vkproject3.domain.books.BookRepository
@@ -9,24 +10,40 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-data class BookDetailsState(
-    val isLoading: Boolean = true,
-    val book: Book? = null,
-    val error: String? = null
+data class Comment(
+    val id: Long,
+    val authorName: String,
+    val text: String,
+    val replies: MutableList<Comment> = mutableStateListOf()
 )
 
-class BookDetailsViewModel(private val repository: BookRepository) : ViewModel() {
-    private val _state = MutableStateFlow(BookDetailsState())
-    val state = _state.asStateFlow()
+sealed interface BookDetailsUiState {
+    object Loading : BookDetailsUiState
+    data class Success(val book: Book) : BookDetailsUiState
+    data class Error(val message: String) : BookDetailsUiState
+}
 
-    fun loadBook(id: String) {
+class BookDetailsViewModel(
+    private val repository: BookRepository
+) : ViewModel() {
+
+    private val _uiState = MutableStateFlow<BookDetailsUiState>(BookDetailsUiState.Loading)
+    val uiState = _uiState.asStateFlow()
+
+    fun loadDetails(
+        bookId: String,
+        editionId: String
+    ) {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null) }
+            _uiState.value = BookDetailsUiState.Loading
             try {
-                val loadedBook = repository.getBookById(id)
-                _state.update { it.copy(isLoading = false, book = loadedBook) }
+                val fullBook = repository.getBookDetails(
+                    bookId = bookId,
+                    editionId = editionId
+                )
+                _uiState.value = BookDetailsUiState.Success(fullBook)
             } catch (e: Exception) {
-                _state.update { it.copy(isLoading = false, error = e.message) }
+                _uiState.value = BookDetailsUiState.Error("Не удалось загрузить детали")
             }
         }
     }

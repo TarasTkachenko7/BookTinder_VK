@@ -16,11 +16,13 @@ import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.filled.ChatBubble
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -69,11 +71,11 @@ import com.practicum.vkproject3.ui.theme.MainBrown
 import com.practicum.vkproject3.ui.theme.VkProject3Theme
 import org.koin.androidx.compose.koinViewModel
 
-sealed class BottomNavItem(val route: String, val title: String, val selectedIcon: ImageVector, val unselectedIcon: ImageVector) {
-    object Books : BottomNavItem("books_screen", "Лента", Icons.Filled.Home, Icons.Outlined.Home)
-    object Discussions : BottomNavItem("discussions", "Обсуждения", Icons.Filled.ChatBubble, Icons.Outlined.ChatBubbleOutline)
-    object Catalog : BottomNavItem("catalog", "Каталог", Icons.AutoMirrored.Filled.MenuBook, Icons.AutoMirrored.Outlined.MenuBook)
-    object Profile : BottomNavItem("profile_screen", "Профиль", Icons.Filled.Person, Icons.Outlined.Person)
+sealed class BottomNavItem(val route: String, val title: String, val icon: ImageVector) {
+    object Books : BottomNavItem("books_screen", "Главная", Icons.Default.Home)
+    object Discussions : BottomNavItem("discussions", "Обсуждения", Icons.Default.ChatBubbleOutline)
+    object Catalog : BottomNavItem("catalog", "Каталог", Icons.Default.MenuBook)
+    object Profile : BottomNavItem("profile_screen", "Профиль", Icons.Default.Person)
 }
 
 class MainActivity : ComponentActivity() {
@@ -250,10 +252,16 @@ fun MainFlowScreen(onLogout: () -> Unit) {
         ) {
             composable(BottomNavItem.Books.route) {
                 HomeScreen(
-                    onFavoritesClick = {
-                        navController.navigate("favorites_screen")
+                    onBookClick = { bookId, editionId ->
+                        val encodedBookId = bookId.replace("/", "%2F")
+                        val encodedEditionId = editionId?.replace("/", "%2F") ?: "none"
+                        navController.navigate("book_details/$encodedBookId/$encodedEditionId")
                     }
                 )
+            }
+
+            composable(BottomNavItem.Discussions.route) {
+                Text("Обсуждения", modifier = Modifier.padding(20.dp))
             }
 
             composable(BottomNavItem.Catalog.route) {
@@ -346,16 +354,19 @@ fun MainFlowScreen(onLogout: () -> Unit) {
             }
 
             composable(
-                route = "book_details/{bookId}",
+                route = "book_details/{bookId}/{editionId}",
                 arguments = listOf(
-                    navArgument("bookId") { type = NavType.StringType }
+                    navArgument("bookId") { type = NavType.StringType },
+                    navArgument("editionId") { type = NavType.StringType }
                 )
             ) { backStackEntry ->
                 val rawBookId = backStackEntry.arguments?.getString("bookId") ?: ""
-                val bookId = Uri.decode(rawBookId)
-
+                //val bookId = Uri.decode(rawBookId)
+                val bookId = backStackEntry.arguments?.getString("bookId")?.replace("%2F", "/") ?: ""
+                val editionId = backStackEntry.arguments?.getString("editionId")?.replace("%2F", "/") ?: ""
                 BookDetailsScreen(
                     bookId = bookId,
+                    editionId = editionId,
                     onBack = { navController.popBackStack() },
                     onAddReviewClick = { selectedBook ->
                         discussionsViewModel.setSelectedBookForReview(
@@ -404,6 +415,7 @@ fun MainFlowScreen(onLogout: () -> Unit) {
                 route = "discussion_chat/{discussionId}",
                 arguments = listOf(navArgument("discussionId") { type = NavType.IntType })
             ) { backStackEntry ->
+
                 val discussionId = backStackEntry.arguments?.getInt("discussionId") ?: 0
 
                 ChatScreen(
