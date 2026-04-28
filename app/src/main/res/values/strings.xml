@@ -1,4 +1,4 @@
-<resources>
+﻿<resources>
     <string name="app_name">BookTinder</string>
 
     <string name="genre_null">Без жанра</string>
@@ -113,4 +113,38 @@
     <string name="profile_settings">Настройки</string>
     <string name="profile_support">Чат с поддержкой</string>
     <string name="content_description_avatar">Аватар</string>
+    <string name="discussion_overflow_menu_description">Дополнительные действия</string>
+    <string name="discussion_write_review">Написать рецензию</string>
+    <string name="discussion_copy_id">Скопировать ID обсуждения</string>
+    <string name="discussion_report">Пожаловаться на обсуждение</string>
+    <string name="report_discussion_subject">Жалоба на обсуждение %1$s</string>
+    <string name="report_discussion_body">ID обсуждения: %1$s\nПричина жалобы:\n</string>
+    <string name="discussion_title">Обсуждение</string>
+    <string name="discussion_not_found">Рецензия не найдена</string>
+    <string name="discussion_comments_count">Комментарии (%1$d)</string>
+    <string name="discussion_current_user_name">Вы</string>
+    <string name="discussion_rating_text">★ %1$s</string>
+    <string name="discussion_members_count">%1$d участников обсуждения</string>
+    <string name="discussion_like_description">Лайк</string>
+    <string name="discussion_comment_placeholder">Оставьте комментарий...</string>
+    <string name="discussion_send_description">Отправить</string>
+    <string name="discussion_add_review_fab_text">+</string>
+    <string name="discussion_reviews_title">Рецензии</string>
+    <string name="discussion_card_rating_members_text">★ %1$s  %2$d участников</string>
+    <string name="create_review_book_picker_title">Выберите книгу</string>
+    <string name="create_review_book_picker_search_placeholder">Поиск по названию или автору</string>
+    <string name="create_review_books_not_found">Книги не найдены</string>
+    <string name="create_review_title">Новая рецензия</string>
+    <string name="create_review_publishing">Публикуем...</string>
+    <string name="create_review_publish">Опубликовать</string>
+    <string name="create_review_choose_book">Выбрать книгу</string>
+    <string name="create_review_no_book_selected">Книга не выбрана</string>
+    <string name="create_review_no_book_selected_description">Сначала выбери книгу, для которой хочешь написать рецензию</string>
+    <string name="create_review_change_book">Изменить</string>
+    <string name="create_review_placeholder">Напишите рецензию...</string>
+    <string name="create_review_character_count">%1$d символов</string>
+    <string name="discussion_error_reviews_load">Не удалось загрузить рецензии</string>
+    <string name="discussion_error_book_not_found">Книга не найдена</string>
+    <string name="discussion_error_book_load">Ошибка загрузки книги</string>
+    <string name="discussion_error_books_load">Не удалось загрузить книги</string>
 </resources>

@@ -1,6 +1,6 @@
-// com.practicum.vkproject3.ui.discussions.DiscussionsScreen.kt
+﻿// com.practicum.vkproject3.ui.discussions.DiscussionsScreen.kt
 
-package com.practicum.vkproject3.ui.discussions
+package com.practicum.vkproject3.presentation.discussions
 
 import ReviewPostCard
 import androidx.compose.foundation.background
@@ -23,13 +23,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.practicum.vkproject3.R
 import com.practicum.vkproject3.ui.profile.BeigeBackground
 import com.practicum.vkproject3.ui.theme.DarkGreen
 import androidx.navigation.NavController
@@ -39,62 +41,74 @@ import com.practicum.vkproject3.ui.books.SearchBarSection
 @Composable
 fun DiscussionsScreen(
     navController: NavController,
-    viewModel: DiscussionsViewModel = viewModel(),
-    onNavigateToFavorites: () -> Unit = {}
+    viewModel: DiscussionsViewModel,
+    onNavigateToFavorites: () -> Unit = {},
+    onAddReviewClick: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
+    val addReviewFabText = stringResource(R.string.discussion_add_review_fab_text)
+    val reviewsTitle = stringResource(R.string.discussion_reviews_title)
 
-    // Основной контейнер
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFF9F8F4))
-            .padding(top = 16.dp)
-    ) {
-        // 1. СЕКЦИЯ ПОИСКА
-        SearchBarSection(
-            searchQuery = searchQuery,
-            onSearchQueryChange = { searchQuery = it },
-            onLikeClick = onNavigateToFavorites
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // 2. ЛЕНТА ПОСТОВ
-        if (uiState.isLoading) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = Color(0xFF3E5A47))
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp)
+    Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = onAddReviewClick,
+                containerColor = Color(0xFFC77A58)
             ) {
-                item {
-                    Text(
-                        text = "Рецензии",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(vertical = 12.dp)
-                    )
-                }
+                Text(addReviewFabText)
+            }
+        },
+        containerColor = Color(0xFFF9F8F4)
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFFF9F8F4))
+                .padding(innerPadding)
+                .padding(top = dimensionResource(R.dimen.discussion_spacing_16))
+        ) {
+            SearchBarSection(
+                searchQuery = searchQuery,
+                onSearchQueryChange = { searchQuery = it },
+                onLikeClick = onNavigateToFavorites
+            )
 
-                // Фильтруем посты по поисковому запросу
-                val filteredPosts = uiState.posts.filter {
-                    it.bookTitle.contains(searchQuery, ignoreCase = true) ||
-                            it.reviewText.contains(searchQuery, ignoreCase = true)
-                }
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.discussion_spacing_8)))
 
-                items(filteredPosts) { post ->
-                    ReviewPostCard(
-                        post = post,
-                        onClick = { navController.navigate("discussion_chat/${post.id}") }
-                    )
+            if (uiState.isLoading) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = Color(0xFF3E5A47))
                 }
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = dimensionResource(R.dimen.discussion_spacing_16))
+                ) {
+                    item {
+                        Text(
+                            text = reviewsTitle,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(vertical = dimensionResource(R.dimen.discussion_spacing_12))
+                        )
+                    }
 
-                item { Spacer(modifier = Modifier.height(80.dp)) }
+                    val filteredPosts = uiState.posts.filter {
+                        it.bookTitle.contains(searchQuery, ignoreCase = true) ||
+                                it.reviewText.contains(searchQuery, ignoreCase = true)
+                    }
+
+                    items(filteredPosts) { post ->
+                        ReviewPostCard(
+                            post = post,
+                            onClick = { navController.navigate("discussion_chat/${post.id}") }
+                        )
+                    }
+
+                    item { Spacer(modifier = Modifier.height(dimensionResource(R.dimen.discussion_spacing_80))) }
+                }
             }
         }
     }

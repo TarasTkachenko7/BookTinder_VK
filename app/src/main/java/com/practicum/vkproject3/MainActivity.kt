@@ -1,14 +1,15 @@
 package com.practicum.vkproject3
 
 import android.os.Bundle
+import android.net.Uri
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.ChatBubbleOutline
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +33,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.practicum.vkproject3.presentation.discussions.ChatScreen
+import com.practicum.vkproject3.presentation.discussions.CreateReviewScreen
+import com.practicum.vkproject3.presentation.discussions.DiscussionsScreen
+import com.practicum.vkproject3.presentation.discussions.DiscussionsViewModel
 import com.practicum.vkproject3.ui.auth.ForgotPasswordScreen
 import com.practicum.vkproject3.ui.auth.LoginScreen
 import com.practicum.vkproject3.ui.auth.RegistrationScreen
@@ -39,17 +43,17 @@ import com.practicum.vkproject3.ui.auth.VerificationScreen
 import com.practicum.vkproject3.ui.books.BookDetailsScreen
 import com.practicum.vkproject3.ui.books.CatalogScreen
 import com.practicum.vkproject3.ui.books.FavoritesScreen
-import com.practicum.vkproject3.ui.discussions.DiscussionsScreen
 import com.practicum.vkproject3.ui.genres.GenrePickScreen
 import com.practicum.vkproject3.ui.home.HomeScreen
 import com.practicum.vkproject3.ui.profile.HistoryScreen
 import com.practicum.vkproject3.ui.profile.ProfileScreen
 import com.practicum.vkproject3.ui.theme.VkProject3Theme
+import org.koin.androidx.compose.koinViewModel
 
 sealed class BottomNavItem(val route: String, val title: String, val icon: ImageVector) {
     object Books : BottomNavItem("books_screen", "Лента", Icons.Default.Home)
     object Discussions : BottomNavItem("discussions", "Обсуждения", Icons.Default.ChatBubbleOutline)
-    object Catalog : BottomNavItem("catalog", "Каталог", Icons.Default.MenuBook)
+    object Catalog : BottomNavItem("catalog", "Каталог", Icons.AutoMirrored.Filled.MenuBook)
     object Profile : BottomNavItem("profile_screen", "Профиль", Icons.Default.Person)
 }
 
@@ -60,51 +64,78 @@ class MainActivity : ComponentActivity() {
             VkProject3Theme {
                 val rootNavController = rememberNavController()
 
-                NavHost(navController = rootNavController, startDestination = "login") {
+                NavHost(
+                    navController = rootNavController,
+                    startDestination = "login"
+                ) {
                     composable("login") {
                         LoginScreen(
-                            onNavigateToRegistration = { rootNavController.navigate("registration") },
+                            onNavigateToRegistration = {
+                                rootNavController.navigate("registration")
+                            },
                             onLoginSuccess = {
-                                rootNavController.navigate("main_app")
-                                {
+                                rootNavController.navigate("main_app") {
                                     popUpTo("login") { inclusive = true }
                                 }
                             },
-                            onNavigateToForgot = { rootNavController.navigate("forgot_password") }
+                            onNavigateToForgot = {
+                                rootNavController.navigate("forgot_password")
+                            }
                         )
                     }
+
                     composable("registration") {
                         RegistrationScreen(
                             onNavigateToVerification = { email ->
-                                rootNavController.navigate("registration_verification/$email") },
-                            onNavigateToLogin = { rootNavController.popBackStack() }
+                                rootNavController.navigate("registration_verification/$email")
+                            },
+                            onNavigateToLogin = {
+                                rootNavController.popBackStack()
+                            }
                         )
                     }
+
                     composable(
-                        "registration_verification/{email}",
-                        arguments = listOf(navArgument("email") { type = NavType.StringType })
+                        route = "registration_verification/{email}",
+                        arguments = listOf(
+                            navArgument("email") { type = NavType.StringType }
+                        )
                     ) { backStackEntry ->
                         val email = backStackEntry.arguments?.getString("email") ?: ""
-                        VerificationScreen(email = email, onBack = { rootNavController.popBackStack() }, onSuccess = {
-                            rootNavController.navigate("genre_pick") { popUpTo("login") { inclusive = true } }
-                        })
+
+                        VerificationScreen(
+                            email = email,
+                            onBack = { rootNavController.popBackStack() },
+                            onSuccess = {
+                                rootNavController.navigate("genre_pick") {
+                                    popUpTo("login") { inclusive = true }
+                                }
+                            }
+                        )
                     }
+
                     composable("forgot_password") {
-                        ForgotPasswordScreen(onBack =
-                            { rootNavController.popBackStack() },
+                        ForgotPasswordScreen(
+                            onBack = { rootNavController.popBackStack() },
                             onSuccessReset = {
                                 rootNavController.popBackStack("login", inclusive = false)
-                            })
-                    }
-                    composable("genre_pick") {
-                        GenrePickScreen(onDone = {
-                            rootNavController.navigate("main_app") {
-                                popUpTo("genre_pick")
-                                    { inclusive = true }
                             }
-                        })
+                        )
                     }
-                    composable("main_app") { MainFlowScreen() }
+
+                    composable("genre_pick") {
+                        GenrePickScreen(
+                            onDone = {
+                                rootNavController.navigate("main_app") {
+                                    popUpTo("genre_pick") { inclusive = true }
+                                }
+                            }
+                        )
+                    }
+
+                    composable("main_app") {
+                        MainFlowScreen()
+                    }
                 }
             }
         }
@@ -114,6 +145,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainFlowScreen() {
     val navController = rememberNavController()
+    val discussionsViewModel: DiscussionsViewModel = koinViewModel()
+
     val items = listOf(
         BottomNavItem.Books,
         BottomNavItem.Discussions,
@@ -123,7 +156,9 @@ fun MainFlowScreen() {
 
     Scaffold(
         bottomBar = {
-            NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
+            NavigationBar(
+                containerColor = MaterialTheme.colorScheme.surface
+            ) {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = navBackStackEntry?.destination
 
@@ -135,12 +170,18 @@ fun MainFlowScreen() {
                     }
 
                     NavigationBarItem(
-                        icon = { Icon(screen.icon, null, Modifier.size(24.dp)) },
+                        icon = {
+                            Icon(
+                                imageVector = screen.icon,
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        },
                         label = { Text(screen.title) },
                         selected = isSelected,
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = Color(0xFFC77A58),
-                            indicatorColor = Color.Transparent 
+                            indicatorColor = Color.Transparent
                         ),
                         onClick = {
                             navController.navigate(screen.route) {
@@ -148,8 +189,7 @@ fun MainFlowScreen() {
                                     saveState = true
                                 }
                                 launchSingleTop = true
-
-                                restoreState = (screen != BottomNavItem.Catalog)
+                                restoreState = screen != BottomNavItem.Catalog
                             }
                         }
                     )
@@ -164,58 +204,138 @@ fun MainFlowScreen() {
         ) {
             composable(BottomNavItem.Books.route) {
                 HomeScreen(
-                    onFavoritesClick = { navController.navigate("favorites_screen") }
+                    onFavoritesClick = {
+                        navController.navigate("favorites_screen")
+                    }
                 )
-            }
-
-            composable(BottomNavItem.Discussions.route) {
-                Text("Обсуждения", modifier = Modifier.padding(20.dp))
             }
 
             composable(BottomNavItem.Catalog.route) {
                 CatalogScreen(
-                    onNavigateToFavorites = { navController.navigate("favorites_screen") },
-                    onBookClick = { bookId -> navController.navigate("book_details/$bookId") }
+                    onNavigateToFavorites = {
+                        navController.navigate("favorites_screen")
+                    },
+                    onBookClick = { bookId ->
+                        navController.navigate("book_details/$bookId")
+                    }
                 )
             }
 
             composable(BottomNavItem.Profile.route) {
-                ProfileScreen(onNavigateToHistory = { navController.navigate("history_screen") })
+                ProfileScreen(
+                    onNavigateToHistory = {
+                        navController.navigate("history_screen")
+                    }
+                )
             }
 
             composable("history_screen") {
-                HistoryScreen(onBack = { navController.popBackStack() })
+                HistoryScreen(
+                    onBack = { navController.popBackStack() }
+                )
             }
 
             composable("favorites_screen") {
                 FavoritesScreen(
                     onBack = { navController.popBackStack() },
-                    onBookClick = { bookId -> navController.navigate("book_details/$bookId") }
+                    onBookClick = { bookId ->
+                        navController.navigate("book_details/$bookId")
+                    }
+                )
+            }
+
+            composable(BottomNavItem.Discussions.route) {
+                DiscussionsScreen(
+                    navController = navController,
+                    viewModel = discussionsViewModel,
+                    onNavigateToFavorites = {
+                        navController.navigate("favorites_screen")
+                    },
+                    onAddReviewClick = {
+                        discussionsViewModel.resetCreateReviewState()
+                        navController.navigate("create_review")
+                    }
                 )
             }
 
             composable(
                 route = "book_details/{bookId}",
-                arguments = listOf(navArgument("bookId") { type = NavType.StringType })
+                arguments = listOf(
+                    navArgument("bookId") { type = NavType.StringType }
+                )
             ) { backStackEntry ->
                 val bookId = backStackEntry.arguments?.getString("bookId") ?: ""
-                BookDetailsScreen(bookId = bookId, onBack = { navController.popBackStack() })
+
+                BookDetailsScreen(
+                    bookId = bookId,
+                    onBack = { navController.popBackStack() },
+                    onAddReviewClick = { selectedBook ->
+                        discussionsViewModel.setSelectedBookForReview(
+                            id = selectedBook.id,
+                            title = selectedBook.title,
+                            author = selectedBook.author,
+                            coverUrl = selectedBook.imageUrl,
+                            rating = if (selectedBook.rating > 0) {
+                                selectedBook.rating.toFloat()
+                            } else {
+                                4.0f
+                            }
+                        )
+
+                        navController.navigate("create_review/${selectedBook.id}")
+                    }
+                )
             }
-            // 1. Главный экран общения (теперь с постами)
-            composable(BottomNavItem.Discussions.route) {
-                DiscussionsScreen(navController = navController)
+
+            composable("create_review") {
+                CreateReviewScreen(
+                    bookId = null,
+                    viewModel = discussionsViewModel,
+                    onBackClick = { navController.popBackStack() },
+                    onPublishSuccess = { navController.popBackStack() }
+                )
             }
+
+            composable(
+                route = "create_review/{bookId}",
+                arguments = listOf(
+                    navArgument("bookId") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+                val bookId = Uri.decode(
+                    backStackEntry.arguments?.getString("bookId") ?: ""
+                )
+
+                CreateReviewScreen(
+                    bookId = bookId,
+                    viewModel = discussionsViewModel,
+                    onBackClick = { navController.popBackStack() },
+                    onPublishSuccess = { navController.popBackStack() }
+                )
+            }
+
+
             composable(
                 route = "discussion_chat/{discussionId}",
                 arguments = listOf(navArgument("discussionId") { type = NavType.IntType })
             ) { backStackEntry ->
                 val discussionId = backStackEntry.arguments?.getInt("discussionId") ?: 0
+
                 ChatScreen(
                     discussionId = discussionId,
-                    onBackClick = { navController.popBackStack() }
+                    viewModel = discussionsViewModel,
+                    onBackClick = { navController.popBackStack() },
+                    onAddReviewClick = { bookId ->
+                        val encodedBookId = Uri.encode(bookId)
+                        navController.navigate("create_review/$encodedBookId") {
+                            launchSingleTop = true
+                            popUpTo(BottomNavItem.Discussions.route) {
+                                saveState = true
+                            }
+                        }
+                    }
                 )
             }
-
         }
     }
 }

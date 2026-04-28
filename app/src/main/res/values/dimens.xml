@@ -36,4 +36,56 @@
     <dimen name="home_drag_handle_width">60dp</dimen>
     <dimen name="home_drag_handle_height">4dp</dimen>
     <dimen name="home_drag_handle_corner">2dp</dimen>
+    <dimen name="discussion_overflow_button_size">48dp</dimen>
+    <dimen name="discussion_overflow_icon_size">24dp</dimen>
+
+    <!-- Discussions -->
+    <dimen name="discussion_spacing_4">4dp</dimen>
+    <dimen name="discussion_spacing_6">6dp</dimen>
+    <dimen name="discussion_spacing_8">8dp</dimen>
+    <dimen name="discussion_spacing_10">10dp</dimen>
+    <dimen name="discussion_spacing_12">12dp</dimen>
+    <dimen name="discussion_spacing_14">14dp</dimen>
+    <dimen name="discussion_spacing_16">16dp</dimen>
+    <dimen name="discussion_spacing_18">18dp</dimen>
+    <dimen name="discussion_spacing_24">24dp</dimen>
+    <dimen name="discussion_spacing_80">80dp</dimen>
+    <dimen name="discussion_card_corner_radius_8">8dp</dimen>
+    <dimen name="discussion_card_corner_radius_12">12dp</dimen>
+    <dimen name="discussion_rating_pill_corner_radius">999dp</dimen>
+    <dimen name="discussion_elevation_0">0dp</dimen>
+    <dimen name="discussion_elevation_1">1dp</dimen>
+    <dimen name="discussion_elevation_2">2dp</dimen>
+    <dimen name="discussion_elevation_6">6dp</dimen>
+    <dimen name="discussion_offset_minus_2">-2dp</dimen>
+    <dimen name="discussion_offset_minus_4">-4dp</dimen>
+    <dimen name="discussion_book_cover_width_large">82dp</dimen>
+    <dimen name="discussion_book_cover_height_large">118dp</dimen>
+    <dimen name="discussion_book_cover_width_medium">60dp</dimen>
+    <dimen name="discussion_book_cover_height_medium">90dp</dimen>
+    <dimen name="discussion_book_cover_size_medium">60dp</dimen>
+    <dimen name="discussion_avatar_size_medium">42dp</dimen>
+    <dimen name="discussion_avatar_size_small">32dp</dimen>
+    <dimen name="discussion_comment_card_padding_horizontal">14dp</dimen>
+    <dimen name="discussion_send_button_size">46dp</dimen>
+
+    <!-- Create Review -->
+    <dimen name="create_review_spacing_4">4dp</dimen>
+    <dimen name="create_review_spacing_6">6dp</dimen>
+    <dimen name="create_review_spacing_8">8dp</dimen>
+    <dimen name="create_review_spacing_12">12dp</dimen>
+    <dimen name="create_review_spacing_16">16dp</dimen>
+    <dimen name="create_review_spacing_20">20dp</dimen>
+    <dimen name="create_review_spacing_24">24dp</dimen>
+    <dimen name="create_review_corner_radius_8">8dp</dimen>
+    <dimen name="create_review_corner_radius_12">12dp</dimen>
+    <dimen name="create_review_corner_radius_16">16dp</dimen>
+    <dimen name="create_review_elevation_1">1dp</dimen>
+    <dimen name="create_review_elevation_2">2dp</dimen>
+    <dimen name="create_review_elevation_8">8dp</dimen>
+    <dimen name="create_review_button_height">52dp</dimen>
+    <dimen name="create_review_book_cover_width_small">50dp</dimen>
+    <dimen name="create_review_book_cover_height_small">75dp</dimen>
+    <dimen name="create_review_book_cover_width_medium">60dp</dimen>
+    <dimen name="create_review_book_cover_height_medium">90dp</dimen>
 </resources>
