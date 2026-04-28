@@ -131,4 +131,6 @@
     <string name="profile_settings">Настройки</string>
     <string name="profile_support">Чат с поддержкой</string>
     <string name="content_description_avatar">Аватар</string>
+    <string name="book_details_write_review">Иконка кнопки написать рецензию</string>
+    <string name="book_details_review_text">Написать рецензию</string>
 </resources>

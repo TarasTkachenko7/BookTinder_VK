@@ -9,7 +9,11 @@ interface BookRepository {
         bookId: String,
         editionId: String
     ): Book
-}
 
     suspend fun getBookById(id: String): Book?
+    suspend fun addToFavorites(book: Book): Boolean
+    suspend fun removeFromFavorites(bookId: String): Boolean
+    suspend fun getFavorites(): List<Book>
+
+    suspend fun isBookFavorite(bookId: String): Boolean
 }

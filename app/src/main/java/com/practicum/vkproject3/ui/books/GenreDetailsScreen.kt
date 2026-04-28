@@ -1,6 +1,5 @@
 package com.practicum.vkproject3.ui.books
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -35,7 +34,7 @@ import org.koin.core.parameter.parametersOf
 fun GenreDetailsScreen(
     genre: String,
     onBack: () -> Unit,
-    onBookClick: (String) -> Unit,
+    onBookClick: (String, String) -> Unit,
     viewModel: GenreDetailsViewModel = koinViewModel(parameters = { parametersOf(genre) })
 ) {
     val state by viewModel.state.collectAsState()
@@ -77,7 +76,7 @@ fun GenreDetailsScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(state.books) { book ->
-                    GenreGridBookCard(book = book, onClick = { onBookClick(book.id) })
+                    GenreGridBookCard(book = book, onClick = { onBookClick(book.id, book.edition_id.toString()) })
                 }
             }
         }

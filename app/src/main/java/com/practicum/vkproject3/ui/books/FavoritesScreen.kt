@@ -28,19 +28,21 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.practicum.vkproject3.R
 import com.practicum.vkproject3.domain.model.Book
-import com.practicum.vkproject3.domain.model.mockCatalog
-
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.foundation.text.BasicTextField
+import com.practicum.vkproject3.presentation.books.FavoritesViewModel
+import org.koin.androidx.compose.koinViewModel
+import androidx.compose.runtime.collectAsState
 
 @Composable
 fun FavoritesScreen(
     onBack: () -> Unit,
-    onBookClick: (String) -> Unit
+    onBookClick: (String, String) -> Unit,
+    viewModel: FavoritesViewModel = koinViewModel()
 ) {
+    val state by viewModel.uiState.collectAsState()
     val context = LocalContext.current
     val resources = context.resources
     
@@ -57,6 +59,7 @@ fun FavoritesScreen(
             .background(bgColor)
             .padding(16.dp)
     ) {
+        // ... (Header Row unchanged)
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
@@ -146,30 +149,40 @@ fun FavoritesScreen(
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        val filteredFavorites = remember(searchQuery, selectedCategory) {
-            mockCatalog.filter { book ->
-                val matchesSearch = if (searchQuery.isBlank()) true
+        if (state.isLoading) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = orangeAction)
+            }
+        } else if (state.error != null) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(state.error ?: "Ошибка", color = Color.Red)
+            }
+        } else {
+            val filteredFavorites = remember(searchQuery, selectedCategory, state.books) {
+                state.books.filter { book ->
+                    val matchesSearch = if (searchQuery.isBlank()) true
                     else book.title.lowercase().contains(searchQuery.lowercase())
-                val matchesCategory = if (selectedCategory == resources.getString(R.string.catalog_all)) true
+                    val matchesCategory = if (selectedCategory == resources.getString(R.string.catalog_all)) true
                     else book.genre.equals(selectedCategory, ignoreCase = true)
-                matchesSearch && matchesCategory
+                    matchesSearch && matchesCategory
+                }
             }
-        }
 
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(bottom = 20.dp)
-        ) {
-            items(filteredFavorites) { book ->
-                FavoriteBookCardItem(book, onBookClick)
-            }
-            if (filteredFavorites.isEmpty()) {
-                item {
-                    Text(
-                        "Ничего не найдено",
-                        color = Color.Gray,
-                        modifier = Modifier.padding(16.dp)
-                    )
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(bottom = 20.dp)
+            ) {
+                items(filteredFavorites) { book ->
+                    FavoriteBookCardItem(book, onBookClick)
+                }
+                if (filteredFavorites.isEmpty()) {
+                    item {
+                        Text(
+                            "Ничего не найдено",
+                            color = Color.Gray,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
                 }
             }
         }
@@ -177,7 +190,7 @@ fun FavoritesScreen(
 }
 
 @Composable
-fun FavoriteBookCardItem(book: Book, onClick: (String) -> Unit) {
+fun FavoriteBookCardItem(book: Book, onClick: (String, String) -> Unit) {
     val context = LocalContext.current
     val resources = context.resources
     
@@ -190,7 +203,7 @@ fun FavoriteBookCardItem(book: Book, onClick: (String) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .height(180.dp)
-            .clickable { onClick(book.id) }
+            .clickable { onClick(book.id, book.edition_id.toString()) }
     ) {
         Row(modifier = Modifier.fillMaxSize()) {
             AsyncImage(

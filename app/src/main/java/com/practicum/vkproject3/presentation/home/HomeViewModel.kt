@@ -1,5 +1,6 @@
 package com.practicum.vkproject3.presentation.home
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.practicum.vkproject3.data.profile.UserSession
@@ -41,8 +42,6 @@ class HomeViewModel(
 
     private val _state = MutableStateFlow(HomeState(isLoading = true))
     val state = _state.asStateFlow()
-
-    private var currentPage = 1
 
     init {
         loadAiBooks()
@@ -87,6 +86,8 @@ class HomeViewModel(
 
     fun onPageChanged(newIndex: Int) {
         _state.update { it.copy(index = newIndex) }
+    }
+
     fun next() {
         _state.update { st ->
             if (st.books.isEmpty()) return@update st
@@ -109,9 +110,9 @@ class HomeViewModel(
     }
 
     fun toggleFavorite() {
-        _state.update { st ->
-            val cur = st.current ?: return@update st
+        val cur = _state.value.current ?: return
 
+        viewModelScope.launch {
             val domainBook = Book(
                 id = cur.id,
                 title = cur.title,
@@ -119,15 +120,24 @@ class HomeViewModel(
                 imageUrl = cur.coverUrl,
                 rating = cur.rating.toDouble(),
                 genre = cur.genreId,
-                description = cur.description
+                description = cur.description,
+                edition_id = cur.editionId
             )
 
-            UserSession.toggleFavorite(domainBook)
-
-            val updated = st.books.map {
-                if (it.id == cur.id) it.copy(isFavorite = !it.isFavorite) else it
+            val success = if (cur.isFavorite) {
+                repository.removeFromFavorites(Uri.encode(cur.id))
+            } else {
+                repository.addToFavorites(domainBook)
             }
-            st.copy(books = updated)
+
+            if (success) {
+                _state.update { st ->
+                    val updatedBooks = st.books.map {
+                        if (it.id == cur.id) it.copy(isFavorite = !it.isFavorite) else it
+                    }
+                    st.copy(books = updatedBooks)
+                }
+            }
         }
     }
 

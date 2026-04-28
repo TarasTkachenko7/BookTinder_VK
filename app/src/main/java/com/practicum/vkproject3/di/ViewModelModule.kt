@@ -13,6 +13,7 @@ import com.practicum.vkproject3.presentation.home.HomeViewModel
 import com.practicum.vkproject3.presentation.profile.ProfileViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
+import com.practicum.vkproject3.presentation.books.FavoritesViewModel
 import org.koin.dsl.module
 
 val viewModelModule = module {
@@ -31,4 +32,5 @@ val viewModelModule = module {
     viewModel { com.practicum.vkproject3.presentation.books.CatalogViewModel(get()) }
     viewModel { parameters -> GenreDetailsViewModel(genre = parameters.get(), repository = get()) }
     viewModel { BookDetailsViewModel(get()) }
+    viewModel { FavoritesViewModel(get()) }
 }

@@ -1,7 +1,9 @@
 package com.practicum.vkproject3.data.books
 
 import android.content.Context
+import android.net.Uri
 import android.util.Log
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.practicum.vkproject3.R
 import com.practicum.vkproject3.data.model.FirebaseBook
@@ -12,9 +14,10 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.withContext
+import com.practicum.vkproject3.domain.model.Book
 import java.net.URLEncoder
 import java.util.UUID
+
 
 class BookRepositoryImpl(
     private val api: OpenLibraryApi,
@@ -22,7 +25,8 @@ class BookRepositoryImpl(
 ) : BookRepository {
 
     private val memoryCache = mutableMapOf<String, Book>()
-
+    private val database = FirebaseDatabase.getInstance().reference
+    private val auth = FirebaseAuth.getInstance()
     private val genreMapping = mapOf(
         "Фантастика" to "science fiction",
         "Детектив" to "mystery",
@@ -61,12 +65,14 @@ class BookRepositoryImpl(
                 val books = response.docs.map { doc ->
                     val book = Book(
                         id = doc.key ?: UUID.randomUUID().toString(),
+                        edition_id = doc.coverEditionKey,
                         title = doc.title ?: context.getString(R.string.book_no_title),
                         author = doc.authorNames?.firstOrNull() ?: context.getString(R.string.book_no_author),
                         imageUrl = doc.coverI?.let { "https://covers.openlibrary.org/b/id/$it-M.jpg" } ?: "",
                         rating = ((doc.key?.hashCode()?.toUInt()?.toLong() ?: 0L) % 21) / 10.0 + 3.0,
                         genre = genre,
-                        description = ""
+                        description = "",
+                        languages = doc.languageList
                     )
                     memoryCache[book.id] = book // Сохраняем в кеш
                     book
@@ -128,7 +134,7 @@ class BookRepositoryImpl(
             }
         }
     }
-}
+
     override suspend fun getBooksByGenre(genre: String, limit: Int): List<Book> {
         return try {
             val englishTag = genreMapping[genre] ?: "fiction"
@@ -139,12 +145,14 @@ class BookRepositoryImpl(
                 val fallbackCoverUrl = "https://ui-avatars.com/api/?name=$encodedTitle&background=2C3E34&color=fff&size=512&font-size=0.3"
                 val book = Book(
                     id = doc.key ?: UUID.randomUUID().toString(),
+                    edition_id = doc.coverEditionKey,
                     title = titleStr,
                     author = doc.authorNames?.firstOrNull() ?: context.getString(R.string.book_no_author),
                     imageUrl = doc.coverI?.let { "https://covers.openlibrary.org/b/id/$it-M.jpg" } ?: fallbackCoverUrl,
                     rating = ((doc.key?.hashCode()?.toUInt()?.toLong() ?: 0L) % 21) / 10.0 + 3.0,
                     genre = genre,
-                    description = ""
+                    description = "",
+                    languages = listOf("ru", "eng")
                 )
                 memoryCache[book.id] = book
                 book
@@ -224,4 +232,64 @@ class BookRepositoryImpl(
 
         return@withContext null
     }
+
+    override suspend fun addToFavorites(book: Book): Boolean{
+        val userId = auth.currentUser?.uid ?: "none"
+
+        val encodedBookId = Uri.encode(book.id)
+        val favRef = database.child("users").child(userId).child("favourites_book").child(encodedBookId)
+
+        val firebaseBook = mapOf(
+            "id" to encodedBookId,
+            "title" to book.title,
+            "author" to book.author,
+            "rating" to book.rating,
+            "genreId" to book.genre,
+            "imageUrl" to book.imageUrl,
+            "description" to book.description,
+            "imageUrl" to book.imageUrl,
+            "editionId" to Uri.encode(book.edition_id)
+        )
+
+        return try{
+            favRef.setValue(firebaseBook).await()
+            true
+        } catch(e: Exception){
+            false
+        }
+    }
+
+    override suspend fun removeFromFavorites(bookId: String): Boolean {
+        val userId = auth.currentUser?.uid ?: "none"
+        val encodedBookId = Uri.encode(bookId)
+
+        return try{
+            database.child("users").child(userId)
+                .child("favourites_book").child(encodedBookId)
+                .removeValue().await()
+            true
+        } catch(e: Exception){
+            false
+        }
+    }
+
+    override suspend fun getFavorites(): List<Book> {
+        val userId = auth.currentUser?.uid ?: return emptyList()
+
+        return try{
+            val snapshot = database.child("users").child(userId).child("favourites_book").get().await()
+            snapshot.children.mapNotNull { child ->
+                val fBook = child.getValue(FirebaseBook::class.java)
+                fBook?.toDomainBook(fBook.genreId)
+            }
+        } catch(e: Exception){
+            emptyList()
+        }
+    }
+
+    override suspend fun isBookFavorite(bookId: String): Boolean {
+        val favorites = getFavorites()
+        return favorites.any { it.id == bookId }
+    }
 }
+

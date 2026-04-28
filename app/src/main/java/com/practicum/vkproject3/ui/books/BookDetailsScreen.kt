@@ -6,6 +6,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
@@ -27,6 +29,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.BookmarkAdd
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Notifications
@@ -34,7 +37,6 @@ import androidx.compose.material3.*
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -57,12 +59,10 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.practicum.vkproject3.R
 import com.practicum.vkproject3.domain.model.Book
-import com.practicum.vkproject3.domain.model.mockCatalog
 import com.practicum.vkproject3.presentation.books.BookDetailsUiState
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import com.practicum.vkproject3.presentation.books.BookDetailsViewModel
-import org.koin.androidx.compose.koinViewModel
 
 val DarkGreen = Color(0xFF2C4A42)
 val MainBrown = Color(0xFFC77A58)
@@ -73,11 +73,11 @@ val TextBrown = Color(0xFF605454)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BookDetailsScreen(
-bookId: String,
-editionId: String,
-onBack: () -> Unit,
-viewModel: BookDetailsViewModel = koinViewModel(),
-onAddReviewClick: (Book) -> Unit,
+    bookId: String,
+    editionId: String,
+    onBack: () -> Unit,
+    viewModel: BookDetailsViewModel = koinViewModel(),
+    onAddReviewClick: (Book) -> Unit,
 ) {
     LaunchedEffect(bookId, editionId) {
         viewModel.loadDetails(bookId, editionId)
@@ -140,6 +140,7 @@ onAddReviewClick: (Book) -> Unit,
                 is BookDetailsUiState.Success -> {
                     val book = state.book
                     val externalUrl = stringResource(R.string.book_details_external_url) + bookId
+                    val isFavorite = state.isFavorite
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
@@ -204,13 +205,13 @@ onAddReviewClick: (Book) -> Unit,
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                        var isFavorite by remember { mutableStateOf(false) }
                         BookActionButtons(
                             isFavorite = isFavorite,
-                            onFavoriteClick = {isFavorite = !isFavorite},
-                            onReadClick = { uriHandler.openUri(externalUrl) }
+                            onFavoriteClick = {viewModel.toggleFavorite(book)},
+                            onReadClick = { uriHandler.openUri(externalUrl) },
+                            onAddReviewClick = { onAddReviewClick(book) }
                         )
                         Spacer(modifier = Modifier.height(24.dp))
 
@@ -392,7 +393,8 @@ fun BookActionButtons(
     modifier: Modifier = Modifier,
     isFavorite: Boolean,
     onFavoriteClick: () -> Unit,
-    onReadClick: () -> Unit
+    onReadClick: () -> Unit,
+    onAddReviewClick: () -> Unit
 ) {
     val scale by animateFloatAsState(
         targetValue = if (isFavorite) 1.2f else 1f,
@@ -408,20 +410,21 @@ fun BookActionButtons(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 16.dp)
+            .horizontalScroll(rememberScrollState()),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Button(
             onClick = onFavoriteClick,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.widthIn(min = 160.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.White,
                 contentColor = Color.Black
             ),
             elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp),
             shape = RoundedCornerShape(12.dp),
-            contentPadding = PaddingValues(vertical = 12.dp)
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
         ) {
             Icon(
                 imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Default.FavoriteBorder,
@@ -432,19 +435,24 @@ fun BookActionButtons(
                 tint = heartColor
             )
             Spacer(Modifier.width(8.dp))
-            Text(stringResource(R.string.book_details_to_favorites), fontSize = 14.sp, fontWeight = FontWeight.Medium)
+            Text(
+                text = stringResource(R.string.book_details_to_favorites),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                maxLines = 1
+            )
         }
 
         Button(
             onClick = onReadClick,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.widthIn(min = 120.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MainBrown,
                 contentColor = Color.White
             ),
             elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp),
             shape = RoundedCornerShape(12.dp),
-            contentPadding = PaddingValues(vertical = 12.dp)
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
         ) {
             Icon(
                 painter = painterResource(R.drawable.auto_stories),
@@ -452,7 +460,37 @@ fun BookActionButtons(
                 modifier = Modifier.size(20.dp)
             )
             Spacer(Modifier.width(8.dp))
-            Text(stringResource(R.string.book_details_read), fontSize = 14.sp, fontWeight = FontWeight.Medium)
+            Text(
+                text = stringResource(R.string.book_details_read),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                maxLines = 1
+            )
+        }
+
+        Button(
+            onClick = onAddReviewClick,
+            modifier = Modifier.widthIn(min = 160.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = DarkGreen,
+                contentColor = Color.White
+            ),
+            elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp),
+            shape = RoundedCornerShape(12.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.BookmarkAdd,
+                contentDescription = stringResource(R.string.book_details_write_review),
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(
+                text = stringResource(R.string.book_details_review_text),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                maxLines = 1
+            )
         }
     }
 }

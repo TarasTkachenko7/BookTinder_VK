@@ -2,10 +2,9 @@ package com.practicum.vkproject3
 
 import android.net.Uri // <-- ДОБАВИЛИ ИМПОРТ ДЛЯ КОДИРОВАНИЯ
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -16,13 +15,11 @@ import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.filled.ChatBubble
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -32,12 +29,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -71,11 +65,11 @@ import com.practicum.vkproject3.ui.theme.MainBrown
 import com.practicum.vkproject3.ui.theme.VkProject3Theme
 import org.koin.androidx.compose.koinViewModel
 
-sealed class BottomNavItem(val route: String, val title: String, val icon: ImageVector) {
-    object Books : BottomNavItem("books_screen", "Главная", Icons.Default.Home)
-    object Discussions : BottomNavItem("discussions", "Обсуждения", Icons.Default.ChatBubbleOutline)
-    object Catalog : BottomNavItem("catalog", "Каталог", Icons.Default.MenuBook)
-    object Profile : BottomNavItem("profile_screen", "Профиль", Icons.Default.Person)
+sealed class BottomNavItem(val route: String, val title: String, val selectedIcon: ImageVector, val unselectedIcon: ImageVector) {
+    object Books : BottomNavItem("books_screen", "Лента", Icons.Filled.Home, Icons.Outlined.Home)
+    object Discussions : BottomNavItem("discussions", "Обсуждения", Icons.Filled.ChatBubble, Icons.Outlined.ChatBubbleOutline)
+    object Catalog : BottomNavItem("catalog", "Каталог", Icons.AutoMirrored.Filled.MenuBook, Icons.AutoMirrored.Outlined.MenuBook)
+    object Profile : BottomNavItem("profile_screen", "Профиль", Icons.Filled.Person, Icons.Outlined.Person)
 }
 
 class MainActivity : ComponentActivity() {
@@ -248,13 +242,13 @@ fun MainFlowScreen(onLogout: () -> Unit) {
         NavHost(
             navController = navController,
             startDestination = BottomNavItem.Books.route,
-            modifier = Modifier
+            modifier = Modifier.padding(innerPadding)
         ) {
             composable(BottomNavItem.Books.route) {
                 HomeScreen(
                     onBookClick = { bookId, editionId ->
-                        val encodedBookId = bookId.replace("/", "%2F")
-                        val encodedEditionId = editionId?.replace("/", "%2F") ?: "none"
+                        val encodedBookId = Uri.encode(bookId)
+                        val encodedEditionId = Uri.encode(editionId)
                         navController.navigate("book_details/$encodedBookId/$encodedEditionId")
                     }
                 )
@@ -269,8 +263,11 @@ fun MainFlowScreen(onLogout: () -> Unit) {
                     onNavigateToFavorites = {
                         navController.navigate("favorites_screen")
                     },
-                    onBookClick = { bookId ->
-                        navController.navigate("book_details/${Uri.encode(bookId)}")
+                    onBookClick = { bookId, editionId ->
+                        val encodedBookId = Uri.encode(bookId)
+                        val encodedEditionId = Uri.encode(editionId)
+                        Log.d("NAV_DEBUG", "bookId=$bookId, editionId=$editionId")
+                        navController.navigate("book_details/$encodedBookId/$encodedEditionId")
                     },
                     onNavigateToGenre = { genre ->
                         navController.navigate("genre_details/$genre")
@@ -286,7 +283,11 @@ fun MainFlowScreen(onLogout: () -> Unit) {
                 com.practicum.vkproject3.ui.books.GenreDetailsScreen(
                     genre = genre,
                     onBack = { navController.popBackStack() },
-                    onBookClick = { bookId -> navController.navigate("book_details/${Uri.encode(bookId)}") }
+                    onBookClick = { bookId, editionId ->
+                        val encodedBookId = Uri.encode(bookId)
+                        val encodedEditionId = Uri.encode(editionId)
+                        navController.navigate("book_details/$encodedBookId/$encodedEditionId")
+                    }
                 )
             }
 
@@ -296,7 +297,7 @@ fun MainFlowScreen(onLogout: () -> Unit) {
                     onNavigateToHistory = { navController.navigate("history_screen") },
                     onNavigateToSettings = { navController.navigate("settings_screen") },
                     onNavigateToSubscription = { navController.navigate("subscription_screen") },
-                    onNavigateToFavoriteBooks = { navController.navigate("profile_favorite_books") },
+                    onNavigateToFavoriteBooks = { navController.navigate("favorites_screen") },
                     onLogout = onLogout
                 )
             }
@@ -325,9 +326,10 @@ fun MainFlowScreen(onLogout: () -> Unit) {
             composable("favorites_screen") {
                 FavoritesScreen(
                     onBack = { navController.popBackStack() },
-                    // ИСПРАВЛЕНИЕ: Кодируем bookId
-                    onBookClick = { bookId ->
-                        navController.navigate("book_details/${Uri.encode(bookId)}")
+                    onBookClick = { bookId, editionId ->
+                        val encodedBookId = Uri.encode(bookId)
+                        val encodedEditionId = Uri.encode(editionId)
+                        navController.navigate("book_details/$encodedBookId/$encodedEditionId")
                     }
                 )
             }
@@ -360,10 +362,8 @@ fun MainFlowScreen(onLogout: () -> Unit) {
                     navArgument("editionId") { type = NavType.StringType }
                 )
             ) { backStackEntry ->
-                val rawBookId = backStackEntry.arguments?.getString("bookId") ?: ""
-                //val bookId = Uri.decode(rawBookId)
-                val bookId = backStackEntry.arguments?.getString("bookId")?.replace("%2F", "/") ?: ""
-                val editionId = backStackEntry.arguments?.getString("editionId")?.replace("%2F", "/") ?: ""
+                val bookId = Uri.decode(backStackEntry.arguments?.getString("bookId"))
+                val editionId = Uri.decode(backStackEntry.arguments?.getString("editionId"))
                 BookDetailsScreen(
                     bookId = bookId,
                     editionId = editionId,

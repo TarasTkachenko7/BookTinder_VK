@@ -22,11 +22,7 @@ data class BookIdResponseDto(
     @SerializedName("first_publish_date") val firstPublishYear: Any?,
     @SerializedName("subjects") val subjects: List<String>?,
     @SerializedName("authors") val authors: List<AuthorRefDto>?
-){
-    fun getAuthorKeys(): List<String> {
-        return authors?.mapNotNull { it.author?.key } ?: emptyList()
-    }
-}
+)
 
 data class AuthorRefDto(
     @SerializedName("author") val author: AuthorKeyDto?

@@ -3,7 +3,6 @@ package com.practicum.vkproject3.ui.home
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -32,7 +31,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -130,7 +128,7 @@ fun HomeScreen(
                         Text(stringResource(R.string.error_book_load))
                         Spacer(Modifier.height(12.dp))
                         Button(
-                            onClick = viewModel::load,
+                            onClick = viewModel::loadAiBooks,
                             colors = ButtonDefaults.buttonColors(containerColor = orangeBrown)
                         ) { Text(stringResource(R.string.home_retry)) }
                     }
@@ -311,11 +309,3 @@ private fun genreNameById(genreId: String): String {
         stringResource(R.string.genre_null)
     }
 }
-
-private val bookQuotes = listOf(
-    "«Комната без книг — всё равно, что тело без души.»\n— Марк Туллий Цицерон",
-    "«Чтение — это один из истоков мышления и умственного развития.»\n— В. А. Сухомлинский",
-    "«Книги — это корабли мысли, странствующие по волнам времени и бережно несущие свой драгоценный груз...»\n— Фрэнсис Бэкон",
-    "«Парадокс чтения: оно уводит нас от реальности, чтобы наполнить реальность смыслом.»\n— Дэниел Пеннак",
-    "«Человек, который не читает хороших книг, не имеет преимуществ перед человеком, который не умеет читать.»\n— Марк Твен"
-)

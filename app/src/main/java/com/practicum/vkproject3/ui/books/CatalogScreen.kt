@@ -38,7 +38,7 @@ private val CardDarkGreen = Color(0xFF2C3E34)
 @Composable
 fun CatalogScreen(
     onNavigateToFavorites: () -> Unit,
-    onBookClick: (String) -> Unit,
+    onBookClick: (String, String) -> Unit,
     onNavigateToGenre: (String) -> Unit,
     viewModel: CatalogViewModel = koinViewModel()
 ) {
@@ -79,7 +79,7 @@ fun CatalogScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(state.filteredBooks) { book ->
-                    CatalogGridBookCard(book = book, onClick = { onBookClick(book.id) })
+                    CatalogGridBookCard(book = book, onClick = { onBookClick(book.id, book.edition_id.toString()) })
                 }
             }
         } else {
@@ -106,7 +106,7 @@ fun GenreRowSection(
     genreName: String,
     books: List<Book>,
     onGenreArrowClick: () -> Unit,
-    onBookClick: (String) -> Unit
+    onBookClick: (String, String) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
@@ -138,7 +138,7 @@ fun GenreRowSection(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(books) { book ->
-                CatalogRowBookCard(book = book, onClick = { onBookClick(book.id) })
+                CatalogRowBookCard(book = book, onClick = { onBookClick(book.id, book.edition_id.toString()) })
             }
         }
     }
