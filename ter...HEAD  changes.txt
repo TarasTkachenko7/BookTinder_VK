@@ -1,0 +1,16 @@
+M	.idea/deploymentTargetSelector.xml
+M	.idea/vcs.xml
+A	.kotlin/errors/errors-1774597208631.log
+M	app/src/main/java/com/practicum/vkproject3/MainActivity.kt
+M	app/src/main/java/com/practicum/vkproject3/di/ViewModelModule.kt
+A	app/src/main/java/com/practicum/vkproject3/presentation/discussions/ChatScreen.kt
+A	app/src/main/java/com/practicum/vkproject3/presentation/discussions/CreateReviewScreen.kt
+A	app/src/main/java/com/practicum/vkproject3/presentation/discussions/DiscussionsComposables.kt
+A	app/src/main/java/com/practicum/vkproject3/presentation/discussions/DiscussionsScreen.kt
+A	app/src/main/java/com/practicum/vkproject3/presentation/discussions/DiscussionsViewModel.kt
+A	app/src/main/java/com/practicum/vkproject3/presentation/discussions/mock/DiscussionMockData.kt
+M	app/src/main/java/com/practicum/vkproject3/ui/books/BookDetailsScreen.kt
+A	app/src/main/java/com/practicum/vkproject3/ui/common/UserAvatar.kt
+M	app/src/main/java/com/practicum/vkproject3/ui/theme/Color.kt
+M	app/src/main/res/values/dimens.xml
+M	app/src/main/res/values/strings.xml

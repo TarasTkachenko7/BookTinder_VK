@@ -29,8 +29,8 @@ data class ReviewComment(
     val id: Int,
     val postId: Int,
     val text: String,
-    val date: String = "С‚РѕР»СЊРєРѕ С‡С‚Рѕ",
-    val authorNickname: String = "РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ ${(1..1000).random()}",
+    val date: String = "только что",
+    val authorNickname: String = "Пользователь ${(1..1000).random()}",
     val authorAvatarUrl: String? = null
 )
 
@@ -323,9 +323,9 @@ class DiscussionsViewModel(
                 bookRating = book.rating,
                 bookCoverUrl = book.coverUrl,
                 membersCount = 1,
-                userNickname = "you",
+                userNickname = "вы",
                 reviewText = form.reviewText.trim(),
-                date = "С‚РѕР»СЊРєРѕ С‡С‚Рѕ",
+                date = "только что",
                 userAvatarUrl = null
             )
 
@@ -371,9 +371,9 @@ class DiscussionsViewModel(
             id = newCommentId,
             postId = postId,
             text = trimmed,
-            date = "С‚РѕР»СЊРєРѕ С‡С‚Рѕ",
+            date = "только что",
             authorNickname = authorNickname,
-            authorAvatarUrl = null  // РџРѕРєР° null, РїРѕС‚РѕРј РјРѕР¶РЅРѕ РґРѕР±Р°РІРёС‚СЊ Р°РІР°С‚Р°СЂ С‚РµРєСѓС‰РµРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
+            authorAvatarUrl = null  // Пока null, потом можно добавить аватар текущего пользователя
         )
 
         _comments.update { current ->
