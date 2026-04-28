@@ -59,7 +59,6 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.practicum.vkproject3.R
 import com.practicum.vkproject3.ui.common.UserAvatar
@@ -213,12 +212,15 @@ fun ChatScreen(
                     .weight(1f)
                     .fillMaxWidth()
                     .padding(paddingValues),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
+                contentPadding = PaddingValues(
+                    horizontal = dimensionResource(R.dimen.discussion_spacing_16),
+                    vertical = dimensionResource(R.dimen.discussion_spacing_12)
+                )
             ) {
                 item {
                     BookHeaderCard(post = post)
 
-                    Spacer(modifier = Modifier.height(14.dp))
+                    Spacer(modifier = Modifier.height(dimensionResource(R.dimen.discussion_spacing_14)))
 
                     ReviewCard(
                         post = post,
@@ -226,7 +228,7 @@ fun ChatScreen(
                         onLikeClick = { isLiked = !isLiked }
                     )
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(dimensionResource(R.dimen.discussion_spacing_24)))
 
                     Text(
                         text = discussionCommentsCount,
@@ -236,18 +238,18 @@ fun ChatScreen(
                     )
 
                     HorizontalDivider(
-                        modifier = Modifier.padding(vertical = 10.dp),
+                        modifier = Modifier.padding(vertical = dimensionResource(R.dimen.discussion_spacing_10)),
                         color = DividerSoft
                     )
                 }
 
                 items(postComments) { comment ->
                     CommentCard(comment = comment)
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(dimensionResource(R.dimen.discussion_spacing_8)))
                 }
 
                 item {
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(dimensionResource(R.dimen.discussion_spacing_8)))
                 }
             }
 
@@ -272,27 +274,30 @@ private fun BookHeaderCard(post: ReviewPost) {
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(dimensionResource(R.dimen.discussion_card_corner_radius_8)),
         colors = CardDefaults.cardColors(containerColor = DarkGreen),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = dimensionResource(R.dimen.discussion_elevation_2))
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(dimensionResource(R.dimen.discussion_spacing_16)),
             verticalAlignment = Alignment.CenterVertically
         ) {
             AsyncImage(
                 model = post.bookCoverUrl,
                 contentDescription = post.bookTitle,
                 modifier = Modifier
-                    .size(width = 82.dp, height = 118.dp)
-                    .clip(RoundedCornerShape(8.dp))
+                    .size(
+                        width = dimensionResource(R.dimen.discussion_book_cover_width_large),
+                        height = dimensionResource(R.dimen.discussion_book_cover_height_large)
+                    )
+                    .clip(RoundedCornerShape(dimensionResource(R.dimen.discussion_card_corner_radius_8)))
             )
 
-            Spacer(modifier = Modifier.width(14.dp))
+            Spacer(modifier = Modifier.width(dimensionResource(R.dimen.discussion_spacing_14)))
 
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
+                verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.discussion_spacing_6))
             ) {
                 Text(
                     text = post.bookTitle,
@@ -308,12 +313,15 @@ private fun BookHeaderCard(post: ReviewPost) {
                 )
 
                 Surface(
-                    shape = RoundedCornerShape(999.dp),
+                    shape = RoundedCornerShape(dimensionResource(R.dimen.discussion_rating_pill_corner_radius)),
                     color = MainBrown.copy(alpha = 0.18f)
                 ) {
                     Text(
                         text = discussionRatingText,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                        modifier = Modifier.padding(
+                            horizontal = dimensionResource(R.dimen.discussion_spacing_10),
+                            vertical = dimensionResource(R.dimen.discussion_spacing_6)
+                        ),
                         style = MaterialTheme.typography.labelMedium,
                         color = Cream
                     )
@@ -335,13 +343,13 @@ private fun ReviewCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .offset(y = (-2).dp),
-        shape = RoundedCornerShape(8.dp),
+            .offset(y = dimensionResource(R.dimen.discussion_offset_minus_2)),
+        shape = RoundedCornerShape(dimensionResource(R.dimen.discussion_card_corner_radius_8)),
         colors = CardDefaults.cardColors(containerColor = SurfaceSoft),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = dimensionResource(R.dimen.discussion_elevation_1))
     ) {
         Column(
-            modifier = Modifier.padding(18.dp)
+            modifier = Modifier.padding(dimensionResource(R.dimen.discussion_spacing_18))
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically
@@ -349,10 +357,10 @@ private fun ReviewCard(
                 UserAvatar(
                     nickname = post.userNickname,
                     avatarUrl = post.userAvatarUrl,
-                    modifier = Modifier.size(42.dp)
+                    modifier = Modifier.size(dimensionResource(R.dimen.discussion_avatar_size_medium))
                 )
 
-                Spacer(modifier = Modifier.width(10.dp))
+                Spacer(modifier = Modifier.width(dimensionResource(R.dimen.discussion_spacing_10)))
 
                 Column {
                     Text(
@@ -369,7 +377,7 @@ private fun ReviewCard(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.discussion_spacing_16)))
 
             Text(
                 text = post.reviewText,
@@ -377,7 +385,7 @@ private fun ReviewCard(
                 color = TextPrimary
             )
 
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.discussion_spacing_14)))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -406,12 +414,15 @@ private fun ReviewCard(
 private fun CommentCard(comment: ReviewComment) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(dimensionResource(R.dimen.discussion_card_corner_radius_8)),
         colors = CardDefaults.cardColors(containerColor = WarmSand.copy(alpha = 0.24f)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = dimensionResource(R.dimen.discussion_elevation_0))
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)
+            modifier = Modifier.padding(
+                horizontal = dimensionResource(R.dimen.discussion_comment_card_padding_horizontal),
+                vertical = dimensionResource(R.dimen.discussion_spacing_12)
+            )
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically
@@ -419,10 +430,10 @@ private fun CommentCard(comment: ReviewComment) {
                 UserAvatar(
                     nickname = comment.authorNickname,
                     avatarUrl = comment.authorAvatarUrl,
-                    modifier = Modifier.size(32.dp)
+                    modifier = Modifier.size(dimensionResource(R.dimen.discussion_avatar_size_small))
                 )
 
-                Spacer(modifier = Modifier.width(10.dp))
+                Spacer(modifier = Modifier.width(dimensionResource(R.dimen.discussion_spacing_10)))
 
                 Column {
                     Text(
@@ -439,7 +450,7 @@ private fun CommentCard(comment: ReviewComment) {
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.discussion_spacing_8)))
 
             Text(
                 text = comment.text,
@@ -461,13 +472,16 @@ private fun CommentInputBar(
 
     Surface(
         color = SurfaceSoft,
-        tonalElevation = 1.dp,
-        shadowElevation = 6.dp
+        tonalElevation = dimensionResource(R.dimen.discussion_elevation_1),
+        shadowElevation = dimensionResource(R.dimen.discussion_elevation_6)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 14.dp)
+                .padding(
+                    horizontal = dimensionResource(R.dimen.discussion_spacing_16),
+                    vertical = dimensionResource(R.dimen.discussion_spacing_14)
+                )
                 .imePadding(),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -481,7 +495,7 @@ private fun CommentInputBar(
                         color = TextSecondary
                     )
                 },
-                shape = RoundedCornerShape(8.dp),
+                shape = RoundedCornerShape(dimensionResource(R.dimen.discussion_card_corner_radius_8)),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Cream,
                     unfocusedContainerColor = Cream,
@@ -495,17 +509,17 @@ private fun CommentInputBar(
                 )
             )
 
-            Spacer(modifier = Modifier.width(10.dp))
+            Spacer(modifier = Modifier.width(dimensionResource(R.dimen.discussion_spacing_10)))
 
             Surface(
                 onClick = onSendClick,
                 shape = CircleShape,
                 color = DarkGreen,
-                shadowElevation = 0.dp,
-                tonalElevation = 0.dp
+                shadowElevation = dimensionResource(R.dimen.discussion_elevation_0),
+                tonalElevation = dimensionResource(R.dimen.discussion_elevation_0)
             ) {
                 Box(
-                    modifier = Modifier.size(46.dp),
+                    modifier = Modifier.size(dimensionResource(R.dimen.discussion_send_button_size)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(

@@ -44,9 +44,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.practicum.vkproject3.R
@@ -114,8 +114,8 @@ fun CreateReviewScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .padding(bottom = 16.dp)
+                    .padding(horizontal = dimensionResource(R.dimen.create_review_spacing_16))
+                    .padding(bottom = dimensionResource(R.dimen.create_review_spacing_16))
             ) {
                 Text(
                     text = pickerTitle,
@@ -124,7 +124,7 @@ fun CreateReviewScreen(
                     color = DarkGreen
                 )
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(dimensionResource(R.dimen.create_review_spacing_12)))
 
                 OutlinedTextField(
                     value = searchQuery,
@@ -133,40 +133,40 @@ fun CreateReviewScreen(
                     placeholder = {
                         Text(pickerSearchPlaceholder)
                     },
-                    shape = RoundedCornerShape(16.dp),
+                    shape = RoundedCornerShape(dimensionResource(R.dimen.create_review_corner_radius_16)),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = MainBrown,
                         unfocusedBorderColor = DividerSoft
                     )
                 )
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(dimensionResource(R.dimen.create_review_spacing_12)))
 
                 when {
                     pickerState.isLoading -> {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(24.dp),
+                                .padding(dimensionResource(R.dimen.create_review_spacing_24)),
                             contentAlignment = Alignment.Center
                         ) {
                             CircularProgressIndicator(color = DarkGreen)
                         }
                     }
 
-                    pickerState.error != null -> {
+                    pickerState.errorResId != null -> {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 12.dp),
+                                .padding(vertical = dimensionResource(R.dimen.create_review_spacing_12)),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = pickerState.error ?: genericError,
+                                text = stringResource(pickerState.errorResId ?: R.string.error_generic),
                                 color = ErrorRed
                             )
 
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.create_review_spacing_8)))
 
                             TextButton(
                                 onClick = { viewModel.loadBooksForPicker() }
@@ -180,7 +180,7 @@ fun CreateReviewScreen(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(24.dp),
+                                .padding(dimensionResource(R.dimen.create_review_spacing_24)),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(booksNotFoundText, color = TextSecondary)
@@ -193,12 +193,14 @@ fun CreateReviewScreen(
                                 Card(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(vertical = 6.dp),
-                                    shape = RoundedCornerShape(12.dp),
+                                        .padding(vertical = dimensionResource(R.dimen.create_review_spacing_6)),
+                                    shape = RoundedCornerShape(dimensionResource(R.dimen.create_review_corner_radius_12)),
                                     colors = CardDefaults.cardColors(
                                         containerColor = Cream
                                     ),
-                                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                                    elevation = CardDefaults.cardElevation(
+                                        defaultElevation = dimensionResource(R.dimen.create_review_elevation_1)
+                                    ),
                                     onClick = {
                                         viewModel.selectBookForReview(book)
                                         showBookPicker = false
@@ -206,20 +208,20 @@ fun CreateReviewScreen(
                                     }
                                 ) {
                                     Row(
-                                        modifier = Modifier.padding(12.dp),
+                                        modifier = Modifier.padding(dimensionResource(R.dimen.create_review_spacing_12)),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         AsyncImage(
                                             model = book.coverUrl,
                                             contentDescription = book.title,
                                             modifier = Modifier
-                                                .width(50.dp)
-                                                .height(75.dp)
-                                                .clip(RoundedCornerShape(8.dp)),
+                                                .width(dimensionResource(R.dimen.create_review_book_cover_width_small))
+                                                .height(dimensionResource(R.dimen.create_review_book_cover_height_small))
+                                                .clip(RoundedCornerShape(dimensionResource(R.dimen.create_review_corner_radius_8))),
                                             contentScale = ContentScale.FillBounds
                                         )
 
-                                        Spacer(modifier = Modifier.width(12.dp))
+                                        Spacer(modifier = Modifier.width(dimensionResource(R.dimen.create_review_spacing_12)))
 
                                         Column(
                                             modifier = Modifier.weight(1f)
@@ -231,7 +233,7 @@ fun CreateReviewScreen(
                                                 color = DarkGreen
                                             )
 
-                                            Spacer(modifier = Modifier.height(4.dp))
+                                            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.create_review_spacing_4)))
 
                                             Text(
                                                 text = book.author,
@@ -239,7 +241,7 @@ fun CreateReviewScreen(
                                                 color = TextSecondary
                                             )
 
-                                            Spacer(modifier = Modifier.height(4.dp))
+                                            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.create_review_spacing_4)))
 
                                             Text(
                                                 text = stringResource(R.string.discussion_rating_text, book.rating.toString()),
@@ -287,7 +289,7 @@ fun CreateReviewScreen(
         },
         bottomBar = {
             Surface(
-                shadowElevation = 8.dp,
+                shadowElevation = dimensionResource(R.dimen.create_review_elevation_8),
                 color = BackgroundLight
             ) {
                 Button(
@@ -299,9 +301,9 @@ fun CreateReviewScreen(
                     enabled = state.canPublish && !state.isPublishing,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp)
-                        .height(52.dp),
-                    shape = RoundedCornerShape(16.dp),
+                        .padding(dimensionResource(R.dimen.create_review_spacing_16))
+                        .height(dimensionResource(R.dimen.create_review_button_height)),
+                    shape = RoundedCornerShape(dimensionResource(R.dimen.create_review_corner_radius_16)),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MainBrown,
                         disabledContainerColor = DividerSoft
@@ -332,27 +334,27 @@ fun CreateReviewScreen(
                 }
             }
 
-            state.error != null && state.selectedBook == null -> {
+            state.errorResId != null && state.selectedBook == null -> {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues)
-                        .padding(24.dp),
+                        .padding(dimensionResource(R.dimen.create_review_spacing_24)),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.create_review_spacing_12))
                     ) {
                         Text(
-                            text = state.error ?: genericError,
+                            text = stringResource(state.errorResId ?: R.string.error_generic),
                             style = MaterialTheme.typography.bodyLarge,
                             color = ErrorRed
                         )
 
                         Button(
                             onClick = { showBookPicker = true },
-                            shape = RoundedCornerShape(16.dp),
+                            shape = RoundedCornerShape(dimensionResource(R.dimen.create_review_corner_radius_16)),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MainBrown
                             )
@@ -376,19 +378,21 @@ fun CreateReviewScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues)
-                        .padding(16.dp)
+                        .padding(dimensionResource(R.dimen.create_review_spacing_16))
                 ) {
                     if (state.selectedBook == null) {
                         Card(
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(16.dp),
+                            shape = RoundedCornerShape(dimensionResource(R.dimen.create_review_corner_radius_16)),
                             colors = CardDefaults.cardColors(
                                 containerColor = SurfaceSoft
                             ),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                            elevation = CardDefaults.cardElevation(
+                                defaultElevation = dimensionResource(R.dimen.create_review_elevation_2)
+                            )
                         ) {
                             Column(
-                                modifier = Modifier.padding(24.dp),
+                                modifier = Modifier.padding(dimensionResource(R.dimen.create_review_spacing_24)),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Text(
@@ -398,7 +402,7 @@ fun CreateReviewScreen(
                                     color = TextPrimary
                                 )
 
-                                Spacer(modifier = Modifier.height(8.dp))
+                                Spacer(modifier = Modifier.height(dimensionResource(R.dimen.create_review_spacing_8)))
 
                                 Text(
                                     text = noBookSelectedDescription,
@@ -406,11 +410,11 @@ fun CreateReviewScreen(
                                     color = TextSecondary
                                 )
 
-                                Spacer(modifier = Modifier.height(16.dp))
+                                Spacer(modifier = Modifier.height(dimensionResource(R.dimen.create_review_spacing_16)))
 
                                 Button(
                                     onClick = { showBookPicker = true },
-                                    shape = RoundedCornerShape(16.dp),
+                                    shape = RoundedCornerShape(dimensionResource(R.dimen.create_review_corner_radius_16)),
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = MainBrown
                                     )
@@ -424,27 +428,29 @@ fun CreateReviewScreen(
 
                         Card(
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
+                            shape = RoundedCornerShape(dimensionResource(R.dimen.create_review_corner_radius_12)),
                             colors = CardDefaults.cardColors(
                                 containerColor = DarkGreen
                             ),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                            elevation = CardDefaults.cardElevation(
+                                defaultElevation = dimensionResource(R.dimen.create_review_elevation_2)
+                            )
                         ) {
                             Row(
-                                modifier = Modifier.padding(12.dp),
+                                modifier = Modifier.padding(dimensionResource(R.dimen.create_review_spacing_12)),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 AsyncImage(
                                     model = book.coverUrl,
                                     contentDescription = book.title,
                                     modifier = Modifier
-                                        .width(60.dp)
-                                        .height(90.dp)
-                                        .clip(RoundedCornerShape(8.dp)),
+                                        .width(dimensionResource(R.dimen.create_review_book_cover_width_medium))
+                                        .height(dimensionResource(R.dimen.create_review_book_cover_height_medium))
+                                        .clip(RoundedCornerShape(dimensionResource(R.dimen.create_review_corner_radius_8))),
                                     contentScale = ContentScale.FillBounds
                                 )
 
-                                Spacer(modifier = Modifier.width(12.dp))
+                                Spacer(modifier = Modifier.width(dimensionResource(R.dimen.create_review_spacing_12)))
 
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
@@ -477,7 +483,7 @@ fun CreateReviewScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(dimensionResource(R.dimen.create_review_spacing_20)))
 
                     OutlinedTextField(
                         value = state.reviewText,
@@ -488,7 +494,7 @@ fun CreateReviewScreen(
                         placeholder = {
                             Text(reviewPlaceholder)
                         },
-                        shape = RoundedCornerShape(16.dp),
+                        shape = RoundedCornerShape(dimensionResource(R.dimen.create_review_corner_radius_16)),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = MainBrown,
                             unfocusedBorderColor = DividerSoft,
@@ -499,7 +505,7 @@ fun CreateReviewScreen(
                         )
                     )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(dimensionResource(R.dimen.create_review_spacing_8)))
 
                     Text(
                         text = reviewCharactersCount,

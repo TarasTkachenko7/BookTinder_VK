@@ -2,8 +2,10 @@ package com.practicum.vkproject3.presentation.discussions
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.practicum.vkproject3.R
 import com.practicum.vkproject3.domain.books.BookRepository
 import com.practicum.vkproject3.domain.model.Book
+import com.practicum.vkproject3.presentation.discussions.mock.DiscussionMockData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -22,12 +24,13 @@ data class ReviewPost(
     val date: String,
     val userAvatarUrl: String? = null
 )
+
 data class ReviewComment(
     val id: Int,
     val postId: Int,
     val text: String,
-    val date: String = "только что",
-    val authorNickname: String = "Пользователь ${(1..1000).random()}",
+    val date: String = "С‚РѕР»СЊРєРѕ С‡С‚Рѕ",
+    val authorNickname: String = "РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ ${(1..1000).random()}",
     val authorAvatarUrl: String? = null
 )
 
@@ -42,14 +45,14 @@ data class ReviewBookUi(
 data class DiscussionsUiState(
     val isLoading: Boolean = false,
     val posts: List<ReviewPost> = emptyList(),
-    val error: String? = null
+    val errorResId: Int? = null
 )
 
 data class CreateReviewState(
     val isBookLoading: Boolean = false,
     val selectedBook: ReviewBookUi? = null,
     val reviewText: String = "",
-    val error: String? = null,
+    val errorResId: Int? = null,
     val isPublishing: Boolean = false
 ) {
     val canPublish: Boolean
@@ -59,7 +62,7 @@ data class CreateReviewState(
 data class BookPickerState(
     val isLoading: Boolean = false,
     val books: List<ReviewBookUi> = emptyList(),
-    val error: String? = null
+    val errorResId: Int? = null
 )
 
 class DiscussionsViewModel(
@@ -87,7 +90,7 @@ class DiscussionsViewModel(
             _uiState.update {
                 it.copy(
                     isLoading = true,
-                    error = null
+                    errorResId = null
                 )
             }
 
@@ -104,13 +107,9 @@ class DiscussionsViewModel(
                         bookRating = book.safeRating(),
                         bookCoverUrl = book.imageUrl,
                         membersCount = 4 + index,
-                        userNickname = listOf("anna_reads", "booklover", "maria")[index % 3],
-                        reviewText = listOf(
-                            "Очень атмосферная книга. Особенно понравился стиль автора и то, как постепенно раскрываются герои.",
-                            "История интересная, но местами показалась немного затянутой. В целом книга оставила хорошее впечатление.",
-                            "Сильная книга, после которой еще долго думаешь о сюжете и персонажах. Мне очень понравилась."
-                        )[index % 3],
-                        date = listOf("сегодня", "вчера", "2 дня назад")[index % 3],
+                        userNickname = DiscussionMockData.userNicknames[index % DiscussionMockData.userNicknames.size],
+                        reviewText = DiscussionMockData.reviewTexts[index % DiscussionMockData.reviewTexts.size],
+                        date = DiscussionMockData.reviewDates[index % DiscussionMockData.reviewDates.size],
                         userAvatarUrl = null
                     )
                 }
@@ -119,30 +118,19 @@ class DiscussionsViewModel(
                     it.copy(
                         isLoading = false,
                         posts = mockPosts,
-                        error = null
+                        errorResId = null
                     )
                 }
 
                 _comments.value = mockPosts.associate { post ->
-                    post.id to listOf(
-                        ReviewComment(
-                            id = 1,
-                            postId = post.id,
-                            text = "Согласен, книга правда цепляет."
-                        ),
-                        ReviewComment(
-                            id = 2,
-                            postId = post.id,
-                            text = "Мне финал показался спорным, но в целом тоже понравилось."
-                        )
-                    )
+                    post.id to DiscussionMockData.buildSeedComments(post.id)
                 }
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
                         isLoading = false,
                         posts = emptyList(),
-                        error = "Не удалось загрузить рецензии"
+                        errorResId = R.string.discussion_error_reviews_load
                     )
                 }
             }
@@ -158,7 +146,7 @@ class DiscussionsViewModel(
                 it.copy(
                     isBookLoading = true,
                     selectedBook = null,
-                    error = null
+                    errorResId = null
                 )
             }
 
@@ -171,7 +159,7 @@ class DiscussionsViewModel(
                         it.copy(
                             isBookLoading = false,
                             selectedBook = null,
-                            error = "Книга не найдена"
+                            errorResId = R.string.discussion_error_book_not_found
                         )
                     }
                     return@launch
@@ -181,7 +169,7 @@ class DiscussionsViewModel(
                     it.copy(
                         isBookLoading = false,
                         selectedBook = book.toReviewBookUi(),
-                        error = null
+                        errorResId = null
                     )
                 }
             } catch (e: Exception) {
@@ -190,7 +178,7 @@ class DiscussionsViewModel(
                     it.copy(
                         isBookLoading = false,
                         selectedBook = null,
-                        error = "Ошибка загрузки книги"
+                        errorResId = R.string.discussion_error_book_load
                     )
                 }
             }
@@ -204,7 +192,7 @@ class DiscussionsViewModel(
             _bookPickerState.update {
                 it.copy(
                     isLoading = true,
-                    error = null
+                    errorResId = null
                 )
             }
 
@@ -220,7 +208,7 @@ class DiscussionsViewModel(
                     it.copy(
                         isLoading = false,
                         books = loadedBooks.distinctBy { book -> book.id },
-                        error = null
+                        errorResId = null
                     )
                 }
             } catch (e: Exception) {
@@ -228,7 +216,7 @@ class DiscussionsViewModel(
                     it.copy(
                         isLoading = false,
                         books = emptyList(),
-                        error = "Не удалось загрузить книги"
+                        errorResId = R.string.discussion_error_books_load
                     )
                 }
             }
@@ -251,7 +239,7 @@ class DiscussionsViewModel(
             it.copy(
                 isBookLoading = false,
                 selectedBook = book,
-                error = null
+                errorResId = null
             )
         }
     }
@@ -261,7 +249,7 @@ class DiscussionsViewModel(
             it.copy(
                 isBookLoading = false,
                 selectedBook = null,
-                error = null
+                errorResId = null
             )
         }
     }
@@ -283,7 +271,7 @@ class DiscussionsViewModel(
                     coverUrl = coverUrl,
                     rating = rating
                 ),
-                error = null
+                errorResId = null
             )
         }
     }
@@ -299,7 +287,7 @@ class DiscussionsViewModel(
                     coverUrl = post.bookCoverUrl,
                     rating = post.bookRating
                 ),
-                error = null
+                errorResId = null
             )
         }
     }
@@ -337,7 +325,7 @@ class DiscussionsViewModel(
                 membersCount = 1,
                 userNickname = "you",
                 reviewText = form.reviewText.trim(),
-                date = "только что",
+                date = "С‚РѕР»СЊРєРѕ С‡С‚Рѕ",
                 userAvatarUrl = null
             )
 
@@ -353,7 +341,7 @@ class DiscussionsViewModel(
                             ReviewComment(
                                 id = 1,
                                 postId = newId,
-                                text = "Добро пожаловать в обсуждение!"
+                                text = DiscussionMockData.publishedReviewWelcomeComment
                             )
                         )
                         )
@@ -383,9 +371,9 @@ class DiscussionsViewModel(
             id = newCommentId,
             postId = postId,
             text = trimmed,
-            date = "только что",
+            date = "С‚РѕР»СЊРєРѕ С‡С‚Рѕ",
             authorNickname = authorNickname,
-            authorAvatarUrl = null  // Пока null, потом можно добавить аватар текущего пользователя
+            authorAvatarUrl = null  // РџРѕРєР° null, РїРѕС‚РѕРј РјРѕР¶РЅРѕ РґРѕР±Р°РІРёС‚СЊ Р°РІР°С‚Р°СЂ С‚РµРєСѓС‰РµРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
         )
 
         _comments.update { current ->

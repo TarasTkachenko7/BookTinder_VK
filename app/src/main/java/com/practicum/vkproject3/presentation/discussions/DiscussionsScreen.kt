@@ -23,11 +23,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
@@ -66,7 +66,7 @@ fun DiscussionsScreen(
                 .fillMaxSize()
                 .background(Color(0xFFF9F8F4))
                 .padding(innerPadding)
-                .padding(top = 16.dp)
+                .padding(top = dimensionResource(R.dimen.discussion_spacing_16))
         ) {
             SearchBarSection(
                 searchQuery = searchQuery,
@@ -74,7 +74,7 @@ fun DiscussionsScreen(
                 onLikeClick = onNavigateToFavorites
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.discussion_spacing_8)))
 
             if (uiState.isLoading) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -84,14 +84,14 @@ fun DiscussionsScreen(
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(horizontal = 16.dp)
+                        .padding(horizontal = dimensionResource(R.dimen.discussion_spacing_16))
                 ) {
                     item {
                         Text(
                             text = reviewsTitle,
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(vertical = 12.dp)
+                            modifier = Modifier.padding(vertical = dimensionResource(R.dimen.discussion_spacing_12))
                         )
                     }
 
@@ -107,7 +107,7 @@ fun DiscussionsScreen(
                         )
                     }
 
-                    item { Spacer(modifier = Modifier.height(80.dp)) }
+                    item { Spacer(modifier = Modifier.height(dimensionResource(R.dimen.discussion_spacing_80))) }
                 }
             }
         }

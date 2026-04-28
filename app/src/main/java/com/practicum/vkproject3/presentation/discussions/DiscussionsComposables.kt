@@ -20,10 +20,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.practicum.vkproject3.R
@@ -40,15 +40,18 @@ fun ReviewPostCard(post: ReviewPost, onClick: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp)
+            .padding(vertical = dimensionResource(R.dimen.discussion_spacing_8))
             .clickable { onClick() }
     ) {
         Card(
-            shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
+            shape = RoundedCornerShape(
+                topStart = dimensionResource(R.dimen.discussion_card_corner_radius_12),
+                topEnd = dimensionResource(R.dimen.discussion_card_corner_radius_12)
+            ),
             colors = CardDefaults.cardColors(containerColor = Color(0xFF3E5A47))
         ) {
             Row(
-                modifier = Modifier.padding(12.dp),
+                modifier = Modifier.padding(dimensionResource(R.dimen.discussion_spacing_12)),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (post.bookCoverUrl.isNotBlank()) {
@@ -56,21 +59,21 @@ fun ReviewPostCard(post: ReviewPost, onClick: () -> Unit) {
                         model = post.bookCoverUrl,
                         contentDescription = post.bookTitle,
                         modifier = Modifier
-                            .width(60.dp)
-                            .height(90.dp)
-                            .clip(RoundedCornerShape(8.dp)),
+                            .width(dimensionResource(R.dimen.discussion_book_cover_width_medium))
+                            .height(dimensionResource(R.dimen.discussion_book_cover_height_medium))
+                            .clip(RoundedCornerShape(dimensionResource(R.dimen.discussion_card_corner_radius_8))),
                         contentScale = ContentScale.FillBounds
                     )
                 } else {
                     Box(
                         modifier = Modifier
-                            .size(60.dp)
-                            .clip(RoundedCornerShape(8.dp))
+                            .size(dimensionResource(R.dimen.discussion_book_cover_size_medium))
+                            .clip(RoundedCornerShape(dimensionResource(R.dimen.discussion_card_corner_radius_8)))
                             .background(Color.Gray)
                     )
                 }
 
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(dimensionResource(R.dimen.discussion_spacing_12)))
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
@@ -94,20 +97,23 @@ fun ReviewPostCard(post: ReviewPost, onClick: () -> Unit) {
         }
 
         Card(
-            shape = RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp),
+            shape = RoundedCornerShape(
+                bottomStart = dimensionResource(R.dimen.discussion_card_corner_radius_12),
+                bottomEnd = dimensionResource(R.dimen.discussion_card_corner_radius_12)
+            ),
             colors = CardDefaults.cardColors(containerColor = Color(0xFFE9E9E9)),
             modifier = Modifier
                 .fillMaxWidth()
-                .offset(y = (-4).dp)
+                .offset(y = dimensionResource(R.dimen.discussion_offset_minus_4))
         ) {
-            Column(modifier = Modifier.padding(12.dp)) {
+            Column(modifier = Modifier.padding(dimensionResource(R.dimen.discussion_spacing_12))) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     UserAvatar(
                         nickname = post.userNickname,
                         avatarUrl = post.userAvatarUrl,
-                        modifier = Modifier.size(42.dp)
+                        modifier = Modifier.size(dimensionResource(R.dimen.discussion_avatar_size_medium))
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(dimensionResource(R.dimen.discussion_spacing_8)))
                     Text(
                         post.userNickname,
                         fontWeight = FontWeight.Medium,
@@ -115,7 +121,7 @@ fun ReviewPostCard(post: ReviewPost, onClick: () -> Unit) {
                     )
                 }
 
-                Spacer(modifier = Modifier.height(6.dp))
+                Spacer(modifier = Modifier.height(dimensionResource(R.dimen.discussion_spacing_6)))
 
                 Text(
                     post.reviewText,

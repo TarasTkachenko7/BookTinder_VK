@@ -143,4 +143,8 @@
     <string name="create_review_change_book">Изменить</string>
     <string name="create_review_placeholder">Напишите рецензию...</string>
     <string name="create_review_character_count">%1$d символов</string>
+    <string name="discussion_error_reviews_load">Не удалось загрузить рецензии</string>
+    <string name="discussion_error_book_not_found">Книга не найдена</string>
+    <string name="discussion_error_book_load">Ошибка загрузки книги</string>
+    <string name="discussion_error_books_load">Не удалось загрузить книги</string>
 </resources>
