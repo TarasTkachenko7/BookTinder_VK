@@ -36,4 +36,6 @@
     <dimen name="home_drag_handle_width">60dp</dimen>
     <dimen name="home_drag_handle_height">4dp</dimen>
     <dimen name="home_drag_handle_corner">2dp</dimen>
+    <dimen name="discussion_overflow_button_size">48dp</dimen>
+    <dimen name="discussion_overflow_icon_size">24dp</dimen>
 </resources>

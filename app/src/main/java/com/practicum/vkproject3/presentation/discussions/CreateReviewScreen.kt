@@ -1,4 +1,4 @@
-package com.practicum.vkproject3.presentation.discussions
+﻿package com.practicum.vkproject3.presentation.discussions
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -44,10 +44,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.practicum.vkproject3.R
 import com.practicum.vkproject3.ui.theme.BackgroundLight
 import com.practicum.vkproject3.ui.theme.Cream
 import com.practicum.vkproject3.ui.theme.DarkGreen
@@ -69,6 +71,21 @@ fun CreateReviewScreen(
 ) {
     val state by viewModel.createReviewState.collectAsState()
     val pickerState by viewModel.bookPickerState.collectAsState()
+    val pickerTitle = stringResource(R.string.create_review_book_picker_title)
+    val pickerSearchPlaceholder = stringResource(R.string.create_review_book_picker_search_placeholder)
+    val genericError = stringResource(R.string.error_generic)
+    val retryText = stringResource(R.string.home_retry)
+    val booksNotFoundText = stringResource(R.string.create_review_books_not_found)
+    val reviewTitle = stringResource(R.string.create_review_title)
+    val backDescription = stringResource(R.string.favorites_back)
+    val publishingText = stringResource(R.string.create_review_publishing)
+    val publishText = stringResource(R.string.create_review_publish)
+    val chooseBookText = stringResource(R.string.create_review_choose_book)
+    val noBookSelectedText = stringResource(R.string.create_review_no_book_selected)
+    val noBookSelectedDescription = stringResource(R.string.create_review_no_book_selected_description)
+    val changeBookText = stringResource(R.string.create_review_change_book)
+    val reviewPlaceholder = stringResource(R.string.create_review_placeholder)
+    val reviewCharactersCount = stringResource(R.string.create_review_character_count, state.reviewText.length)
 
     var showBookPicker by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
@@ -101,7 +118,7 @@ fun CreateReviewScreen(
                     .padding(bottom = 16.dp)
             ) {
                 Text(
-                    text = "Выберите книгу",
+                    text = pickerTitle,
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     color = DarkGreen
@@ -114,7 +131,7 @@ fun CreateReviewScreen(
                     onValueChange = { searchQuery = it },
                     modifier = Modifier.fillMaxWidth(),
                     placeholder = {
-                        Text("Поиск по названию или автору")
+                        Text(pickerSearchPlaceholder)
                     },
                     shape = RoundedCornerShape(16.dp),
                     colors = OutlinedTextFieldDefaults.colors(
@@ -145,7 +162,7 @@ fun CreateReviewScreen(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = pickerState.error ?: "Ошибка",
+                                text = pickerState.error ?: genericError,
                                 color = ErrorRed
                             )
 
@@ -154,7 +171,7 @@ fun CreateReviewScreen(
                             TextButton(
                                 onClick = { viewModel.loadBooksForPicker() }
                             ) {
-                                Text("Попробовать снова", color = MainBrown)
+                                Text(retryText, color = MainBrown)
                             }
                         }
                     }
@@ -166,7 +183,7 @@ fun CreateReviewScreen(
                                 .padding(24.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text("Книги не найдены", color = TextSecondary)
+                            Text(booksNotFoundText, color = TextSecondary)
                         }
                     }
 
@@ -225,7 +242,7 @@ fun CreateReviewScreen(
                                             Spacer(modifier = Modifier.height(4.dp))
 
                                             Text(
-                                                text = "⭐ ${book.rating}",
+                                                text = stringResource(R.string.discussion_rating_text, book.rating.toString()),
                                                 style = MaterialTheme.typography.bodySmall,
                                                 color = MainBrown
                                             )
@@ -245,7 +262,7 @@ fun CreateReviewScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "Новая рецензия",
+                        reviewTitle,
                         color = TextPrimary
                     )
                 },
@@ -258,7 +275,7 @@ fun CreateReviewScreen(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Назад",
+                            contentDescription = backDescription,
                             tint = TextPrimary
                         )
                     }
@@ -292,9 +309,9 @@ fun CreateReviewScreen(
                 ) {
                     Text(
                         text = if (state.isPublishing) {
-                            "Публикуем..."
+                            publishingText
                         } else {
-                            "Опубликовать"
+                            publishText
                         },
                         color = Cream
                     )
@@ -328,7 +345,7 @@ fun CreateReviewScreen(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         Text(
-                            text = state.error ?: "Ошибка",
+                            text = state.error ?: genericError,
                             style = MaterialTheme.typography.bodyLarge,
                             color = ErrorRed
                         )
@@ -340,14 +357,14 @@ fun CreateReviewScreen(
                                 containerColor = MainBrown
                             )
                         ) {
-                            Text("Выбрать книгу", color = Cream)
+                            Text(chooseBookText, color = Cream)
                         }
 
                         if (!bookId.isNullOrBlank()) {
                             TextButton(
                                 onClick = { viewModel.loadBookForReview(bookId) }
                             ) {
-                                Text("Попробовать снова", color = MainBrown)
+                                Text(retryText, color = MainBrown)
                             }
                         }
                     }
@@ -375,7 +392,7 @@ fun CreateReviewScreen(
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Text(
-                                    text = "Книга не выбрана",
+                                    text = noBookSelectedText,
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Medium,
                                     color = TextPrimary
@@ -384,7 +401,7 @@ fun CreateReviewScreen(
                                 Spacer(modifier = Modifier.height(8.dp))
 
                                 Text(
-                                    text = "Сначала выбери книгу, для которой хочешь написать рецензию",
+                                    text = noBookSelectedDescription,
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = TextSecondary
                                 )
@@ -398,7 +415,7 @@ fun CreateReviewScreen(
                                         containerColor = MainBrown
                                     )
                                 ) {
-                                    Text("Выбрать книгу", color = Cream)
+                                    Text(chooseBookText, color = Cream)
                                 }
                             }
                         }
@@ -442,7 +459,7 @@ fun CreateReviewScreen(
                                         fontSize = 12.sp
                                     )
                                     Text(
-                                        text = "⭐ ${book.rating}",
+                                        text = stringResource(R.string.discussion_rating_text, book.rating.toString()),
                                         color = WarmSand,
                                         fontSize = 11.sp
                                     )
@@ -452,7 +469,7 @@ fun CreateReviewScreen(
                                     onClick = { showBookPicker = true }
                                 ) {
                                     Text(
-                                        "Изменить",
+                                        changeBookText,
                                         color = WarmSand
                                     )
                                 }
@@ -469,7 +486,7 @@ fun CreateReviewScreen(
                             .fillMaxWidth()
                             .weight(1f),
                         placeholder = {
-                            Text("Напишите рецензию...")
+                            Text(reviewPlaceholder)
                         },
                         shape = RoundedCornerShape(16.dp),
                         colors = OutlinedTextFieldDefaults.colors(
@@ -485,7 +502,7 @@ fun CreateReviewScreen(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = "${state.reviewText.length} символов",
+                        text = reviewCharactersCount,
                         modifier = Modifier.align(Alignment.End),
                         style = MaterialTheme.typography.bodySmall,
                         color = TextSecondary

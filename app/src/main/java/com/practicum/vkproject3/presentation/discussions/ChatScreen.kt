@@ -1,5 +1,10 @@
-package com.practicum.vkproject3.presentation.discussions
+﻿package com.practicum.vkproject3.presentation.discussions
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,8 +29,12 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,11 +42,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -48,9 +55,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.practicum.vkproject3.R
 import com.practicum.vkproject3.ui.common.UserAvatar
 import com.practicum.vkproject3.ui.theme.BackgroundLight
 import com.practicum.vkproject3.ui.theme.Cream
@@ -63,6 +74,8 @@ import com.practicum.vkproject3.ui.theme.TextPrimary
 import com.practicum.vkproject3.ui.theme.TextSecondary
 import com.practicum.vkproject3.ui.theme.WarmSand
 
+const val SUPPORT_EMAIL = "support@example.com"
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
@@ -73,10 +86,16 @@ fun ChatScreen(
 ) {
     var commentText by remember { mutableStateOf("") }
     var isLiked by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val discussionTitle = stringResource(R.string.discussion_title)
+    val discussionBackDescription = stringResource(R.string.favorites_back)
+    val discussionNotFound = stringResource(R.string.discussion_not_found)
+    val discussionCurrentUserName = stringResource(R.string.discussion_current_user_name)
 
     val post = viewModel.getPostById(discussionId)
     val comments by viewModel.comments.collectAsState()
     val postComments = comments[discussionId].orEmpty()
+    val discussionCommentsCount = stringResource(R.string.discussion_comments_count, postComments.size)
 
     Scaffold(
         containerColor = BackgroundLight,
@@ -84,7 +103,7 @@ fun ChatScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Обсуждение",
+                        text = discussionTitle,
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.SemiBold,
                         color = TextPrimary
@@ -94,18 +113,72 @@ fun ChatScreen(
                     IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Назад",
+                            contentDescription = discussionBackDescription,
                             tint = TextPrimary
                         )
                     }
                 },
                 actions = {
                     if (post?.bookId != null && onAddReviewClick != null) {
-                        TextButton(onClick = {onAddReviewClick(post.bookId)}) {
-                            Text(
-                                text = "Написать рецензию",
-                                color = MainBrown,
-                                style = MaterialTheme.typography.labelLarge
+                        var expanded by remember { mutableStateOf(false) }
+                        val discussionIdText = discussionId.toString()
+                        val overflowMenuContentDescription = stringResource(R.string.discussion_overflow_menu_description)
+                        val writeReviewText = stringResource(R.string.discussion_write_review)
+                        val copyDiscussionIdText = stringResource(R.string.discussion_copy_id)
+                        val reportDiscussionText = stringResource(R.string.discussion_report)
+                        val reportSubject = stringResource(R.string.report_discussion_subject, discussionIdText)
+                        val reportBody = stringResource(R.string.report_discussion_body, discussionIdText)
+                        val overflowButtonSize = dimensionResource(R.dimen.discussion_overflow_button_size)
+                        val overflowIconSize = dimensionResource(R.dimen.discussion_overflow_icon_size)
+
+                        IconButton(
+                            onClick = { expanded = true },
+                            modifier = Modifier.size(overflowButtonSize)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.MoreVert,
+                                contentDescription = overflowMenuContentDescription,
+                                tint = MainBrown,
+                                modifier = Modifier.size(overflowIconSize)
+                            )
+                        }
+
+                        DropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text(text = writeReviewText) },
+                                onClick = {
+                                    expanded = false
+                                    onAddReviewClick(post.bookId)
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(text = copyDiscussionIdText) },
+                                onClick = {
+                                    expanded = false
+                                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                    clipboard.setPrimaryClip(
+                                        ClipData.newPlainText("discussionId", discussionIdText)
+                                    )
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(text = reportDiscussionText) },
+                                onClick = {
+                                    expanded = false
+                                    val intent = Intent(
+                                        Intent.ACTION_SENDTO,
+                                        Uri.parse(
+                                            "mailto:$SUPPORT_EMAIL" +
+                                                    "?subject=${Uri.encode(reportSubject)}" +
+                                                    "&body=${Uri.encode(reportBody)}"
+                                        )
+                                    )
+
+                                    context.startActivity(intent)
+                                }
                             )
                         }
                     }
@@ -122,7 +195,7 @@ fun ChatScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Рецензия не найдена",
+                    text = discussionNotFound,
                     style = MaterialTheme.typography.bodyLarge,
                     color = TextSecondary
                 )
@@ -156,7 +229,7 @@ fun ChatScreen(
                     Spacer(modifier = Modifier.height(24.dp))
 
                     Text(
-                        text = "Комментарии (${postComments.size})",
+                        text = discussionCommentsCount,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = TextPrimary
@@ -184,7 +257,7 @@ fun ChatScreen(
                 onSendClick = {
                     val trimmed = commentText.trim()
                     if (trimmed.isNotEmpty()) {
-                        viewModel.addComment(discussionId, trimmed, "Вы")
+                        viewModel.addComment(discussionId, trimmed, discussionCurrentUserName)
                         commentText = ""
                     }
                 }
@@ -195,6 +268,8 @@ fun ChatScreen(
 
 @Composable
 private fun BookHeaderCard(post: ReviewPost) {
+    val discussionRatingText = stringResource(R.string.discussion_rating_text, post.bookRating.toString())
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
@@ -237,7 +312,7 @@ private fun BookHeaderCard(post: ReviewPost) {
                     color = MainBrown.copy(alpha = 0.18f)
                 ) {
                     Text(
-                        text = "★ ${post.bookRating}",
+                        text = discussionRatingText,
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
                         style = MaterialTheme.typography.labelMedium,
                         color = Cream
@@ -254,6 +329,9 @@ private fun ReviewCard(
     isLiked: Boolean,
     onLikeClick: () -> Unit
 ) {
+    val discussionMembersCount = stringResource(R.string.discussion_members_count, post.membersCount)
+    val discussionLikeDescription = stringResource(R.string.discussion_like_description)
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -284,7 +362,7 @@ private fun ReviewCard(
                         color = TextPrimary
                     )
                     Text(
-                        text = "${post.membersCount} участников обсуждения",
+                        text = discussionMembersCount,
                         style = MaterialTheme.typography.bodySmall,
                         color = TextSecondary
                     )
@@ -309,7 +387,7 @@ private fun ReviewCard(
                 IconButton(onClick = onLikeClick) {
                     Icon(
                         imageVector = if (isLiked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                        contentDescription = "Лайк",
+                        contentDescription = discussionLikeDescription,
                         tint = if (isLiked) ErrorRed else TextSecondary
                     )
                 }
@@ -378,6 +456,9 @@ private fun CommentInputBar(
     onValueChange: (String) -> Unit,
     onSendClick: () -> Unit
 ) {
+    val discussionCommentPlaceholder = stringResource(R.string.discussion_comment_placeholder)
+    val discussionSendDescription = stringResource(R.string.discussion_send_description)
+
     Surface(
         color = SurfaceSoft,
         tonalElevation = 1.dp,
@@ -396,7 +477,7 @@ private fun CommentInputBar(
                 modifier = Modifier.weight(1f),
                 placeholder = {
                     Text(
-                        text = "Оставьте комментарий...",
+                        text = discussionCommentPlaceholder,
                         color = TextSecondary
                     )
                 },
@@ -429,7 +510,7 @@ private fun CommentInputBar(
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.Send,
-                        contentDescription = "Отправить",
+                        contentDescription = discussionSendDescription,
                         tint = Cream
                     )
                 }

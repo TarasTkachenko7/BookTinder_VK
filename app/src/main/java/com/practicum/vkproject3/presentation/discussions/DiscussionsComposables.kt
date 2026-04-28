@@ -1,4 +1,4 @@
-import androidx.compose.foundation.background
+﻿import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,16 +20,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.practicum.vkproject3.R
 import com.practicum.vkproject3.ui.common.UserAvatar
 import com.practicum.vkproject3.presentation.discussions.ReviewPost
 
 @Composable
 fun ReviewPostCard(post: ReviewPost, onClick: () -> Unit) {
+    val ratingAndMembersText = stringResource(
+        R.string.discussion_card_rating_members_text,
+        post.bookRating.toString(),
+        post.membersCount
+    )
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -78,7 +85,7 @@ fun ReviewPostCard(post: ReviewPost, onClick: () -> Unit) {
                         fontSize = 12.sp
                     )
                     Text(
-                        "⭐ ${post.bookRating}  ${post.membersCount} участников",
+                        ratingAndMembersText,
                         color = Color.White,
                         fontSize = 11.sp
                     )

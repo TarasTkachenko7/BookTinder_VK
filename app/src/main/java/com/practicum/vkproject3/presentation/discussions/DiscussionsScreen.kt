@@ -1,4 +1,4 @@
-// com.practicum.vkproject3.ui.discussions.DiscussionsScreen.kt
+﻿// com.practicum.vkproject3.ui.discussions.DiscussionsScreen.kt
 
 package com.practicum.vkproject3.presentation.discussions
 
@@ -24,12 +24,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.practicum.vkproject3.R
 import com.practicum.vkproject3.ui.profile.BeigeBackground
 import com.practicum.vkproject3.ui.theme.DarkGreen
 import androidx.navigation.NavController
@@ -45,6 +47,8 @@ fun DiscussionsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
+    val addReviewFabText = stringResource(R.string.discussion_add_review_fab_text)
+    val reviewsTitle = stringResource(R.string.discussion_reviews_title)
 
     Scaffold(
         floatingActionButton = {
@@ -52,7 +56,7 @@ fun DiscussionsScreen(
                 onClick = onAddReviewClick,
                 containerColor = Color(0xFFC77A58)
             ) {
-                Text("+")
+                Text(addReviewFabText)
             }
         },
         containerColor = Color(0xFFF9F8F4)
@@ -84,7 +88,7 @@ fun DiscussionsScreen(
                 ) {
                     item {
                         Text(
-                            text = "Рецензии",
+                            text = reviewsTitle,
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(vertical = 12.dp)
