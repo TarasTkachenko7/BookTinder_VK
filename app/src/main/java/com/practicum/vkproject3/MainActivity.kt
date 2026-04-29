@@ -35,6 +35,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
@@ -193,11 +194,11 @@ fun MainFlowScreen(onLogout: () -> Unit) {
             Surface(
                 shadowElevation = 0.dp,
                 shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-                color = Color.White
+                color = Color(0xFFE0DCD7)
             ) {
                 NavigationBar(
                     modifier = Modifier.fillMaxWidth(),
-                    containerColor = Color.White,
+                    containerColor = Color(0xFFE0DCD7),
                     tonalElevation = 0.dp,
                     windowInsets = WindowInsets(0.dp, 0.dp, 0.dp, 0.dp)
                 ) {
@@ -215,14 +216,15 @@ fun MainFlowScreen(onLogout: () -> Unit) {
 
                         NavigationBarItem(
                             icon = { Icon(if (isSelected) screen.selectedIcon else screen.unselectedIcon, null, Modifier.size(26.dp)) },
+                            label = { Text(screen.title, fontSize = 12.sp) },
                             selected = isSelected,
-                            alwaysShowLabel = false,
+                            alwaysShowLabel = true,
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = MainBrown,
-                                unselectedIconColor = Color.Gray.copy(alpha = 0.6f),
+                                unselectedIconColor = Color.Black,
                                 selectedTextColor = MainBrown,
-                                unselectedTextColor = Color.Gray.copy(alpha = 0.6f),
-                                indicatorColor = MainBrown.copy(alpha = 0.1f)
+                                unselectedTextColor = Color.Black,
+                                indicatorColor = Color.Transparent
                             ),
                             onClick = {
                                 if (isSelected) {

@@ -69,7 +69,7 @@ fun ProfileScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Профиль", fontWeight = FontWeight.Bold, fontSize = 22.sp) },
+                title = { Text(stringResource(R.string.profile_title), fontWeight = FontWeight.Bold, fontSize = 22.sp) },
                 actions = {
                     IconButton(onClick = { }) {
                         Icon(
@@ -133,7 +133,7 @@ fun ProfileScreen(
             )
 
             Text(
-                text = "Читатель",
+                text = stringResource(R.string.profile_reader),
                 fontSize = 16.sp,
                 color = Color.Gray,
                 modifier = Modifier.padding(top = 4.dp)
@@ -154,7 +154,7 @@ fun ProfileScreen(
                 )
 
                 MenuButton(
-                    text = "Любимые книги",
+                    text = stringResource(R.string.profile_favorite_books),
                     icon = Icons.Default.FavoriteBorder,
                     iconTint = Color(0xFFE91E63),
                     onClick = onNavigateToFavoriteBooks

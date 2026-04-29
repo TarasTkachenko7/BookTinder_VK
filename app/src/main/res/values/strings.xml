@@ -101,6 +101,9 @@
     <string name="forgot_password_change_action">Изменить пароль</string>
 
     <string name="profile_name">Спотти Вкатов</string>
+    <string name="profile_title">Профиль</string>
+    <string name="profile_reader">Читатель</string>
+    <string name="profile_favorite_books">Любимые книги</string>
     <string name="profile_edit">Редактировать профиль</string>
     <string name="profile_subscription">Управление подпиской</string>
     <string name="profile_history">История просмотров</string>
