@@ -1,6 +1,7 @@
 package com.practicum.vkproject3.data.model
 
 import com.practicum.vkproject3.domain.model.Book
+import com.practicum.vkproject3.domain.model.mapToDomainBook
 
 data class FirebaseBook(
     val id: String = "",
@@ -12,7 +13,7 @@ data class FirebaseBook(
     val description: String = ""
 ) {
     fun toDomainBook(genreName: String): Book {
-        return Book(
+        return mapToDomainBook(
             id = id,
             title = title,
             author = author,

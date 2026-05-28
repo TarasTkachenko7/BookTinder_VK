@@ -17,18 +17,19 @@ import org.koin.dsl.module
 
 val viewModelModule = module {
     viewModel { LoginViewModel(get()) }
-    viewModel { RegistrationViewModel(get()) }
+    viewModel { RegistrationViewModel(get(), androidContext()) }
     viewModel { VerificationViewModel(get()) }
     viewModel { ForgotPasswordViewModel(get()) }
 
     viewModel { BookViewModel(get()) }
-    viewModel { HomeViewModel(get(), get()) }
+    viewModel { HomeViewModel(get(), get(), get()) }
     viewModel { GenrePickViewModel(get(), androidContext(), get()) }
     viewModel { ProfileViewModel(get(), get()) }
 
-    viewModel { DiscussionsViewModel(get()) }
+    viewModel { DiscussionsViewModel(get(), get()) }
 
     viewModel { com.practicum.vkproject3.presentation.books.CatalogViewModel(get()) }
     viewModel { parameters -> GenreDetailsViewModel(genre = parameters.get(), repository = get()) }
     viewModel { BookDetailsViewModel(get()) }
+    viewModel { com.practicum.vkproject3.presentation.books.FavoritesViewModel(get()) }
 }

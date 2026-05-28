@@ -79,6 +79,17 @@ fun BookDetailsScreen(
 
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = { },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
+                    }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = BeigeBackground)
+            )
+        },
         sheetPeekHeight = 60.dp,
         sheetContainerColor = DarkGreen,
         sheetContentColor = Color.White,
@@ -97,10 +108,16 @@ fun BookDetailsScreen(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = resources.getString(R.string.book_details_about_book),
+                    text = "О книге",
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
+                    fontSize = 18.sp
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "${book.author} - известный писатель...",
+                    color = Color.White.copy(alpha = 0.85f),
+                    fontSize = 14.sp
                 )
                 Spacer(modifier = Modifier.height(8.dp))
             }
@@ -112,39 +129,16 @@ fun BookDetailsScreen(
                     .heightIn(max = 500.dp)
                     .padding(horizontal = 24.dp)
                     .padding(bottom = 24.dp)
-                    .verticalScroll(rememberScrollState())
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
+
                 Text(
-                    text = resources.getString(R.string.book_details_about_author),
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = resources.getString(R.string.book_details_author_bio, book.author),
+                    text = book.description,
+                    textAlign = TextAlign.Center,
+                    color = Color.White.copy(alpha = 0.95f),
                     fontSize = 14.sp,
-                    color = Color.White.copy(alpha = 0.8f),
-                    textAlign = TextAlign.Center
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Text(
-                    text = resources.getString(R.string.book_details_plot),
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Подтягиваем РЕАЛЬНОЕ описание книги, если оно есть
-                val descriptionText = book.description ?: resources.getString(R.string.book_details_plot_description)
-                Text(
-                    text = descriptionText,
-                    fontSize = 14.sp,
-                    color = Color.White.copy(alpha = 0.8f),
-                    textAlign = TextAlign.Center
+                    lineHeight = 18.sp
                 )
                 Spacer(modifier = Modifier.height(40.dp))
             }
@@ -163,108 +157,87 @@ fun BookDetailsScreen(
                     .padding(horizontal = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Назад",
-                            tint = Color.Black
-                        )
-                    }
-
-                    Row {
-                        IconButton(onClick = { }) {
-                            Icon(Icons.Default.FavoriteBorder, null, tint = Color.Black)
-                        }
-                        IconButton(onClick = { }) {
-                            Icon(Icons.Default.Notifications, null, tint = Color.Black)
-                        }
-                    }
-                }
-
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Card(
-                    shape = RoundedCornerShape(20.dp),
-                    elevation = CardDefaults.cardElevation(8.dp),
                     modifier = Modifier
-                        .width(240.dp)
-                        .height(360.dp)
+                        .fillMaxWidth(0.75f)
+                        .height(500.dp),
+                    shape = RoundedCornerShape(18.dp),
+                    colors = CardDefaults.cardColors(containerColor = DarkGreen)
                 ) {
-                    if (book.imageUrl.isNotEmpty()) {
-                        AsyncImage(
-                            model = book.imageUrl,
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    } else {
+                    Column(Modifier.fillMaxSize()) {
                         Box(
                             Modifier
-                                .fillMaxSize()
-                                .background(Color.Gray)
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = DarkGreen),
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = book.title,
-                            color = Color.White,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center
-                        )
-
-                        Text(
-                            text = book.author,
-                            color = Color.White.copy(alpha = 0.8f),
-                            fontSize = 14.sp
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            repeat(5) {
-                                Icon(
-                                    Icons.Default.Star,
-                                    null,
-                                    tint = Color.White,
-                                    modifier = Modifier.size(14.dp)
+                                .fillMaxWidth()
+                                .weight(1f)
+                        ) {
+                            if (book.imageUrl.isNotEmpty()) {
+                                AsyncImage(
+                                    model = book.imageUrl,
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .clip(RoundedCornerShape(bottomStart = 14.dp, bottomEnd = 14.dp)),
+                                    contentScale = ContentScale.Crop
+                                )
+                            } else {
+                                Box(
+                                    Modifier
+                                        .fillMaxSize()
+                                        .background(Color.Gray)
+                                        .clip(RoundedCornerShape(bottomStart = 14.dp, bottomEnd = 14.dp))
                                 )
                             }
+                        }
 
+                        Column(
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 12.dp)
+                        ) {
                             Text(
-                                " ${book.rating}",
+                                text = book.title,
                                 color = Color.White,
-                                fontSize = 12.sp,
-                                modifier = Modifier.padding(start = 4.dp)
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp,
+                                maxLines = 2,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                                lineHeight = 20.sp
                             )
-
-                            Spacer(modifier = Modifier.weight(1f))
 
                             Text(
-                                book.genre,
-                                color = Color.White.copy(alpha = 0.6f),
-                                fontSize = 12.sp
+                                text = book.author,
+                                color = Color.White.copy(alpha = 0.85f),
+                                fontSize = 14.sp,
+                                maxLines = 1,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                                modifier = Modifier.padding(top = 4.dp)
                             )
+
+                            Row(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = String.format(java.util.Locale.US, "%.1f", book.rating),
+                                    color = Color.White.copy(alpha = 0.9f),
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+
+                                Text(
+                                    text = book.genre,
+                                    color = Color.White.copy(alpha = 0.9f),
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    maxLines = 1,
+                                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                )
+                            }
                         }
                     }
                 }

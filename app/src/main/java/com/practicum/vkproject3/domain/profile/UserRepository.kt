@@ -5,4 +5,5 @@ interface UserRepository {
     suspend fun getProfile(): UserProfile
     suspend fun updateProfile(name: String, genres: List<String>, avatarUrl: String?): Boolean
     suspend fun restorePassword(email: String): Boolean
+    fun observeUserGenres(): kotlinx.coroutines.flow.Flow<List<String>>
 }

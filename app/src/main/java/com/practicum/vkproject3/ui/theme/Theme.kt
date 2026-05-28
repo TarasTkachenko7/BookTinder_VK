@@ -32,17 +32,15 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun VkProject3Theme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = false, // Ignored, always false to force Light Theme
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            dynamicLightColorScheme(context)
         }
-
-        darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
     

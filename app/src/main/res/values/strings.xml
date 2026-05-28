@@ -54,7 +54,7 @@
     <string name="book_details_plot">Сюжет</string>
     <string name="book_details_plot_description">Захватывающая история о...</string>
     <string name="book_details_back">Back</string>
-    <string name="book_details_read">Читать</string>
+    <string name="book_details_read">Подробнее</string>
 
     <string name="catalog_all">Все</string>
     <string name="catalog_fantasy">Фэнтези</string>
@@ -69,7 +69,7 @@
     <string name="favorites_back">Назад</string>
     <string name="favorites_search_placeholder">Поиск...</string>
     <string name="favorites_title">Вам понравилось</string>
-    <string name="favorites_read_button">Читать</string>
+    <string name="favorites_read_button">Подробнее</string>
 
     <string name="login_title">Вход</string>
     <string name="placeholder_email">Почта</string>

@@ -110,7 +110,7 @@ fun GenreGridBookCard(book: Book, onClick: () -> Unit) {
                     color = Color.White,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
-                    maxLines = 2,
+                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.height(2.dp))

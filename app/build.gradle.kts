@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.google.gms.google-services")
+    id("com.google.devtools.ksp")
 }
 
 val localProperties = Properties()
@@ -81,6 +82,12 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:34.10.0"))
     implementation("com.google.firebase:firebase-database")
     implementation("com.google.firebase:firebase-auth")
+
+    // Room Database
+    val roomVersion = "2.7.0"
+    implementation("androidx.room:room-runtime:$roomVersion")
+    implementation("androidx.room:room-ktx:$roomVersion")
+    ksp("androidx.room:room-compiler:$roomVersion")
 
     // AndroidX & Compose (Version Catalog)
     implementation(libs.androidx.core.ktx)

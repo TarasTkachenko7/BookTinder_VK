@@ -16,3 +16,40 @@ val mockCatalog = listOf(
     Book("3", "Об интерфейсе", "Алан Купер", 4.8, "Дизайн", "https://covers.openlibrary.org/b/id/14414574-L.jpg", "kakadu"),
     Book("4", "Психбольница", "Алан Купер", 4.7, "Дизайн", "https://covers.openlibrary.org/b/id/10565013-L.jpg", "jimichu")
 )
+
+fun mapToDomainBook(
+    id: String,
+    title: String,
+    author: String,
+    rating: Double,
+    genre: String,
+    imageUrl: String,
+    description: String
+): Book {
+    val formattedRating = kotlin.math.round(rating * 10) / 10.0
+    
+    val translatedGenre = when (genre.trim().lowercase()) {
+        "fantasy", "science fiction" -> "Фантастика"
+        "detective", "mystery" -> "Детектив"
+        "romance" -> "Роман"
+        "adventure" -> "Приключения"
+        "drama" -> "Драма"
+        "fiction" -> "Разное"
+        "classic", "classics" -> "Классика"
+        "horror" -> "Ужасы"
+        "psychology" -> "Психология"
+        "science" -> "Научпоп"
+        "business" -> "Бизнес"
+        else -> genre.trim().replaceFirstChar { it.uppercase() }
+    }
+
+    return Book(
+        id = id,
+        title = title,
+        author = author,
+        rating = formattedRating,
+        genre = translatedGenre,
+        imageUrl = imageUrl,
+        description = description
+    )
+}

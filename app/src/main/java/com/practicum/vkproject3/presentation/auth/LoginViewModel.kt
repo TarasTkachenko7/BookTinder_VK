@@ -14,7 +14,6 @@ data class LoginState(
     val password: String = "",
     val emailError: String? = null,
     val passwordError: String? = null,
-    val errorMessage: String? = null,
     val isLoading: Boolean = false,
     val isSuccess: Boolean = false
 )
@@ -27,11 +26,11 @@ class LoginViewModel(
     val state = _state.asStateFlow()
 
     fun onEmailChange(newValue: String) {
-        _state.update { it.copy(email = newValue, emailError = null, errorMessage = null) }
+        _state.update { it.copy(email = newValue, emailError = null) }
     }
 
     fun onPasswordChange(newValue: String) {
-        _state.update { it.copy(password = newValue, passwordError = null, errorMessage = null) }
+        _state.update { it.copy(password = newValue, passwordError = null) }
     }
 
     fun login() {
@@ -41,12 +40,12 @@ class LoginViewModel(
         var emailErr: String? = null
         var passwordErr: String? = null
 
-        if (currentState.email.isBlank()) {
-            emailErr = "Обязательное поле"
+        if (currentState.email.isBlank() || !android.util.Patterns.EMAIL_ADDRESS.matcher(currentState.email).matches()) {
+            emailErr = "Некорректный формат email"
             hasError = true
         }
         if (currentState.password.isBlank()) {
-            passwordErr = "Обязательное поле"
+            passwordErr = "Введите пароль"
             hasError = true
         }
 
@@ -56,7 +55,7 @@ class LoginViewModel(
         }
 
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, errorMessage = null) }
+            _state.update { it.copy(isLoading = true) }
 
             val request = AuthRequest(
                 email = currentState.email,
@@ -67,8 +66,15 @@ class LoginViewModel(
             if (result.isSuccess) {
                 _state.update { it.copy(isLoading = false, isSuccess = true) }
             } else {
-                val errorMsg = result.exceptionOrNull()?.message ?: "Произошла неизвестная ошибка"
-                _state.update { it.copy(isLoading = false, errorMessage = errorMsg) }
+                val exception = result.exceptionOrNull()
+                if (exception is com.google.firebase.auth.FirebaseAuthInvalidUserException) {
+                    _state.update { it.copy(isLoading = false, emailError = "Такого пользователя не существует", passwordError = null) }
+                } else if (exception is com.google.firebase.auth.FirebaseAuthInvalidCredentialsException) {
+                    _state.update { it.copy(isLoading = false, passwordError = "Неверный пароль", emailError = null) }
+                } else {
+                    val errorMsg = exception?.toUserFriendlyMessage() ?: "Произошла неизвестная ошибка. Повторите попытку"
+                    _state.update { it.copy(isLoading = false, passwordError = errorMsg, emailError = null) }
+                }
             }
         }
     }

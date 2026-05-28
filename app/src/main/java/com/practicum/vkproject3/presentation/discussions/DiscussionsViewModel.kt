@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.practicum.vkproject3.domain.books.BookRepository
 import com.practicum.vkproject3.domain.model.Book
+import com.practicum.vkproject3.domain.profile.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -58,12 +59,16 @@ data class CreateReviewState(
 
 data class BookPickerState(
     val isLoading: Boolean = false,
+    val isPaginating: Boolean = false,
     val books: List<ReviewBookUi> = emptyList(),
-    val error: String? = null
+    val error: String? = null,
+    val lastKey: String? = null,
+    val isEndReached: Boolean = false
 )
 
 class DiscussionsViewModel(
-    private val repository: BookRepository
+    private val repository: BookRepository,
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DiscussionsUiState(isLoading = true))
@@ -80,6 +85,7 @@ class DiscussionsViewModel(
 
     init {
         loadInitialPosts()
+        loadBooksForPicker()
     }
 
     private fun loadInitialPosts() {
@@ -199,29 +205,29 @@ class DiscussionsViewModel(
         }
     }
 
-    fun loadBooksForPicker() {
-        if (_bookPickerState.value.books.isNotEmpty()) return
+    fun loadBooksForPicker(isPagination: Boolean = false) {
+        val state = _bookPickerState.value
+        if (state.isLoading || state.isPaginating || (isPagination && state.isEndReached)) return
 
         viewModelScope.launch {
-            _bookPickerState.update {
-                it.copy(
-                    isLoading = true,
-                    error = null
-                )
+            if (isPagination) {
+                _bookPickerState.update { it.copy(isPaginating = true, error = null) }
+            } else {
+                _bookPickerState.update { it.copy(isLoading = true, error = null) }
             }
 
             try {
-                val loadedBooks = mutableListOf<ReviewBookUi>()
-
-                for (page in 1..3) {
-                    val (books, _) = repository.getBooks(page)
-                    loadedBooks += books.map { book -> book.toReviewBookUi() }
-                }
+                val (pagedBooks, newLastKey) = repository.getPagedBooks(20, if (isPagination) state.lastKey else null)
+                val loadedBooks = pagedBooks.map { book -> book.toReviewBookUi() }
 
                 _bookPickerState.update {
+                    val combined = if (isPagination) it.books + loadedBooks else loadedBooks
                     it.copy(
                         isLoading = false,
-                        books = loadedBooks.distinctBy { book -> book.id },
+                        isPaginating = false,
+                        books = combined.distinctBy { book -> book.id },
+                        lastKey = newLastKey,
+                        isEndReached = loadedBooks.size < 20,
                         error = null
                     )
                 }
@@ -229,7 +235,7 @@ class DiscussionsViewModel(
                 _bookPickerState.update {
                     it.copy(
                         isLoading = false,
-                        books = emptyList(),
+                        isPaginating = false,
                         error = "Не удалось загрузить книги"
                     )
                 }
@@ -319,6 +325,13 @@ class DiscussionsViewModel(
 
             val newId = (_uiState.value.posts.maxOfOrNull { it.id } ?: 0) + 1
 
+            val userProfile = try {
+                userRepository.getProfile()
+            } catch (e: Exception) {
+                null
+            }
+            val userName = userProfile?.name?.takeIf { it.isNotBlank() } ?: "Пользователь"
+
             val newPost = ReviewPost(
                 id = newId,
                 bookId = book.id,
@@ -327,7 +340,7 @@ class DiscussionsViewModel(
                 bookRating = book.rating,
                 bookCoverUrl = book.coverUrl,
                 membersCount = 1,
-                userNickname = "you",
+                userNickname = userName,
                 reviewText = form.reviewText.trim(),
                 date = "только что"
             )
@@ -382,16 +395,7 @@ class DiscussionsViewModel(
     }
 
     private suspend fun findBookById(bookId: String): Book? {
-        var page = 1
-
-        repeat(10) {
-            val (books, _) = repository.getBooks(page)
-            val found = books.firstOrNull { it.id == bookId }
-            if (found != null) return found
-            page++
-        }
-
-        return null
+        return repository.getBookById(bookId)
     }
 
     private fun Book.toReviewBookUi(): ReviewBookUi {

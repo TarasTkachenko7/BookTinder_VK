@@ -12,8 +12,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -27,6 +30,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.practicum.vkproject3.presentation.discussions.ReviewPost
+
+fun getParticipantsString(count: Int): String {
+    val mod10 = count % 10
+    val mod100 = count % 100
+    
+    return when {
+        mod100 in 11..14 -> "$count участников"
+        mod10 == 1 -> "$count участник"
+        mod10 in 2..4 -> "$count участника"
+        else -> "$count участников"
+    }
+}
 
 @Composable
 fun ReviewPostCard(post: ReviewPost, onClick: () -> Unit) {
@@ -76,11 +91,20 @@ fun ReviewPostCard(post: ReviewPost, onClick: () -> Unit) {
                         color = Color.LightGray,
                         fontSize = 12.sp
                     )
-                    Text(
-                        "⭐ ${post.bookRating}  ${post.membersCount} участников",
-                        color = Color.White,
-                        fontSize = 11.sp
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = "Рейтинг",
+                            tint = Color.White,
+                            modifier = Modifier.size(12.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "${post.bookRating}  ${getParticipantsString(post.membersCount)}",
+                            color = Color.White,
+                            fontSize = 11.sp
+                        )
+                    }
                 }
             }
         }
@@ -106,6 +130,12 @@ fun ReviewPostCard(post: ReviewPost, onClick: () -> Unit) {
                         fontWeight = FontWeight.Medium,
                         fontSize = 13.sp
                     )
+                    Spacer(modifier = Modifier.weight(1f))
+                    Text(
+                        post.date,
+                        fontSize = 10.sp,
+                        color = Color.Gray
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(6.dp))
@@ -115,13 +145,6 @@ fun ReviewPostCard(post: ReviewPost, onClick: () -> Unit) {
                     fontSize = 13.sp,
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis
-                )
-
-                Text(
-                    post.date,
-                    modifier = Modifier.align(Alignment.End),
-                    fontSize = 10.sp,
-                    color = Color.Gray
                 )
             }
         }

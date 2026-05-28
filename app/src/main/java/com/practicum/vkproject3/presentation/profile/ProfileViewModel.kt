@@ -47,7 +47,8 @@ class ProfileViewModel(
             try {
                 val success = repository.updateProfile(name, genres, avatarUrl)
                 if (success) {
-                    _state.value = _state.value.copy(isLoading = false, isUpdateSuccess = true)
+                    _state.value = _state.value.copy(isUpdateSuccess = true)
+                    loadData()
                 } else {
                     _state.value = _state.value.copy(isLoading = false, error = "Ошибка обновления")
                 }

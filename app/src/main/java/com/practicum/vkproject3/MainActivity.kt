@@ -24,6 +24,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -34,6 +35,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -62,7 +64,7 @@ import com.practicum.vkproject3.ui.genres.GenrePickScreen
 import com.practicum.vkproject3.ui.home.HomeScreen
 import com.practicum.vkproject3.ui.onboarding.OnboardingScreen
 import com.practicum.vkproject3.ui.profile.EditProfileScreen
-import com.practicum.vkproject3.ui.profile.HistoryScreen
+import com.practicum.vkproject3.ui.profile.SettingsScreen
 import com.practicum.vkproject3.ui.profile.PlaceholderScreen
 import com.practicum.vkproject3.ui.profile.ProfileScreen
 import com.practicum.vkproject3.ui.theme.BeigeBackground
@@ -125,7 +127,11 @@ class MainActivity : ComponentActivity() {
                         val email = backStackEntry.arguments?.getString("email") ?: ""
                         VerificationScreen(
                             email = email,
-                            onBack = { rootNavController.popBackStack() },
+                            onBack = { 
+                                rootNavController.navigate("login") {
+                                    popUpTo(0)
+                                }
+                            },
                             onSuccess = {
                                 rootNavController.navigate("onboarding") {
                                     popUpTo("login") { inclusive = true }
@@ -207,16 +213,32 @@ fun MainFlowScreen(onLogout: () -> Unit) {
 
                     items.forEach { screen ->
                         val currentRoute = currentDestination?.route
-                        val isSelected = when (screen) {
-                            BottomNavItem.Books -> currentRoute == BottomNavItem.Books.route
-                            BottomNavItem.Discussions -> currentRoute == BottomNavItem.Discussions.route
-                            BottomNavItem.Catalog -> currentRoute == BottomNavItem.Catalog.route || currentRoute == "favorites_screen" || currentRoute?.startsWith("book_details") == true
-                            BottomNavItem.Profile -> currentRoute == BottomNavItem.Profile.route || currentRoute == "edit_profile" || currentRoute == "history_screen" || currentRoute == "settings_screen" || currentRoute == "subscription_screen" || currentRoute == "profile_favorite_books"
+                        val isFavorites = currentRoute?.contains("favorites_screen") == true
+                        
+                        val isSelected = if (isFavorites) {
+                            false
+                        } else {
+                            val inHierarchy = currentDestination?.hierarchy?.any { it.route == screen.route } == true
+                            val inFlatSubRoute = when (screen) {
+                                BottomNavItem.Books -> false
+                                BottomNavItem.Discussions -> currentRoute?.contains("review") == true || currentRoute?.contains("chat") == true
+                                BottomNavItem.Catalog -> currentRoute?.startsWith("book_details") == true || currentRoute?.startsWith("genre_details") == true
+                                BottomNavItem.Profile -> currentRoute == "edit_profile" || currentRoute == "settings_screen" || currentRoute == "subscription_screen"
+                            }
+                            inHierarchy || inFlatSubRoute
                         }
 
                         NavigationBarItem(
                             icon = { Icon(if (isSelected) screen.selectedIcon else screen.unselectedIcon, null, Modifier.size(26.dp)) },
-                            label = { Text(screen.title, fontSize = 12.sp) },
+                            label = {
+                                Text(
+                                    text = screen.title,
+                                    fontSize = 11.sp,
+                                    maxLines = 1,
+                                    softWrap = false,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            },
                             selected = isSelected,
                             alwaysShowLabel = true,
                             colors = NavigationBarItemDefaults.colors(
@@ -229,6 +251,15 @@ fun MainFlowScreen(onLogout: () -> Unit) {
                             onClick = {
                                 if (isSelected) {
                                     navController.popBackStack(screen.route, inclusive = false)
+                                } else if (isFavorites) {
+                                    val popped = navController.popBackStack(screen.route, inclusive = false)
+                                    if (!popped) {
+                                        navController.navigate(screen.route) {
+                                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        }
+                                    }
                                 } else {
                                     navController.navigate(screen.route) {
                                         popUpTo(navController.graph.findStartDestination().id) {
@@ -248,7 +279,7 @@ fun MainFlowScreen(onLogout: () -> Unit) {
         NavHost(
             navController = navController,
             startDestination = BottomNavItem.Books.route,
-            modifier = Modifier
+            modifier = Modifier.padding(innerPadding)
         ) {
             composable(BottomNavItem.Books.route) {
                 HomeScreen(
@@ -287,29 +318,24 @@ fun MainFlowScreen(onLogout: () -> Unit) {
             composable(BottomNavItem.Profile.route) {
                 ProfileScreen(
                     onNavigateToEdit = { navController.navigate("edit_profile") },
-                    onNavigateToHistory = { navController.navigate("history_screen") },
                     onNavigateToSettings = { navController.navigate("settings_screen") },
                     onNavigateToSubscription = { navController.navigate("subscription_screen") },
-                    onNavigateToFavoriteBooks = { navController.navigate("profile_favorite_books") },
+                    onNavigateToFavoriteBooks = { navController.navigate("favorites_screen") },
                     onLogout = onLogout
                 )
             }
 
             composable("edit_profile") {
                 EditProfileScreen(
-                    onBack = { navController.popBackStack() },
-                    onLogout = onLogout
-                )
-            }
-
-            composable("history_screen") {
-                HistoryScreen(
                     onBack = { navController.popBackStack() }
                 )
             }
 
             composable("settings_screen") {
-                PlaceholderScreen(title = "Настройки", onBack = { navController.popBackStack() })
+                SettingsScreen(
+                    onBack = { navController.popBackStack() },
+                    onLogout = onLogout
+                )
             }
 
             composable("subscription_screen") {
@@ -323,13 +349,6 @@ fun MainFlowScreen(onLogout: () -> Unit) {
                     onBookClick = { bookId ->
                         navController.navigate("book_details/${Uri.encode(bookId)}")
                     }
-                )
-            }
-
-            composable("profile_favorite_books") {
-                PlaceholderScreen(
-                    title = "Любимые книги",
-                    onBack = { navController.popBackStack() }
                 )
             }
 

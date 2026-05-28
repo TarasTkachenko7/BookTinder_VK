@@ -44,7 +44,6 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun EditProfileScreen(
     onBack: () -> Unit,
-    onLogout: () -> Unit,
     viewModel: ProfileViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -78,12 +77,6 @@ fun EditProfileScreen(
         }
     }
 
-    LaunchedEffect(state.isLoggedOut) {
-        if (state.isLoggedOut) {
-            onLogout()
-        }
-    }
-
     LaunchedEffect(state.isUpdateSuccess) {
         if (state.isUpdateSuccess) {
             viewModel.resetUpdateSuccess()
@@ -92,8 +85,18 @@ fun EditProfileScreen(
     }
 
     val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
+        contract = ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
+        uri?.let {
+            try {
+                context.contentResolver.takePersistableUriPermission(
+                    it,
+                    android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            } catch (e: SecurityException) {
+                e.printStackTrace()
+            }
+        }
         selectedImageUri = uri
     }
 
@@ -171,7 +174,7 @@ fun EditProfileScreen(
                             .size(40.dp)
                             .background(MainBrown, CircleShape)
                             .border(3.dp, BeigeBackground, CircleShape)
-                            .clickable { launcher.launch("image/*") },
+                            .clickable { launcher.launch(arrayOf("image/*")) },
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(Icons.Default.Edit, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
@@ -268,13 +271,13 @@ fun EditProfileScreen(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                selectedGenres.forEach { id ->
-                                    val index = genreIds.indexOf(id)
+                                selectedGenres.forEach { name ->
+                                    val index = genreNames.indexOf(name)
                                     if (index != -1) {
                                         Surface(
                                             shape = RoundedCornerShape(10.dp),
                                             color = MainBrown.copy(alpha = 0.1f),
-                                            modifier = Modifier.clickable { selectedGenres.remove(id) }
+                                            modifier = Modifier.clickable { selectedGenres.remove(name) }
                                         ) {
                                             Row(
                                                 verticalAlignment = Alignment.CenterVertically,
@@ -304,6 +307,8 @@ fun EditProfileScreen(
 
                 Spacer(modifier = Modifier.height(48.dp))
 
+                Spacer(modifier = Modifier.weight(1f))
+
                 Button(
                     onClick = {
                         val avatarToSave = selectedImageUri?.toString() ?: state.user?.avatarUrl
@@ -317,30 +322,6 @@ fun EditProfileScreen(
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
                 ) {
                     Text("Сохранить изменения", fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                val dullBrown = Color(0xFF9E8E85)
-                OutlinedButton(
-                    onClick = { viewModel.logout() },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = dullBrown),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, dullBrown),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Text("Выйти из аккаунта", fontSize = 16.sp, fontWeight = FontWeight.Medium)
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                TextButton(
-                    onClick = { viewModel.deleteAccount() },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Удалить аккаунт", color = Color.Red.copy(alpha = 0.7f), fontWeight = FontWeight.SemiBold)
                 }
 
                 Spacer(modifier = Modifier.height(40.dp))
@@ -380,14 +361,15 @@ fun EditProfileScreen(
                         modifier = Modifier.fillMaxHeight(0.6f)
                     ) {
                         itemsIndexed(genreIds) { index, id ->
-                            val isChecked = selectedGenres.contains(id)
+                            val name = genreNames[index]
+                            val isChecked = selectedGenres.contains(name)
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(12.dp))
                                     .clickable {
-                                        if (isChecked) selectedGenres.remove(id)
-                                        else selectedGenres.add(id)
+                                        if (isChecked) selectedGenres.remove(name)
+                                        else selectedGenres.add(name)
                                     }
                                     .padding(vertical = 12.dp, horizontal = 8.dp),
                                 verticalAlignment = Alignment.CenterVertically

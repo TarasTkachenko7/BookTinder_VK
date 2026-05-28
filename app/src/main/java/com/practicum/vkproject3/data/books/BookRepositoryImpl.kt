@@ -8,16 +8,28 @@ import com.practicum.vkproject3.data.model.FirebaseBook
 import com.practicum.vkproject3.data.network.api.OpenLibraryApi
 import com.practicum.vkproject3.domain.books.BookRepository
 import com.practicum.vkproject3.domain.model.Book
+import com.practicum.vkproject3.domain.model.mapToDomainBook
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.net.URLEncoder
 import java.util.UUID
 
+import com.practicum.vkproject3.data.db.FavoriteBookDao
+import com.practicum.vkproject3.data.db.toDomain
+import com.practicum.vkproject3.data.db.toEntity
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.launch
+
 class BookRepositoryImpl(
     private val api: OpenLibraryApi,
-    private val context: Context
+    private val context: Context,
+    private val favoriteBookDao: FavoriteBookDao
 ) : BookRepository {
 
     private val memoryCache = mutableMapOf<String, Book>()
@@ -33,7 +45,7 @@ class BookRepositoryImpl(
     override suspend fun getBooks(page: Int): Pair<List<Book>, Int> = withContext(Dispatchers.IO) {
         val response = api.searchBooks(query = "language:rus", page = page)
         val books = response.docs.map { doc ->
-            val book = Book(
+            val book = mapToDomainBook(
                 id = doc.key ?: "",
                 title = doc.title ?: context.getString(R.string.book_no_title),
                 author = doc.authorNames?.firstOrNull() ?: context.getString(R.string.book_no_author),
@@ -54,7 +66,7 @@ class BookRepositoryImpl(
             try {
                 val response = api.searchBooks(query = genre, page = 1, limit = limit)
                 val books = response.docs.map { doc ->
-                    val book = Book(
+                    val book = mapToDomainBook(
                         id = doc.key ?: UUID.randomUUID().toString(),
                         title = doc.title ?: context.getString(R.string.book_no_title),
                         author = doc.authorNames?.firstOrNull() ?: context.getString(R.string.book_no_author),
@@ -85,7 +97,7 @@ class BookRepositoryImpl(
                 val titleStr = doc.title ?: context.getString(R.string.book_no_title)
                 val encodedTitle = URLEncoder.encode(titleStr, "UTF-8")
                 val fallbackCoverUrl = "https://ui-avatars.com/api/?name=$encodedTitle&background=2C3E34&color=fff&size=512&font-size=0.3"
-                val book = Book(
+                val book = mapToDomainBook(
                     id = doc.key ?: UUID.randomUUID().toString(),
                     title = titleStr,
                     author = doc.authorNames?.firstOrNull() ?: context.getString(R.string.book_no_author),
@@ -123,6 +135,66 @@ class BookRepositoryImpl(
         }
     }
 
+    override suspend fun getAllBooks(): List<Book> = withContext(Dispatchers.IO) {
+        val firebaseBooks = getAllBooksFromDatabase()
+        firebaseBooks.map { fBook ->
+            val book = mapToDomainBook(
+                id = fBook.id,
+                title = fBook.title,
+                author = fBook.author,
+                imageUrl = fBook.imageUrl,
+                rating = fBook.rating,
+                genre = fBook.genreId,
+                description = fBook.description
+            )
+            memoryCache[book.id] = book
+            book
+        }
+    }
+
+    override suspend fun getPagedBooks(limit: Int, lastKey: String?): Pair<List<Book>, String?> = withContext(Dispatchers.IO) {
+        return@withContext try {
+            var query = booksRef.orderByKey().limitToFirst(if (lastKey == null) limit else limit + 1)
+            if (lastKey != null) {
+                query = query.startAt(lastKey)
+            }
+            
+            val snapshot = query.get().await()
+            val booksList = mutableListOf<Book>()
+            var newLastKey: String? = null
+            
+            var count = 0
+            for (childSnapshot in snapshot.children) {
+                if (lastKey != null && count == 0 && childSnapshot.key == lastKey) {
+                    count++
+                    continue
+                }
+                
+                val fBook = childSnapshot.getValue(FirebaseBook::class.java)
+                if (fBook != null) {
+                    val book = mapToDomainBook(
+                        id = fBook.id,
+                        title = fBook.title,
+                        author = fBook.author,
+                        imageUrl = fBook.imageUrl,
+                        rating = fBook.rating,
+                        genre = fBook.genreId,
+                        description = fBook.description
+                    )
+                    memoryCache[book.id] = book
+                    booksList.add(book)
+                    newLastKey = childSnapshot.key
+                }
+                count++
+            }
+            
+            Pair(booksList, newLastKey)
+        } catch (e: Exception) {
+            Log.e("FirebaseData", "Ошибка загрузки страницы книг: ${e.message}")
+            Pair(emptyList(), null)
+        }
+    }
+
     override suspend fun getBookById(id: String): Book? = withContext(Dispatchers.IO) {
         memoryCache[id]?.let { return@withContext it }
 
@@ -131,13 +203,13 @@ class BookRepositoryImpl(
             val fBook = firebaseBooks.find { it.id == id }
 
             if (fBook != null) {
-                return@withContext Book(
+                return@withContext mapToDomainBook(
                     id = fBook.id ?: id,
                     title = fBook.title ?: context.getString(R.string.book_no_title),
                     author = fBook.author ?: context.getString(R.string.book_no_author),
                     imageUrl = fBook.imageUrl ?: "",
                     rating = fBook.rating?.toString()?.toDoubleOrNull() ?: 0.0,
-                    genre = fBook.genreId ?: "Неизвестный жанр",
+                    genre = fBook.genreId ?: "unknown",
                     description = fBook.description ?: "Описание отсутствует."
                 )
             }
@@ -156,7 +228,7 @@ class BookRepositoryImpl(
                 val encodedTitle = URLEncoder.encode(titleStr, "UTF-8")
                 val fallbackCoverUrl = "https://ui-avatars.com/api/?name=$encodedTitle&background=2C3E34&color=fff&size=512&font-size=0.3"
 
-                return@withContext Book(
+                return@withContext mapToDomainBook(
                     id = doc.key ?: id,
                     title = titleStr,
                     author = doc.authorNames?.firstOrNull() ?: context.getString(R.string.book_no_author),
@@ -171,5 +243,76 @@ class BookRepositoryImpl(
         }
 
         return@withContext null
+    }
+
+    private val auth = FirebaseAuth.getInstance()
+    private val usersDatabase = FirebaseDatabase.getInstance().getReference("users")
+
+    override suspend fun saveFavoriteBook(book: Book) {
+        favoriteBookDao.insertBook(book.toEntity())
+        
+        kotlinx.coroutines.GlobalScope.launch(Dispatchers.IO) {
+            val uid = auth.currentUser?.uid ?: return@launch
+            try {
+                val fBook = com.practicum.vkproject3.data.model.FirebaseBook(
+                    id = book.id,
+                    title = book.title,
+                    author = book.author,
+                    rating = book.rating,
+                    genreId = book.genre,
+                    imageUrl = book.imageUrl,
+                    description = book.description
+                )
+                usersDatabase.child(uid).child("favorites").child(book.id).setValue(fBook).await()
+            } catch (e: Exception) {
+                Log.e("Sync", "Failed to sync save: ${e.message}")
+            }
+        }
+    }
+
+    override suspend fun removeFavoriteBook(bookId: String) {
+        favoriteBookDao.deleteBook(bookId)
+        
+        kotlinx.coroutines.GlobalScope.launch(Dispatchers.IO) {
+            val uid = auth.currentUser?.uid ?: return@launch
+            try {
+                usersDatabase.child(uid).child("favorites").child(bookId).removeValue().await()
+            } catch (e: Exception) {
+                Log.e("Sync", "Failed to sync delete: ${e.message}")
+            }
+        }
+    }
+
+    override fun observeFavoriteBooks(): Flow<List<Book>> {
+        return favoriteBookDao.observeFavoriteBooks().map { entities ->
+            entities.map { it.toDomain() }
+        }
+    }
+
+    override suspend fun syncFavoritesOnStartup(): Unit = withContext(Dispatchers.IO) {
+        val uid = auth.currentUser?.uid ?: return@withContext
+        try {
+            val snapshot = usersDatabase.child(uid).child("favorites").get().await()
+            val remoteBooks = mutableListOf<com.practicum.vkproject3.data.model.FirebaseBook>()
+            for (child in snapshot.children) {
+                child.getValue(com.practicum.vkproject3.data.model.FirebaseBook::class.java)?.let { remoteBooks.add(it) }
+            }
+            
+            favoriteBookDao.deleteAll()
+            val entities = remoteBooks.map { 
+                Book(
+                    id = it.id,
+                    title = it.title,
+                    author = it.author,
+                    rating = it.rating,
+                    genre = it.genreId,
+                    imageUrl = it.imageUrl,
+                    description = it.description
+                ).toEntity()
+            }
+            favoriteBookDao.insertBooks(entities)
+        } catch (e: Exception) {
+            Log.e("Sync", "Failed to sync on startup: ${e.message}")
+        }
     }
 }

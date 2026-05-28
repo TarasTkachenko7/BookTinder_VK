@@ -10,6 +10,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
@@ -28,7 +30,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.practicum.vkproject3.R
 import com.practicum.vkproject3.domain.model.Book
-import com.practicum.vkproject3.domain.model.mockCatalog
+import com.practicum.vkproject3.data.profile.UserSession
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,11 +38,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.foundation.text.BasicTextField
 
+import com.practicum.vkproject3.presentation.books.FavoritesViewModel
+import org.koin.androidx.compose.koinViewModel
+import androidx.compose.runtime.collectAsState
+
 @Composable
 fun FavoritesScreen(
     onBack: () -> Unit,
-    onBookClick: (String) -> Unit
+    onBookClick: (String) -> Unit,
+    viewModel: FavoritesViewModel = koinViewModel()
 ) {
+    val state by viewModel.state.collectAsState()
     val context = LocalContext.current
     val resources = context.resources
     
@@ -68,52 +76,76 @@ fun FavoritesScreen(
                 )
             }
 
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                placeholder = { Text(resources.getString(R.string.favorites_search_placeholder), color = Color.Gray) },
+            Row(
                 modifier = Modifier
                     .weight(1f)
-                    .height(50.dp),
-                shape = CircleShape,
-                leadingIcon = { Icon(Icons.Default.Search, null, tint = Color.Gray) },
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = searchBg,
-                    unfocusedContainerColor = searchBg,
-                    focusedBorderColor = Color.Transparent,
-                    unfocusedBorderColor = Color.Transparent
-                ),
-                singleLine = true
-            )
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Box(
-                Modifier
-                    .size(38.dp)
-                    .clip(CircleShape)
-                    .background(androidx.compose.ui.res.colorResource(R.color.icon_gray).copy(alpha = 0.9f))
-                    .clickable { },
-                Alignment.Center
+                    .height(50.dp)
+                    .background(searchBg, CircleShape),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    imageVector = Icons.Default.Notifications,
+                    imageVector = Icons.Default.Search,
                     contentDescription = null,
-                    tint = androidx.compose.ui.res.colorResource(R.color.text_black).copy(alpha = 0.75f)
+                    tint = Color.Gray,
+                    modifier = Modifier.padding(start = 16.dp, end = 8.dp)
                 )
+                BasicTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    singleLine = true,
+                    textStyle = androidx.compose.ui.text.TextStyle(
+                        fontSize = 16.sp,
+                        color = Color.Black
+                    ),
+                    cursorBrush = androidx.compose.ui.graphics.SolidColor(Color.Black),
+                    modifier = Modifier.weight(1f),
+                    decorationBox = { innerTextField ->
+                        Box(contentAlignment = Alignment.CenterStart) {
+                            if (searchQuery.isEmpty()) {
+                                Text(resources.getString(R.string.favorites_search_placeholder), color = Color.Gray, fontSize = 16.sp)
+                            }
+                            innerTextField()
+                        }
+                    }
+                )
+                if (searchQuery.isNotEmpty()) {
+                    IconButton(
+                        onClick = { searchQuery = "" },
+                        modifier = Modifier.padding(end = 4.dp)
+                    ) {
+                        Icon(
+                            imageVector = androidx.compose.material.icons.Icons.Default.Clear,
+                            contentDescription = "Очистить поиск",
+                            tint = Color.Gray
+                        )
+                    }
+                } else {
+                    Spacer(Modifier.width(16.dp))
+                }
             }
+
+            // Spacer(modifier = Modifier.width(8.dp))
+            // 
+            // Box(
+            //     Modifier
+            //         .size(38.dp)
+            //         .clip(CircleShape)
+            //         .background(androidx.compose.ui.res.colorResource(R.color.icon_gray).copy(alpha = 0.9f))
+            //         .clickable { },
+            //     Alignment.Center
+            // ) {
+            //     Icon(
+            //         imageVector = Icons.Default.Notifications,
+            //         contentDescription = null,
+            //         tint = androidx.compose.ui.res.colorResource(R.color.text_black).copy(alpha = 0.75f)
+            //     )
+            // }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        val categories = listOf(
-            resources.getString(R.string.catalog_all),
-            resources.getString(R.string.catalog_fantasy),
-            resources.getString(R.string.catalog_drama),
-            resources.getString(R.string.catalog_detective),
-            resources.getString(R.string.catalog_romance),
-            "Дизайн"
-        )
+        val genreArray = resources.getStringArray(R.array.genre_name_res_ids).toList()
+        val categories = listOf(resources.getString(R.string.catalog_all)) + genreArray + listOf(resources.getString(R.string.book_genre_miscellaneous))
         LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             items(categories) { cat ->
                 val isSelected = cat == selectedCategory
@@ -146,14 +178,12 @@ fun FavoritesScreen(
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        val filteredFavorites = remember(searchQuery, selectedCategory) {
-            mockCatalog.filter { book ->
-                val matchesSearch = if (searchQuery.isBlank()) true
-                    else book.title.lowercase().contains(searchQuery.lowercase())
-                val matchesCategory = if (selectedCategory == resources.getString(R.string.catalog_all)) true
-                    else book.genre.equals(selectedCategory, ignoreCase = true)
-                matchesSearch && matchesCategory
-            }
+        val filteredFavorites = state.favorites.filter { book ->
+            val matchesSearch = book.title.contains(searchQuery, ignoreCase = true) || 
+                              book.author.contains(searchQuery, ignoreCase = true)
+            val matchesCategory = selectedCategory == resources.getString(R.string.catalog_all) || book.genre == selectedCategory
+            
+            matchesSearch && matchesCategory
         }
 
         LazyColumn(
@@ -161,7 +191,11 @@ fun FavoritesScreen(
             contentPadding = PaddingValues(bottom = 20.dp)
         ) {
             items(filteredFavorites) { book ->
-                FavoriteBookCardItem(book, onBookClick)
+                FavoriteBookCardItem(
+                    book = book,
+                    onClick = onBookClick,
+                    onUnlikeClick = { viewModel.removeFavorite(it) }
+                )
             }
             if (filteredFavorites.isEmpty()) {
                 item {
@@ -177,7 +211,7 @@ fun FavoritesScreen(
 }
 
 @Composable
-fun FavoriteBookCardItem(book: Book, onClick: (String) -> Unit) {
+fun FavoriteBookCardItem(book: Book, onClick: (String) -> Unit, onUnlikeClick: (String) -> Unit) {
     val context = LocalContext.current
     val resources = context.resources
     
@@ -190,7 +224,6 @@ fun FavoriteBookCardItem(book: Book, onClick: (String) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .height(180.dp)
-            .clickable { onClick(book.id) }
     ) {
         Row(modifier = Modifier.fillMaxSize()) {
             AsyncImage(
@@ -215,7 +248,7 @@ fun FavoriteBookCardItem(book: Book, onClick: (String) -> Unit) {
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
-                    maxLines = 2,
+                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
 
@@ -239,7 +272,7 @@ fun FavoriteBookCardItem(book: Book, onClick: (String) -> Unit) {
                         )
                     }
                     Text(
-                        text = "${book.rating}",
+                        text = String.format(java.util.Locale.US, "%.1f", book.rating),
                         color = Color.White,
                         fontSize = 12.sp,
                         modifier = Modifier.padding(start = 4.dp)
@@ -254,22 +287,37 @@ fun FavoriteBookCardItem(book: Book, onClick: (String) -> Unit) {
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                Button(
-                    onClick = { },
-                    colors = ButtonDefaults.buttonColors(containerColor = btnOrange),
-                    shape = RoundedCornerShape(8.dp),
-                    modifier = Modifier
-                        .align(Alignment.End)
-                        .height(36.dp)
-                        .width(120.dp),
-                    contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = resources.getString(R.string.favorites_read_button), 
-                        color = Color.White, 
-                        fontSize = 14.sp, 
-                        fontWeight = FontWeight.Bold
-                    )
+                    IconButton(
+                        onClick = { onUnlikeClick(book.id) }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Favorite,
+                            contentDescription = "Remove from favorites",
+                            tint = btnOrange
+                        )
+                    }
+
+                    Button(
+                        onClick = { onClick(book.id) },
+                        colors = ButtonDefaults.buttonColors(containerColor = btnOrange),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier
+                            .height(48.dp)
+                            .width(120.dp),
+                        contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp)
+                    ) {
+                        Text(
+                            text = resources.getString(R.string.favorites_read_button), 
+                            color = Color.White, 
+                            fontSize = 14.sp, 
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
         }

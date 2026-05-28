@@ -10,6 +10,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -46,11 +47,6 @@ fun ChatScreen(
                     }
                 },
                 actions = {
-                    post?.bookId?.let { bookId ->
-                        TextButton(onClick = { onAddReviewClick?.invoke() }) {
-                            Text("Написать рецензию")
-                        }
-                    }
                 }
             )
         }
@@ -86,6 +82,7 @@ fun ChatScreen(
                             .padding(bottom = 16.dp)
                     ) {
                         Card(
+                            modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(12.dp),
                             colors = CardDefaults.cardColors(containerColor = Color(0xFF3E5A47))
                         ) {
@@ -112,11 +109,20 @@ fun ChatScreen(
                                         color = Color.LightGray,
                                         fontSize = 14.sp
                                     )
-                                    Text(
-                                        "⭐ ${post.bookRating}",
-                                        color = Color.White,
-                                        fontSize = 13.sp
-                                    )
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            imageVector = Icons.Default.Star,
+                                            contentDescription = "Рейтинг",
+                                            tint = Color.White,
+                                            modifier = Modifier.size(14.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(
+                                            text = "${post.bookRating}",
+                                            color = Color.White,
+                                            fontSize = 13.sp
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -149,7 +155,7 @@ fun ChatScreen(
                                                 Icons.Default.FavoriteBorder
                                             },
                                             contentDescription = "Лайк",
-                                            tint = if (isLiked) Color.Red else Color.Gray
+                                            tint = if (isLiked) Color(0xFFC56E4A) else Color.Gray
                                         )
                                     }
 
@@ -206,8 +212,10 @@ fun ChatScreen(
                         placeholder = { Text("Оставьте комментарий...") },
                         shape = RoundedCornerShape(24.dp),
                         colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color(0xFFF5F5DC),
-                            unfocusedContainerColor = Color(0xFFF5F5DC)
+                            focusedContainerColor = Color(0xFFF0F0F0),
+                            unfocusedContainerColor = Color(0xFFF0F0F0),
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
                         )
                     )
 

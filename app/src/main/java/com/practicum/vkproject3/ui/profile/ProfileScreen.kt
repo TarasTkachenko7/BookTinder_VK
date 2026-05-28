@@ -40,7 +40,6 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun ProfileScreen(
     onNavigateToEdit: () -> Unit = {},
-    onNavigateToHistory: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
     onNavigateToSubscription: () -> Unit = {},
     onNavigateToFavoriteBooks: () -> Unit = {},
@@ -71,13 +70,13 @@ fun ProfileScreen(
             TopAppBar(
                 title = { Text(stringResource(R.string.profile_title), fontWeight = FontWeight.Bold, fontSize = 22.sp) },
                 actions = {
-                    IconButton(onClick = { }) {
+                    /* IconButton(onClick = { }) {
                         Icon(
                             imageVector = Icons.Default.NotificationsNone,
                             contentDescription = null,
                             tint = Color.Black.copy(alpha = 0.7f)
                         )
-                    }
+                    } */
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = BeigeBackground)
             )
@@ -165,12 +164,6 @@ fun ProfileScreen(
                     icon = Icons.Default.StarBorder,
                     iconTint = Color(0xFFFF9800),
                     onClick = onNavigateToSubscription
-                )
-
-                MenuButton(
-                    text = stringResource(R.string.profile_history),
-                    icon = Icons.Default.History,
-                    onClick = onNavigateToHistory
                 )
 
                 MenuButton(

@@ -21,7 +21,8 @@ data class RegistrationState(
 )
 
 class RegistrationViewModel(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val context: android.content.Context
 ) : ViewModel() {
     private val _state = MutableStateFlow(RegistrationState())
     val state = _state.asStateFlow()
@@ -42,13 +43,16 @@ class RegistrationViewModel(
         val currentState = _state.value
         var hasError = false
 
-        if (!currentState.email.contains("@") || currentState.email.isBlank()) {
-            _state.update { it.copy(emailError = "Некорректный формат почты") }
+        if (currentState.email.isBlank() || !android.util.Patterns.EMAIL_ADDRESS.matcher(currentState.email).matches()) {
+            _state.update { it.copy(emailError = "Некорректный формат email") }
             hasError = true
         }
 
-        if (currentState.password.length < 8) {
-            _state.update { it.copy(passwordError = "Пароль не должен быть короче 8 символов") }
+        if (currentState.password.isBlank()) {
+            _state.update { it.copy(passwordError = "Введите пароль") }
+            hasError = true
+        } else if (currentState.password.length < 6) {
+            _state.update { it.copy(passwordError = "Слишком слабый пароль (минимум 6 символов)") }
             hasError = true
         }
 
@@ -62,17 +66,25 @@ class RegistrationViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
 
+            val prefs = context.getSharedPreferences("user_prefs", android.content.Context.MODE_PRIVATE)
+            val genres = prefs.getStringSet("user_genres", emptySet())?.toList() ?: emptyList()
+
             val request = RegisterRequest(
                 email = currentState.email,
-                password = currentState.password
+                password = currentState.password,
+                selectedGenres = genres
             )
             val result = authRepository.register(request)
 
             if (result.isSuccess) {
                 _state.update { it.copy(isLoading = false, isSuccess = true) }
             } else {
-                val errorMsg = result.exceptionOrNull()?.message ?: "Произошла неизвестная ошибка"
-                _state.update { it.copy(isLoading = false, emailError = errorMsg) }
+                val exception = result.exceptionOrNull()
+                if (exception is com.google.firebase.auth.FirebaseAuthUserCollisionException) {
+                    _state.update { it.copy(isLoading = false, emailError = exception.toUserFriendlyMessage()) }
+                } else {
+                    _state.update { it.copy(isLoading = false, passwordError = exception?.toUserFriendlyMessage() ?: "Произошла неизвестная ошибка. Повторите попытку") }
+                }
             }
         }
     }

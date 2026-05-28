@@ -20,13 +20,14 @@ class AuthRepositoryImpl(
             val result = auth.createUserWithEmailAndPassword(request.email, request.password).await()
             val user = result.user
             if (user != null) {
-                val userMap = mapOf(
-                    "uid" to user.uid,
-                    "email" to request.email,
-                    "name" to "",
-                    "genres" to emptyList<String>()
+                val userRecord = com.practicum.vkproject3.data.model.User(
+                    uid = user.uid,
+                    email = request.email,
+                    name = "Неизвестный",
+                    avatarUrl = null,
+                    favoriteGenres = request.selectedGenres
                 )
-                database.child(user.uid).setValue(userMap)
+                database.child(user.uid).setValue(userRecord)
 
                 user.sendEmailVerification().await()
 
@@ -41,6 +42,11 @@ class AuthRepositoryImpl(
 
     override suspend fun login(request: AuthRequest): Result<AuthResponse> {
         return try {
+            val methods = auth.fetchSignInMethodsForEmail(request.email).await().signInMethods
+            if (methods.isNullOrEmpty()) {
+                throw com.google.firebase.auth.FirebaseAuthInvalidUserException("ERROR_USER_NOT_FOUND", "Такого пользователя не существует")
+            }
+
             val result = auth.signInWithEmailAndPassword(request.email, request.password).await()
             val user = result.user
             if (user != null) {

@@ -40,7 +40,12 @@ class VerificationViewModel(
             if (result.isSuccess) {
                 _state.update { it.copy(isLoading = false, isResent = true) }
             } else {
-                val errorMsg = result.exceptionOrNull()?.message ?: "Ошибка при отправке"
+                val exception = result.exceptionOrNull()
+                val errorMsg = if (exception is com.google.firebase.FirebaseTooManyRequestsException) {
+                    "Слишком много попыток. Подождите пару минут перед повторной отправкой."
+                } else {
+                    "Не удалось отправить письмо. Проверьте интернет и повторите попытку."
+                }
                 _state.update { it.copy(isLoading = false, error = errorMsg) }
             }
         }

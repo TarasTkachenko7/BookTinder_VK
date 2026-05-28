@@ -78,7 +78,7 @@ fun LoginScreen(
             placeholder = stringResource(R.string.placeholder_password),
             leadingIcon = Icons.Default.Lock,
             isPassword = true,
-            errorMessage = state.passwordError ?: state.errorMessage
+            errorMessage = state.passwordError
         )
 
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {

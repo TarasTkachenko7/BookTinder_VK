@@ -40,7 +40,7 @@ class ForgotPasswordViewModel(
             if (result.isSuccess) {
                 _state.update { it.copy(isLoading = false, step = ForgotStep.SUCCESS) }
             } else {
-                val errorMsg = result.exceptionOrNull()?.message ?: "Ошибка при отправке письма"
+                val errorMsg = result.exceptionOrNull()?.toUserFriendlyMessage() ?: "Произошла неизвестная ошибка. Повторите попытку"
                 _state.update { it.copy(isLoading = false, errorMessage = errorMsg) }
             }
         }

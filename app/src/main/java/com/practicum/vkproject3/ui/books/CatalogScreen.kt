@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Tune
@@ -52,8 +53,7 @@ fun CatalogScreen(
     ) {
         CatalogSearchBarSection(
             searchQuery = state.searchQuery,
-            onSearchQueryChange = viewModel::onSearchQueryChange,
-            onFilterClick = {  }
+            onSearchQueryChange = viewModel::onSearchQueryChange
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -202,7 +202,7 @@ fun BookCardContent(book: Book) {
             color = Color.White,
             fontSize = 13.sp,
             fontWeight = FontWeight.Bold,
-            maxLines = 2,
+            maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
         Spacer(modifier = Modifier.height(2.dp))
@@ -219,9 +219,13 @@ fun BookCardContent(book: Book) {
                 Icon(
                     Icons.Default.Star, null,
                     tint = Color.White,
-                    modifier = Modifier.size(12.dp)
+                    modifier = Modifier.size(12.dp).offset(y = 1.dp)
                 )
-                Text(" ${book.rating}", color = Color.White, fontSize = 11.sp)
+                Text(
+                    text = " " + String.format(java.util.Locale.US, "%.1f", book.rating), 
+                    color = Color.White, 
+                    fontSize = 11.sp
+                )
             }
 
             Text(
@@ -238,39 +242,55 @@ fun BookCardContent(book: Book) {
 @Composable
 fun CatalogSearchBarSection(
     searchQuery: String,
-    onSearchQueryChange: (String) -> Unit,
-    onFilterClick: () -> Unit
+    onSearchQueryChange: (String) -> Unit
 ) {
-    Row(Modifier.padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
-        OutlinedTextField(
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .height(50.dp)
+            .background(Color(0xFFEBEBEB), CircleShape),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = Icons.Default.Search,
+            contentDescription = null,
+            tint = Color.Gray,
+            modifier = Modifier.padding(start = 16.dp, end = 8.dp)
+        )
+        androidx.compose.foundation.text.BasicTextField(
             value = searchQuery,
             onValueChange = onSearchQueryChange,
-            placeholder = { Text("Поиск") },
-            modifier = Modifier.weight(1f).height(50.dp),
-            shape = CircleShape,
-            leadingIcon = { Icon(Icons.Default.Search, null, tint = Color.Gray) },
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = Color(0xFFEBEBEB),
-                unfocusedContainerColor = Color(0xFFEBEBEB),
-                focusedBorderColor = Color.Transparent,
-                unfocusedBorderColor = Color.Transparent
+            singleLine = true,
+            textStyle = androidx.compose.ui.text.TextStyle(
+                fontSize = 16.sp,
+                color = Color.Black
             ),
-            singleLine = true
+            cursorBrush = androidx.compose.ui.graphics.SolidColor(Color.Black),
+            modifier = Modifier.weight(1f),
+            decorationBox = { innerTextField ->
+                Box(contentAlignment = Alignment.CenterStart) {
+                    if (searchQuery.isEmpty()) {
+                        Text("Поиск", color = Color.Gray, fontSize = 16.sp)
+                    }
+                    innerTextField()
+                }
+            }
         )
-        Spacer(Modifier.width(8.dp))
-        Box(
-            Modifier
-                .size(50.dp)
-                .clip(CircleShape)
-                .background(Color(0xFFEBEBEB))
-                .clickable { onFilterClick() },
-            Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Default.Tune,
-                contentDescription = "Фильтры",
-                tint = Color.Black.copy(alpha = 0.75f)
-            )
+        
+        if (searchQuery.isNotEmpty()) {
+            IconButton(
+                onClick = { onSearchQueryChange("") },
+                modifier = Modifier.padding(end = 4.dp)
+            ) {
+                Icon(
+                    imageVector = androidx.compose.material.icons.Icons.Default.Clear,
+                    contentDescription = "Очистить поиск",
+                    tint = Color.Gray
+                )
+            }
+        } else {
+            Spacer(Modifier.width(16.dp))
         }
     }
 }

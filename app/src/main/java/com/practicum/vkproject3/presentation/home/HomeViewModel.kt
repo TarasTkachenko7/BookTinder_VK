@@ -8,6 +8,7 @@ import com.practicum.vkproject3.domain.books.GigaChatRepository
 import com.practicum.vkproject3.domain.model.Book
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -35,14 +36,41 @@ data class HomeState(
 
 class HomeViewModel(
     private val repository: BookRepository,
-    private val aiRepository: GigaChatRepository
+    private val aiRepository: GigaChatRepository,
+    private val userRepository: com.practicum.vkproject3.domain.profile.UserRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeState(isLoading = true))
     val state = _state.asStateFlow()
 
+    private val favoriteIds = MutableStateFlow<Set<String>>(emptySet())
+
     init {
-        loadAiBooks()
+        viewModelScope.launch {
+            repository.syncFavoritesOnStartup()
+        }
+        viewModelScope.launch {
+            repository.observeFavoriteBooks().collect { favorites ->
+                val newIds = favorites.map { it.id }.toSet()
+                favoriteIds.value = newIds
+                _state.update { st ->
+                    st.copy(books = st.books.map { it.copy(isFavorite = newIds.contains(it.id)) })
+                }
+            }
+        }
+        viewModelScope.launch {
+            userRepository.observeUserGenres()
+                .distinctUntilChanged()
+                .collect { newGenres ->
+                    if (newGenres.isNotEmpty()) {
+                        UserSession.selectedGenres = newGenres.toSet()
+                        _state.update { it.copy(isLoading = true, books = emptyList(), index = 0, isExhausted = false) }
+                        loadAiBooks()
+                    } else if (_state.value.books.isEmpty() && !_state.value.isExhausted) {
+                        loadAiBooks()
+                    }
+                }
+        }
     }
 
     fun loadAiBooks() {
@@ -103,6 +131,18 @@ class HomeViewModel(
         }
     }
 
+    fun setIndex(newIndex: Int) {
+        _state.update { st ->
+            if (st.books.isEmpty() || newIndex == st.index) return@update st
+
+            if (newIndex >= st.books.size - 3 && !st.isLoading && !st.isExhausted) {
+                loadAiBooks()
+            }
+
+            st.copy(index = newIndex)
+        }
+    }
+
     fun toggleFavorite() {
         _state.update { st ->
             val cur = st.current ?: return@update st
@@ -117,10 +157,17 @@ class HomeViewModel(
                 description = cur.description
             )
 
-            UserSession.toggleFavorite(domainBook)
+            val isFav = !cur.isFavorite
+            viewModelScope.launch {
+                if (isFav) {
+                    repository.saveFavoriteBook(domainBook)
+                } else {
+                    repository.removeFavoriteBook(domainBook.id)
+                }
+            }
 
             val updated = st.books.map {
-                if (it.id == cur.id) it.copy(isFavorite = !it.isFavorite) else it
+                if (it.id == cur.id) it.copy(isFavorite = isFav) else it
             }
             st.copy(books = updated)
         }
@@ -137,7 +184,7 @@ class HomeViewModel(
             coverUrl = imageUrl,
             genreId = genre,
             rating = displayRating,
-            isFavorite = UserSession.isFavorite(id),
+            isFavorite = favoriteIds.value.contains(id),
             description = this.description ?: "Описание отсутствует."
         )
     }

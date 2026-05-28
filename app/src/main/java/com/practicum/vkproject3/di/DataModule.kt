@@ -14,11 +14,24 @@ import com.practicum.vkproject3.data.books.GigaChatRepositoryImpl
 import com.practicum.vkproject3.data.genres.GenreRepositoryImpl
 import com.practicum.vkproject3.domain.genres.GenreRepository
 
+import androidx.room.Room
+import com.practicum.vkproject3.data.db.AppDatabase
+
 val dataModule = module {
+    single {
+        Room.databaseBuilder(
+            androidContext(),
+            AppDatabase::class.java,
+            "book_tinder_db"
+        ).fallbackToDestructiveMigration().build()
+    }
+    
+    single { get<AppDatabase>().favoriteBookDao() }
+
     single { UserGenreManager() }
 
     single<AuthRepository> { AuthRepositoryImpl(get()) }
-    single<BookRepository> { BookRepositoryImpl(get(), androidContext()) }
+    single<BookRepository> { BookRepositoryImpl(get(), androidContext(), get()) }
     
     single<UserRepository> { UserRepositoryImpl(androidContext(), get()) }
 

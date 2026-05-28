@@ -99,7 +99,7 @@ fun BookItem(book: Book) {
                     text = book.title,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    maxLines = 2,
+                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     lineHeight = 22.sp
                 )
