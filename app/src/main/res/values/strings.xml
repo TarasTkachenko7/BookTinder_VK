@@ -14,7 +14,7 @@
     <string name="home_loading">Загрузка...</string>
     <string name="home_retry">Повторить</string>
     <string name="home_no_books">Книг не найдено</string>
-    <string name="home_rating_format">★ %.1f</string>
+    <string name="home_rating_format">%.1f</string>
     <string name="home_info_description">Информация о приложении</string>
     <string name="home_favorites_description">Избранное</string>
     <string name="home_notifications_description">Уведомления</string>

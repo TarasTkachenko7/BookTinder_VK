@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.input.pointer.pointerInput
@@ -275,12 +276,21 @@ fun HomeScreen(
                                                             Arrangement.SpaceBetween,
                                                             Alignment.CenterVertically
                                                         ) {
-                                                            Text(
-                                                                text = stringResource(R.string.home_rating_format, book.rating),
-                                                                color = Color.White.copy(alpha = 0.9f),
-                                                                fontSize = 13.sp,
-                                                                fontWeight = FontWeight.Medium
-                                                            )
+                                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                                Icon(
+                                                                    imageVector = Icons.Default.Star,
+                                                                    contentDescription = null,
+                                                                    tint = Color.White,
+                                                                    modifier = Modifier.size(14.dp)
+                                                                )
+                                                                Spacer(modifier = Modifier.width(4.dp))
+                                                                Text(
+                                                                    text = stringResource(R.string.home_rating_format, book.rating),
+                                                                    color = Color.White.copy(alpha = 0.9f),
+                                                                    fontSize = 13.sp,
+                                                                    fontWeight = FontWeight.Medium
+                                                                )
+                                                            }
 
                                                             Text(
                                                                 text = book.genreId,
