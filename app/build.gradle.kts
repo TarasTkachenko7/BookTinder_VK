@@ -68,6 +68,9 @@ dependencies {
     implementation("com.github.bumptech.glide:glide:4.16.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
     implementation("androidx.fragment:fragment-ktx:1.6.2")
+    val media3Version = "1.10.1"
+    implementation("androidx.media3:media3-exoplayer:$media3Version")
+    implementation("androidx.media3:media3-ui:$media3Version")
 
     // Network
     implementation("com.squareup.retrofit2:retrofit:2.9.0")

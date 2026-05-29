@@ -1,6 +1,6 @@
 package com.practicum.vkproject3
 
-import android.net.Uri // <-- ДОБАВИЛИ ИМПОРТ ДЛЯ КОДИРОВАНИЯ
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -47,12 +47,11 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
 import com.practicum.vkproject3.presentation.discussions.ChatScreen
 import com.practicum.vkproject3.presentation.discussions.CreateReviewScreen
 import com.practicum.vkproject3.presentation.discussions.DiscussionsScreen
 import com.practicum.vkproject3.presentation.discussions.DiscussionsViewModel
+import com.practicum.vkproject3.ui.launch.LaunchVideoScreen
 import com.practicum.vkproject3.ui.auth.ForgotPasswordScreen
 import com.practicum.vkproject3.ui.auth.LoginScreen
 import com.practicum.vkproject3.ui.auth.RegistrationScreen
@@ -70,6 +69,7 @@ import com.practicum.vkproject3.ui.profile.ProfileScreen
 import com.practicum.vkproject3.ui.theme.BeigeBackground
 import com.practicum.vkproject3.ui.theme.MainBrown
 import com.practicum.vkproject3.ui.theme.VkProject3Theme
+import androidx.core.view.WindowCompat
 import org.koin.androidx.compose.koinViewModel
 
 sealed class BottomNavItem(val route: String, val title: String, val selectedIcon: ImageVector, val unselectedIcon: ImageVector) {
@@ -83,14 +83,25 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val firebase : DatabaseReference = FirebaseDatabase.getInstance().getReference()
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         val auth = FirebaseAuth.getInstance()
         setContent {
             VkProject3Theme {
                 val rootNavController = rememberNavController()
-                val startDestination = if (auth.currentUser != null) "main_app" else "login"
 
-                NavHost(navController = rootNavController, startDestination = startDestination) {
+                NavHost(navController = rootNavController, startDestination = "launch_video") {
+                    composable("launch_video") {
+                        LaunchVideoScreen(
+                            onFinished = {
+                                val targetRoute = if (auth.currentUser != null) "main_app" else "login"
+                                rootNavController.navigate(targetRoute) {
+                                    popUpTo("launch_video") { inclusive = true }
+                                    launchSingleTop = true
+                                }
+                            }
+                        )
+                    }
+
                     composable("login") {
                         LoginScreen(
                             onNavigateToRegistration = {
