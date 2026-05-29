@@ -43,7 +43,7 @@ fun SettingsScreen(
                 title = { Text(stringResource(R.string.profile_settings), fontWeight = FontWeight.Bold, fontSize = 20.sp) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.placeholder_back))
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = BeigeBackground)
@@ -69,7 +69,7 @@ fun SettingsScreen(
                 border = BorderStroke(1.dp, dullBrown),
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Text("Выйти из аккаунта", fontSize = 16.sp, fontWeight = FontWeight.Medium)
+                Text(stringResource(R.string.settings_logout), fontSize = 16.sp, fontWeight = FontWeight.Medium)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -78,7 +78,7 @@ fun SettingsScreen(
                 onClick = { viewModel.deleteAccount() },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Удалить аккаунт", color = Color.Red.copy(alpha = 0.7f), fontWeight = FontWeight.SemiBold)
+                Text(stringResource(R.string.settings_delete_account), color = Color.Red.copy(alpha = 0.7f), fontWeight = FontWeight.SemiBold)
             }
         }
     }

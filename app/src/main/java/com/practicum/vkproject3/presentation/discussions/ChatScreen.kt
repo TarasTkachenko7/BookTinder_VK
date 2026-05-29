@@ -17,10 +17,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.practicum.vkproject3.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,10 +42,10 @@ fun ChatScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Обсуждение", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.discussion_title), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.placeholder_back))
                     }
                 },
                 actions = {
@@ -58,7 +60,7 @@ fun ChatScreen(
                     .padding(padding),
                 contentAlignment = Alignment.Center
             ) {
-                Text("Рецензия не найдена")
+                Text(stringResource(R.string.discussion_no_review_found))
             }
             return@Scaffold
         }
@@ -110,15 +112,15 @@ fun ChatScreen(
                                         fontSize = 14.sp
                                     )
                                     Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(
-                                            imageVector = Icons.Default.Star,
-                                            contentDescription = "Рейтинг",
-                                            tint = Color.White,
-                                            modifier = Modifier.size(14.dp)
-                                        )
+                                            Icon(
+                                                imageVector = Icons.Default.Star,
+                                                contentDescription = stringResource(R.string.discussion_rating),
+                                                tint = Color.White,
+                                                modifier = Modifier.size(14.dp)
+                                            )
                                         Spacer(modifier = Modifier.width(4.dp))
                                         Text(
-                                            text = "${post.bookRating}",
+                                            text = stringResource(R.string.home_rating_format, post.bookRating),
                                             color = Color.White,
                                             fontSize = 13.sp
                                         )
@@ -147,17 +149,17 @@ fun ChatScreen(
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    IconButton(onClick = { isLiked = !isLiked }) {
-                                        Icon(
-                                            imageVector = if (isLiked) {
-                                                Icons.Default.Favorite
-                                            } else {
-                                                Icons.Default.FavoriteBorder
-                                            },
-                                            contentDescription = "Лайк",
-                                            tint = if (isLiked) Color(0xFFC56E4A) else Color.Gray
-                                        )
-                                    }
+                                            IconButton(onClick = { isLiked = !isLiked }) {
+                                                Icon(
+                                                    imageVector = if (isLiked) {
+                                                        Icons.Default.Favorite
+                                                    } else {
+                                                        Icons.Default.FavoriteBorder
+                                                    },
+                                            contentDescription = stringResource(R.string.discussion_like),
+                                                    tint = if (isLiked) Color(0xFFC56E4A) else Color.Gray
+                                                )
+                                            }
 
                                     Text(
                                         post.date,
@@ -170,7 +172,7 @@ fun ChatScreen(
 
                         Spacer(modifier = Modifier.height(24.dp))
                         Text(
-                            "Комментарии (${postComments.size})",
+                            stringResource(R.string.discussion_comments_title, postComments.size),
                             fontWeight = FontWeight.Bold,
                             fontSize = 16.sp
                         )
@@ -209,7 +211,7 @@ fun ChatScreen(
                         value = commentText,
                         onValueChange = { commentText = it },
                         modifier = Modifier.weight(1f),
-                        placeholder = { Text("Оставьте комментарий...") },
+                        placeholder = { Text(stringResource(R.string.discussion_comment_placeholder)) },
                         shape = RoundedCornerShape(24.dp),
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = Color(0xFFF0F0F0),
@@ -229,7 +231,7 @@ fun ChatScreen(
                     ) {
                         Icon(
                             Icons.AutoMirrored.Filled.Send,
-                            contentDescription = "Отправить",
+                            contentDescription = stringResource(R.string.discussion_send),
                             tint = Color(0xFF3E5A47)
                         )
                     }

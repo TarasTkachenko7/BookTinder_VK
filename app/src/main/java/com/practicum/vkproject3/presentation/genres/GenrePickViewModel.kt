@@ -3,6 +3,7 @@ package com.practicum.vkproject3.presentation.genres
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.practicum.vkproject3.R
 import com.practicum.vkproject3.data.profile.UserGenreManager
 import com.practicum.vkproject3.data.profile.UserSession
 import com.practicum.vkproject3.domain.genres.GenreRepository
@@ -50,7 +51,7 @@ class GenrePickViewModel(
                 _state.update {
                     it.copy(
                         isLoading = false,
-                        error = "Не удалось загрузить жанры"
+                        error = context.getString(R.string.error_genre_load)
                     )
                 }
             }

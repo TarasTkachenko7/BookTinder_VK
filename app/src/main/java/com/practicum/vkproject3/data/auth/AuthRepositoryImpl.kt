@@ -23,7 +23,7 @@ class AuthRepositoryImpl(
                 val userRecord = com.practicum.vkproject3.data.model.User(
                     uid = user.uid,
                     email = request.email,
-                    name = "Неизвестный",
+                    name = "",
                     avatarUrl = null,
                     favoriteGenres = request.selectedGenres
                 )
@@ -31,9 +31,9 @@ class AuthRepositoryImpl(
 
                 user.sendEmailVerification().await()
 
-                Result.success(AuthResponse(token = user.uid, message = "Success"))
+                Result.success(AuthResponse(token = user.uid, message = null))
             } else {
-                Result.failure(Exception("Не удалось получить данные пользователя"))
+                Result.failure(Exception())
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -44,15 +44,15 @@ class AuthRepositoryImpl(
         return try {
             val methods = auth.fetchSignInMethodsForEmail(request.email).await().signInMethods
             if (methods.isNullOrEmpty()) {
-                throw com.google.firebase.auth.FirebaseAuthInvalidUserException("ERROR_USER_NOT_FOUND", "Такого пользователя не существует")
+                throw com.google.firebase.auth.FirebaseAuthInvalidUserException("ERROR_USER_NOT_FOUND", "")
             }
 
             val result = auth.signInWithEmailAndPassword(request.email, request.password).await()
             val user = result.user
             if (user != null) {
-                Result.success(AuthResponse(token = user.uid, message = "Success"))
+                Result.success(AuthResponse(token = user.uid, message = null))
             } else {
-                Result.failure(Exception("Ошибка входа"))
+                Result.failure(Exception())
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -89,7 +89,7 @@ class AuthRepositoryImpl(
 
     override suspend fun deleteAccount(): Result<Unit> {
         return try {
-            val user = auth.currentUser ?: return Result.failure(Exception("Пользователь не авторизован"))
+            val user = auth.currentUser ?: return Result.failure(Exception())
             val uid = user.uid
 
             val databaseReference = FirebaseDatabase

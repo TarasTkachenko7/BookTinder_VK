@@ -43,6 +43,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -68,6 +69,7 @@ fun HomeScreen(
     val orangeBrown = colorResource(R.color.orange_brown)
     val iconGray = colorResource(R.color.icon_gray)
     val textBlack = colorResource(R.color.text_black)
+    val bookQuotes = stringArrayResource(R.array.home_quotes).toList()
 
     val pagerState = rememberPagerState(
         initialPage = state.index,
@@ -122,7 +124,7 @@ fun HomeScreen(
                 Text(text = stringResource(R.string.home_about_book), color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(10.dp))
                 Column(Modifier.verticalScroll(rememberScrollState())) {
-                    val description = state.current?.description ?: "Описание отсутствует."
+                    val description = state.current?.description ?: stringResource(R.string.description_absent)
                     Text(
                         text = description,
                         textAlign = TextAlign.Center,
@@ -166,14 +168,6 @@ fun HomeScreen(
                             contentDescription = stringResource(R.string.home_favorites_description),
                             onClick = onFavoritesClick
                         )
-                        // Spacer(Modifier.width(10.dp))
-                        // RoundIconButton(
-                        //     Icons.Default.Notifications,
-                        //     iconGray,
-                        //     textBlack,
-                        //     stringResource(R.string.home_notifications_description),
-                        //     onNotificationsClick
-                        // )
                     }
                 }
                 Spacer(Modifier.height(14.dp))
@@ -317,7 +311,7 @@ fun HomeScreen(
                                                 ) {
                                                     Icon(
                                                         imageVector = Icons.Default.Favorite,
-                                                        contentDescription = "Liked",
+                                                        contentDescription = stringResource(R.string.home_liked_description),
                                                         tint = orangeBrown,
                                                         modifier = Modifier.size(120.dp)
                                                     )
@@ -347,7 +341,7 @@ fun HomeScreen(
                                             Arrangement.Center,
                                             Alignment.CenterHorizontally
                                         ) {
-                                            Text("Ошибка при загрузке новых рекомендаций")
+                                            Text(stringResource(R.string.home_error_recommendations))
                                             Spacer(Modifier.height(12.dp))
                                             Button(
                                                 onClick = viewModel::loadAiBooks,
@@ -362,7 +356,7 @@ fun HomeScreen(
                                             verticalArrangement = Arrangement.Center
                                         ) {
                                             Text(
-                                                text = "На сегодня всё!",
+                                                text = stringResource(R.string.home_exhausted_title),
                                                 fontSize = 28.sp,
                                                 fontWeight = FontWeight.Bold,
                                                 color = textBlack,
@@ -370,7 +364,7 @@ fun HomeScreen(
                                             )
                                             Spacer(modifier = Modifier.height(16.dp))
                                             Text(
-                                                text = "Мы подберем для вас новую партию рекомендаций, как только в библиотеке появятся обновления.",
+                                                text = stringResource(R.string.home_exhausted_subtitle),
                                                 fontSize = 16.sp,
                                                 color = textBlack.copy(alpha = 0.7f),
                                                 textAlign = TextAlign.Center,
@@ -396,7 +390,7 @@ fun HomeScreen(
                                                 onClick = viewModel::prev,
                                                 colors = ButtonDefaults.buttonColors(containerColor = orangeBrown)
                                             ) {
-                                                Text("Вернуться к предыдущей", color = Color.White)
+                                                Text(stringResource(R.string.home_back_to_previous), color = Color.White)
                                             }
                                         }
                                     } else {
@@ -429,11 +423,31 @@ data class OnboardingPage(
 fun HomeOnboardingOverlay(onDismiss: () -> Unit) {
     val orangeBrown = colorResource(R.color.orange_brown)
     val pages = listOf(
-        OnboardingPage("Открой мир книг", "созданный именно для тебя", "Мы подберём книги под твой вкус\n• быстро\n• точно\n• красиво"),
-        OnboardingPage("Механика свайпов", null, "Листай книги влево и вправо\n\nПонравилась? Просто лайкни\n\nНе твоё — свайпай дальше"),
-        OnboardingPage("Избранное", null, "Все понравившиеся — в твоей личной коллекции\n\nДобавляй книги в избранное и возвращайся к ним в любое время.\n\nКрасиво. Удобно. По уму."),
-        OnboardingPage("ИИ-рекомендации", "Твой персональный книжный ИИ-эксперт", "Мы анализируем твои лайки, жанры и стиль чтения, чтобы собирать умную ленту рекомендаций\n\nКаждый свайп делает её точнее"),
-        OnboardingPage("Готов?", null, "Пойдём искать твою следующую любимую книгу\n\nТы в одном свайпе от идеального чтения!")
+        OnboardingPage(
+            stringResource(R.string.home_onboarding_page_1_title),
+            stringResource(R.string.home_onboarding_page_1_subtitle),
+            stringResource(R.string.home_onboarding_page_1_body)
+        ),
+        OnboardingPage(
+            stringResource(R.string.home_onboarding_page_2_title),
+            null,
+            stringResource(R.string.home_onboarding_page_2_body)
+        ),
+        OnboardingPage(
+            stringResource(R.string.home_onboarding_page_3_title),
+            null,
+            stringResource(R.string.home_onboarding_page_3_body)
+        ),
+        OnboardingPage(
+            stringResource(R.string.home_onboarding_page_4_title),
+            stringResource(R.string.home_onboarding_page_4_subtitle),
+            stringResource(R.string.home_onboarding_page_4_body)
+        ),
+        OnboardingPage(
+            stringResource(R.string.home_onboarding_page_5_title),
+            null,
+            stringResource(R.string.home_onboarding_page_5_body)
+        )
     )
 
     Box(
@@ -464,7 +478,7 @@ fun HomeOnboardingOverlay(onDismiss: () -> Unit) {
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
-                        contentDescription = "Close",
+                        contentDescription = stringResource(R.string.home_close),
                         tint = Color.White,
                         modifier = Modifier.clickable { onDismiss() }
                     )
@@ -531,7 +545,7 @@ fun HomeOnboardingOverlay(onDismiss: () -> Unit) {
 
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                        contentDescription = "Next",
+                        contentDescription = stringResource(R.string.home_next_book),
                         tint = orangeBrown,
                         modifier = Modifier
                             .size(32.dp)
@@ -569,10 +583,3 @@ private fun RoundIconButton(
 
 
 
-private val bookQuotes = listOf(
-    "«Комната без книг — всё равно, что тело без души.»\n— Марк Туллий Цицерон",
-    "«Чтение — это один из истоков мышления и умственного развития.»\n— В. А. Сухомлинский",
-    "«Книги — это корабли мысли, странствующие по волнам времени и бережно несущие свой драгоценный груз...»\n— Фрэнсис Бэкон",
-    "«Парадокс чтения: оно уводит нас от реальности, чтобы наполнить реальность смыслом.»\n— Дэниел Пеннак",
-    "«Человек, который не читает хороших книг, не имеет преимуществ перед человеком, который не умеет читать.»\n— Марк Твен"
-)

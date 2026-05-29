@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -52,28 +53,28 @@ fun OnboardingScreen(
     val pages = listOf(
         OnboardingPageData(
             imageRes = R.drawable.onboarding1,
-            title = "Твоя идеальная библиотека",
-            description = "Мы подберем книги, от которых ты не сможешь оторваться. Быстро и точно"
+            title = stringResource(R.string.onboarding_title_1),
+            description = stringResource(R.string.onboarding_description_1)
         ),
         OnboardingPageData(
             imageRes = R.drawable.onboarding2,
-            title = "Свайпай и выбирай",
-            description = "Вправо — если хочешь прочитать. Влево — идем дальше. Выбор за тобой"
+            title = stringResource(R.string.onboarding_title_2),
+            description = stringResource(R.string.onboarding_description_2)
         ),
         OnboardingPageData(
             imageRes = R.drawable.onboarding3,
-            title = "ИИ знает твои вкусы",
-            description = "Умные алгоритмы анализируют твои лайки. Каждый свайп делает ленту еще точнее"
+            title = stringResource(R.string.onboarding_title_3),
+            description = stringResource(R.string.onboarding_description_3)
         ),
         OnboardingPageData(
             imageRes = R.drawable.onboarding4,
-            title = "Делись и читай",
-            description = "Делись своим мнением в ленте и узнавай мнения других читателей"
+            title = stringResource(R.string.onboarding_title_4),
+            description = stringResource(R.string.onboarding_description_4)
         ),
         OnboardingPageData(
             imageRes = R.drawable.onboarding5,
-            title = "Готов к первой главе?",
-            description = "Твоя следующая любимая книга уже ждет. Один свайп — и мы начинаем"
+            title = stringResource(R.string.onboarding_title_5),
+            description = stringResource(R.string.onboarding_description_5)
         )
     )
 
@@ -144,7 +145,7 @@ fun OnboardingScreen(
                     label = "btn_text"
                 ) { last ->
                     Text(
-                        text = if (last) "Выбрать жанры" else "Далее",
+                        text = if (last) stringResource(R.string.onboarding_choose_genres) else stringResource(R.string.onboarding_next),
                         color = Color.White,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold

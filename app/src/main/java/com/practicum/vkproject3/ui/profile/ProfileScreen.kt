@@ -69,15 +69,6 @@ fun ProfileScreen(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.profile_title), fontWeight = FontWeight.Bold, fontSize = 22.sp) },
-                actions = {
-                    /* IconButton(onClick = { }) {
-                        Icon(
-                            imageVector = Icons.Default.NotificationsNone,
-                            contentDescription = null,
-                            tint = Color.Black.copy(alpha = 0.7f)
-                        )
-                    } */
-                },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = BeigeBackground)
             )
         },

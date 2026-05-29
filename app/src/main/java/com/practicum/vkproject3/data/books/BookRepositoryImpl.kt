@@ -35,11 +35,11 @@ class BookRepositoryImpl(
     private val memoryCache = mutableMapOf<String, Book>()
 
     private val genreMapping = mapOf(
-        "Фантастика" to "science fiction",
-        "Детектив" to "mystery",
-        "Роман" to "romance",
-        "Приключения" to "adventure",
-        "Драма" to "drama"
+        context.getString(R.string.genre_fantasy) to "science fiction",
+        context.getString(R.string.genre_detective) to "mystery",
+        context.getString(R.string.genre_romance) to "romance",
+        context.getString(R.string.genre_adventure) to "adventure",
+        context.getString(R.string.genre_drama) to "drama"
     )
 
     override suspend fun getBooks(page: Int): Pair<List<Book>, Int> = withContext(Dispatchers.IO) {
@@ -52,7 +52,7 @@ class BookRepositoryImpl(
                 imageUrl = doc.coverI?.let { "https://covers.openlibrary.org/b/id/$it-L.jpg" } ?: "",
                 rating = 0.0,
                 genre = context.getString(R.string.book_genre_miscellaneous),
-                description = ""
+                description = context.getString(R.string.description_absent)
             )
             memoryCache[book.id] = book
             book
@@ -73,9 +73,9 @@ class BookRepositoryImpl(
                         imageUrl = doc.coverI?.let { "https://covers.openlibrary.org/b/id/$it-M.jpg" } ?: "",
                         rating = ((doc.key?.hashCode()?.toUInt()?.toLong() ?: 0L) % 21) / 10.0 + 3.0,
                         genre = genre,
-                        description = ""
+                        description = context.getString(R.string.description_absent)
                     )
-                    memoryCache[book.id] = book // Сохраняем в кеш
+                    memoryCache[book.id] = book
                     book
                 }
                 if (books.isNotEmpty()) {
@@ -104,7 +104,7 @@ class BookRepositoryImpl(
                     imageUrl = doc.coverI?.let { "https://covers.openlibrary.org/b/id/$it-M.jpg" } ?: fallbackCoverUrl,
                     rating = ((doc.key?.hashCode()?.toUInt()?.toLong() ?: 0L) % 21) / 10.0 + 3.0,
                     genre = genre,
-                    description = ""
+                    description = context.getString(R.string.description_absent)
                 )
                 memoryCache[book.id] = book
                 book
@@ -210,7 +210,7 @@ class BookRepositoryImpl(
                     imageUrl = fBook.imageUrl ?: "",
                     rating = fBook.rating?.toString()?.toDoubleOrNull() ?: 0.0,
                     genre = fBook.genreId ?: "unknown",
-                    description = fBook.description ?: "Описание отсутствует."
+                    description = fBook.description ?: context.getString(R.string.description_absent)
                 )
             }
         } catch (e: Exception) {
@@ -234,8 +234,8 @@ class BookRepositoryImpl(
                     author = doc.authorNames?.firstOrNull() ?: context.getString(R.string.book_no_author),
                     imageUrl = doc.coverI?.let { "https://covers.openlibrary.org/b/id/$it-L.jpg" } ?: fallbackCoverUrl,
                     rating = ((doc.key?.hashCode()?.toUInt()?.toLong() ?: 0L) % 21) / 10.0 + 3.0,
-                    genre = "Разное",
-                    description = "Описание отсутствует."
+                    genre = context.getString(R.string.book_genre_miscellaneous),
+                    description = context.getString(R.string.description_absent)
                 )
             }
         } catch (e: Exception) {

@@ -41,10 +41,10 @@ fun VerificationScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Подтверждение", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.verification_confirm_title), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.placeholder_back))
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = BeigeBackground)
@@ -70,7 +70,7 @@ fun VerificationScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "Мы отправили ссылку для подтверждения на вашу почту:",
+                text = stringResource(R.string.verification_sent_to_email),
                 textAlign = TextAlign.Center,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Medium
@@ -85,7 +85,7 @@ fun VerificationScreen(
             )
 
             Text(
-                text = "Пожалуйста, перейдите по ссылке в письме, чтобы продолжить.",
+                text = stringResource(R.string.verification_continue_prompt),
                 textAlign = TextAlign.Center,
                 fontSize = 14.sp,
                 color = Color.Gray
@@ -112,7 +112,7 @@ fun VerificationScreen(
                 if (state.isLoading) {
                     CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
                 } else {
-                    Text("Я подтвердил почту", fontSize = 18.sp)
+                    Text(stringResource(R.string.verification_confirmed_button), fontSize = 18.sp)
                 }
             }
 
@@ -120,7 +120,7 @@ fun VerificationScreen(
 
             TextButton(onClick = { viewModel.resendEmail() }) {
                 Text(
-                    text = if (state.isResent) "Письмо отправлено повторно" else "Отправить письмо еще раз",
+                    text = if (state.isResent) stringResource(R.string.verification_sent_again) else stringResource(R.string.verification_resend),
                     color = DarkGreen
                 )
             }

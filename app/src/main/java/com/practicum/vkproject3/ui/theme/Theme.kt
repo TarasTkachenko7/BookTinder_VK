@@ -32,7 +32,7 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun VkProject3Theme(
-    darkTheme: Boolean = false, // Ignored, always false to force Light Theme
+    darkTheme: Boolean = false,
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {

@@ -16,20 +16,20 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 val viewModelModule = module {
-    viewModel { LoginViewModel(get()) }
+    viewModel { LoginViewModel(get(), androidContext()) }
     viewModel { RegistrationViewModel(get(), androidContext()) }
-    viewModel { VerificationViewModel(get()) }
-    viewModel { ForgotPasswordViewModel(get()) }
+    viewModel { VerificationViewModel(get(), androidContext()) }
+    viewModel { ForgotPasswordViewModel(get(), androidContext()) }
 
     viewModel { BookViewModel(get()) }
-    viewModel { HomeViewModel(get(), get(), get()) }
+    viewModel { HomeViewModel(get(), get(), get(), androidContext()) }
     viewModel { GenrePickViewModel(get(), androidContext(), get()) }
-    viewModel { ProfileViewModel(get(), get()) }
+    viewModel { ProfileViewModel(get(), get(), androidContext()) }
 
-    viewModel { DiscussionsViewModel(get(), get()) }
+    viewModel { DiscussionsViewModel(get(), get(), androidContext()) }
 
-    viewModel { com.practicum.vkproject3.presentation.books.CatalogViewModel(get()) }
-    viewModel { parameters -> GenreDetailsViewModel(genre = parameters.get(), repository = get()) }
+    viewModel { com.practicum.vkproject3.presentation.books.CatalogViewModel(get(), androidContext()) }
+    viewModel { parameters -> GenreDetailsViewModel(genre = parameters.get(), repository = get(), context = androidContext()) }
     viewModel { BookDetailsViewModel(get()) }
     viewModel { com.practicum.vkproject3.presentation.books.FavoritesViewModel(get()) }
 }

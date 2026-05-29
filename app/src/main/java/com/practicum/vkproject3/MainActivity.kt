@@ -24,7 +24,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -35,6 +34,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -70,13 +70,14 @@ import com.practicum.vkproject3.ui.theme.BeigeBackground
 import com.practicum.vkproject3.ui.theme.MainBrown
 import com.practicum.vkproject3.ui.theme.VkProject3Theme
 import androidx.core.view.WindowCompat
+import androidx.annotation.StringRes
 import org.koin.androidx.compose.koinViewModel
 
-sealed class BottomNavItem(val route: String, val title: String, val selectedIcon: ImageVector, val unselectedIcon: ImageVector) {
-    object Books : BottomNavItem("books_screen", "Лента", Icons.Filled.Home, Icons.Outlined.Home)
-    object Discussions : BottomNavItem("discussions", "Обсуждения", Icons.Filled.ChatBubble, Icons.Outlined.ChatBubbleOutline)
-    object Catalog : BottomNavItem("catalog", "Каталог", Icons.AutoMirrored.Filled.MenuBook, Icons.AutoMirrored.Outlined.MenuBook)
-    object Profile : BottomNavItem("profile_screen", "Профиль", Icons.Filled.Person, Icons.Outlined.Person)
+sealed class BottomNavItem(val route: String, @StringRes val titleRes: Int, val selectedIcon: ImageVector, val unselectedIcon: ImageVector) {
+    object Books : BottomNavItem("books_screen", R.string.bottom_nav_books, Icons.Filled.Home, Icons.Outlined.Home)
+    object Discussions : BottomNavItem("discussions", R.string.bottom_nav_discussions, Icons.Filled.ChatBubble, Icons.Outlined.ChatBubbleOutline)
+    object Catalog : BottomNavItem("catalog", R.string.bottom_nav_catalog, Icons.AutoMirrored.Filled.MenuBook, Icons.AutoMirrored.Outlined.MenuBook)
+    object Profile : BottomNavItem("profile_screen", R.string.bottom_nav_profile, Icons.Filled.Person, Icons.Outlined.Person)
 }
 
 class MainActivity : ComponentActivity() {
@@ -243,7 +244,7 @@ fun MainFlowScreen(onLogout: () -> Unit) {
                             icon = { Icon(if (isSelected) screen.selectedIcon else screen.unselectedIcon, null, Modifier.size(26.dp)) },
                             label = {
                                 Text(
-                                    text = screen.title,
+                                    text = stringResource(screen.titleRes),
                                     fontSize = 11.sp,
                                     maxLines = 1,
                                     softWrap = false,
@@ -350,13 +351,12 @@ fun MainFlowScreen(onLogout: () -> Unit) {
             }
 
             composable("subscription_screen") {
-                PlaceholderScreen(title = "Подписка", onBack = { navController.popBackStack() })
+                PlaceholderScreen(title = stringResource(R.string.subscription_title), onBack = { navController.popBackStack() })
             }
 
             composable("favorites_screen") {
                 FavoritesScreen(
                     onBack = { navController.popBackStack() },
-                    // ИСПРАВЛЕНИЕ: Кодируем bookId
                     onBookClick = { bookId ->
                         navController.navigate("book_details/${Uri.encode(bookId)}")
                     }

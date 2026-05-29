@@ -1,3 +1,4 @@
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -24,27 +25,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.practicum.vkproject3.R
 import com.practicum.vkproject3.presentation.discussions.ReviewPost
 
-fun getParticipantsString(count: Int): String {
-    val mod10 = count % 10
-    val mod100 = count % 100
-    
-    return when {
-        mod100 in 11..14 -> "$count участников"
-        mod10 == 1 -> "$count участник"
-        mod10 in 2..4 -> "$count участника"
-        else -> "$count участников"
-    }
+fun getParticipantsString(count: Int, context: Context): String {
+    return context.resources.getQuantityString(R.plurals.discussion_participants, count, count)
 }
 
 @Composable
 fun ReviewPostCard(post: ReviewPost, onClick: () -> Unit) {
+    val context = LocalContext.current
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -94,13 +90,13 @@ fun ReviewPostCard(post: ReviewPost, onClick: () -> Unit) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             imageVector = Icons.Default.Star,
-                            contentDescription = "Рейтинг",
+                            contentDescription = context.getString(R.string.discussion_rating),
                             tint = Color.White,
                             modifier = Modifier.size(12.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = "${post.bookRating}  ${getParticipantsString(post.membersCount)}",
+                            text = "${post.bookRating}  ${getParticipantsString(post.membersCount, context)}",
                             color = Color.White,
                             fontSize = 11.sp
                         )

@@ -73,7 +73,6 @@ fun GenrePickScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Используем объект genre напрямую из стейта
                 state.genres.forEach { genre ->
                     val isSelected = state.selected.contains(genre.id)
 
@@ -82,7 +81,7 @@ fun GenrePickScreen(
                         onClick = { viewModel.toggleGenre(genre.id) },
                         label = {
                             Text(
-                                text = genre.name, // Берем имя жанра из базы
+                                text = genre.name,
                                 modifier = Modifier.padding(horizontal = 4.dp)
                             )
                         },

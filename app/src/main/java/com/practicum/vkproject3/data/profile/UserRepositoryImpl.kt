@@ -37,7 +37,6 @@ class UserRepositoryImpl(
                     UserSession.selectedGenres = userRecord.favoriteGenres.toSet()
                 }
             } catch (e: Exception) {
-                // Ignore failure and fallback to local
             }
         }
 

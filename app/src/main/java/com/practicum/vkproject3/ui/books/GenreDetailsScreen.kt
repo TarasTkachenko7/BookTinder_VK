@@ -19,11 +19,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.practicum.vkproject3.R
 import com.practicum.vkproject3.domain.model.Book
 import com.practicum.vkproject3.presentation.books.GenreDetailsViewModel
 import com.practicum.vkproject3.ui.theme.BeigeBackground
@@ -46,7 +48,7 @@ fun GenreDetailsScreen(
                 title = { Text(text = genre, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.genre_details_back))
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = BeigeBackground)
@@ -131,7 +133,7 @@ fun GenreGridBookCard(book: Book, onClick: () -> Unit) {
                         tint = Color.White,
                         modifier = Modifier.size(12.dp)
                     )
-                    Text(" ${book.rating}", color = Color.White, fontSize = 11.sp)
+                    Text(" " + stringResource(R.string.home_rating_format, book.rating), color = Color.White, fontSize = 11.sp)
                 }
             }
         }

@@ -40,7 +40,7 @@ fun ForgotPasswordScreen(
                 title = { },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.placeholder_back))
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = BeigeBackground)
@@ -61,7 +61,7 @@ fun ForgotPasswordScreen(
                 ForgotStep.EMAIL -> EmailStep(state, viewModel)
                 ForgotStep.SUCCESS -> {
                     Text(
-                        text = "Письмо для сброса пароля отправлено на вашу почту!",
+                        text = stringResource(R.string.forgot_password_success),
                         color = DarkGreen,
                         textAlign = TextAlign.Center,
                         fontSize = 18.sp,
@@ -74,7 +74,7 @@ fun ForgotPasswordScreen(
                         colors = ButtonDefaults.buttonColors(containerColor = DarkGreen),
                         shape = RoundedCornerShape(12.dp)
                     ) {
-                        Text("Вернуться к логину", fontSize = 16.sp)
+                        Text(stringResource(R.string.forgot_password_back_to_login), fontSize = 16.sp)
                     }
                 }
             }

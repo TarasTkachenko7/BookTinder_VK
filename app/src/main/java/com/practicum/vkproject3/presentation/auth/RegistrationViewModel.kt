@@ -2,6 +2,7 @@ package com.practicum.vkproject3.presentation.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.practicum.vkproject3.R
 import com.practicum.vkproject3.data.network.model.RegisterRequest
 import com.practicum.vkproject3.domain.auth.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,20 +45,20 @@ class RegistrationViewModel(
         var hasError = false
 
         if (currentState.email.isBlank() || !android.util.Patterns.EMAIL_ADDRESS.matcher(currentState.email).matches()) {
-            _state.update { it.copy(emailError = "Некорректный формат email") }
+            _state.update { it.copy(emailError = context.getString(R.string.auth_invalid_email)) }
             hasError = true
         }
 
         if (currentState.password.isBlank()) {
-            _state.update { it.copy(passwordError = "Введите пароль") }
+            _state.update { it.copy(passwordError = context.getString(R.string.auth_enter_password)) }
             hasError = true
         } else if (currentState.password.length < 6) {
-            _state.update { it.copy(passwordError = "Слишком слабый пароль (минимум 6 символов)") }
+            _state.update { it.copy(passwordError = context.getString(R.string.auth_password_too_weak)) }
             hasError = true
         }
 
         if (currentState.password != currentState.confirmPassword) {
-            _state.update { it.copy(confirmPasswordError = "Пароли не совпадают") }
+            _state.update { it.copy(confirmPasswordError = context.getString(R.string.auth_passwords_mismatch)) }
             hasError = true
         }
 
@@ -81,9 +82,10 @@ class RegistrationViewModel(
             } else {
                 val exception = result.exceptionOrNull()
                 if (exception is com.google.firebase.auth.FirebaseAuthUserCollisionException) {
-                    _state.update { it.copy(isLoading = false, emailError = exception.toUserFriendlyMessage()) }
+                    _state.update { it.copy(isLoading = false, emailError = context.getString(exception.toUserFriendlyMessageRes())) }
                 } else {
-                    _state.update { it.copy(isLoading = false, passwordError = exception?.toUserFriendlyMessage() ?: "Произошла неизвестная ошибка. Повторите попытку") }
+                    val errorMessage = exception?.let { context.getString(it.toUserFriendlyMessageRes()) } ?: context.getString(R.string.auth_unknown_error)
+                    _state.update { it.copy(isLoading = false, passwordError = errorMessage) }
                 }
             }
         }

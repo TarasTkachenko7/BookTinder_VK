@@ -1,8 +1,10 @@
 package com.practicum.vkproject3.data.books
 
+import android.content.Context
 import com.google.firebase.database.FirebaseDatabase
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.practicum.vkproject3.R
 import com.practicum.vkproject3.BuildConfig
 import com.practicum.vkproject3.data.model.FirebaseBook
 import com.practicum.vkproject3.data.network.api.GigaChatApi
@@ -14,7 +16,8 @@ import kotlinx.coroutines.tasks.await
 import java.util.UUID
 
 class GigaChatRepositoryImpl(
-    private val api: GigaChatApi
+    private val api: GigaChatApi,
+    private val context: Context
 ) : GigaChatRepository {
     private val authKey = BuildConfig.GIGA_CHAT_KEY
     private var cachedToken: String? = null
@@ -24,16 +27,16 @@ class GigaChatRepositoryImpl(
     private val booksRef = FirebaseDatabase.getInstance().getReference("books")
 
     private val genreNames = mapOf(
-        "fantasy" to "Фантастика",
-        "detective" to "Детектив",
-        "romance" to "Роман",
-        "adventure" to "Приключения",
-        "drama" to "Драма",
-        "classic" to "Классика",
-        "horror" to "Ужасы",
-        "psychology" to "Психология",
-        "science" to "Научпоп",
-        "business" to "Бизнес"
+        "fantasy" to context.getString(R.string.genre_fantasy),
+        "detective" to context.getString(R.string.genre_detective),
+        "romance" to context.getString(R.string.genre_romance),
+        "adventure" to context.getString(R.string.genre_adventure),
+        "drama" to context.getString(R.string.genre_drama),
+        "classic" to context.getString(R.string.genre_classic),
+        "horror" to context.getString(R.string.genre_horror),
+        "psychology" to context.getString(R.string.genre_psychology),
+        "science" to context.getString(R.string.genre_science),
+        "business" to context.getString(R.string.genre_business)
     )
 
     override suspend fun getRecommendations(

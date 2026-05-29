@@ -1,7 +1,9 @@
 package com.practicum.vkproject3.presentation.profile
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.practicum.vkproject3.R
 import com.practicum.vkproject3.domain.auth.AuthRepository
 import com.practicum.vkproject3.domain.model.UserProfile
 import com.practicum.vkproject3.domain.profile.UserRepository
@@ -19,7 +21,8 @@ data class ProfileState(
 
 class ProfileViewModel(
     private val repository: UserRepository,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val context: Context
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ProfileState(isLoading = true))
@@ -36,7 +39,7 @@ class ProfileViewModel(
                 val profile = repository.getProfile()
                 _state.value = _state.value.copy(isLoading = false, user = profile)
             } catch (e: Exception) {
-                _state.value = _state.value.copy(isLoading = false, error = "Ошибка сети")
+                _state.value = _state.value.copy(isLoading = false, error = context.getString(R.string.profile_network_error))
             }
         }
     }
@@ -50,10 +53,10 @@ class ProfileViewModel(
                     _state.value = _state.value.copy(isUpdateSuccess = true)
                     loadData()
                 } else {
-                    _state.value = _state.value.copy(isLoading = false, error = "Ошибка обновления")
+                    _state.value = _state.value.copy(isLoading = false, error = context.getString(R.string.profile_update_error))
                 }
             } catch (e: Exception) {
-                _state.value = _state.value.copy(isLoading = false, error = "Ошибка сети")
+                _state.value = _state.value.copy(isLoading = false, error = context.getString(R.string.profile_network_error))
             }
         }
     }
@@ -78,13 +81,12 @@ class ProfileViewModel(
                 if (result.isSuccess) {
                     _state.value = _state.value.copy(isLoading = false, isLoggedOut = true)
                 } else {
-                    val firebaseError = result.exceptionOrNull()?.message ?: "Не удалось удалить аккаунт"
-                    _state.value = _state.value.copy(isLoading = false, error = firebaseError)
+                    _state.value = _state.value.copy(isLoading = false, error = context.getString(R.string.profile_delete_failed))
                 }
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     isLoading = false,
-                    error = e.message ?: "Ошибка"
+                    error = e.message ?: context.getString(R.string.profile_error_generic)
                 )
             }
         }

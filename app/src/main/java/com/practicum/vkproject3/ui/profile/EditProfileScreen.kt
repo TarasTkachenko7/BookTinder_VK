@@ -30,6 +30,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -110,10 +111,10 @@ fun EditProfileScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Редактировать", fontWeight = FontWeight.Bold, fontSize = 20.sp) },
+                title = { Text(stringResource(R.string.edit_profile_title), fontWeight = FontWeight.Bold, fontSize = 20.sp) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.placeholder_back))
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = BeigeBackground)
@@ -132,7 +133,6 @@ fun EditProfileScreen(
             ) {
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Аватар
                 Box(
                     modifier = Modifier.size(130.dp),
                     contentAlignment = Alignment.Center
@@ -183,7 +183,6 @@ fun EditProfileScreen(
 
                 Spacer(modifier = Modifier.height(40.dp))
 
-                // Карточка ввода имени
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     color = Color.White,
@@ -197,7 +196,7 @@ fun EditProfileScreen(
                                 char in 'а'..'я' || char in 'А'..'Я' || char == 'ё' || char == 'Ё' || char in 'a'..'z' || char in 'A'..'Z' || char == ' '
                             }
                         },
-                        label = { Text("Ваше имя", color = Color.Gray) },
+                        label = { Text(stringResource(R.string.edit_profile_name_label), color = Color.Gray) },
                         leadingIcon = {
                             Box(
                                 modifier = Modifier
@@ -223,7 +222,6 @@ fun EditProfileScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Карточка выбора жанров
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     color = Color.White,
@@ -241,13 +239,13 @@ fun EditProfileScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Любимые жанры",
+                                text = stringResource(R.string.edit_profile_favorite_genres),
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 18.sp,
                                 color = Color.Black.copy(alpha = 0.85f)
                             )
                             Text(
-                                text = "Изменить",
+                                text = stringResource(R.string.edit_profile_change),
                                 color = MainBrown,
                                 fontWeight = FontWeight.Medium,
                                 modifier = Modifier
@@ -261,7 +259,7 @@ fun EditProfileScreen(
 
                         if (selectedGenres.isEmpty()) {
                             Text(
-                                text = "Вы еще не выбрали жанры",
+                                text = stringResource(R.string.edit_profile_no_genres),
                                 color = Color.Gray,
                                 fontSize = 15.sp
                             )
@@ -320,8 +318,8 @@ fun EditProfileScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = MainBrown),
                     shape = RoundedCornerShape(16.dp),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
-                ) {
-                    Text("Сохранить изменения", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                    ) {
+                    Text(stringResource(R.string.edit_profile_save), fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 }
 
                 Spacer(modifier = Modifier.height(40.dp))
@@ -352,7 +350,7 @@ fun EditProfileScreen(
                         .padding(horizontal = 24.dp, vertical = 16.dp)
                 ) {
                     Text(
-                        text = "Выберите жанры",
+                        text = stringResource(R.string.edit_profile_choose_genres),
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(bottom = 16.dp)
@@ -393,7 +391,7 @@ fun EditProfileScreen(
                         colors = ButtonDefaults.buttonColors(containerColor = MainBrown),
                         shape = RoundedCornerShape(16.dp)
                     ) {
-                        Text("Готово", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.edit_profile_done), fontSize = 16.sp, fontWeight = FontWeight.Bold)
                     }
                     Spacer(modifier = Modifier.height(24.dp))
                 }

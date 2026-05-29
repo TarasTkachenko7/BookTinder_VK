@@ -1,7 +1,9 @@
 package com.practicum.vkproject3.presentation.home
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.practicum.vkproject3.R
 import com.practicum.vkproject3.data.profile.UserSession
 import com.practicum.vkproject3.domain.books.BookRepository
 import com.practicum.vkproject3.domain.books.GigaChatRepository
@@ -37,7 +39,8 @@ data class HomeState(
 class HomeViewModel(
     private val repository: BookRepository,
     private val aiRepository: GigaChatRepository,
-    private val userRepository: com.practicum.vkproject3.domain.profile.UserRepository
+    private val userRepository: com.practicum.vkproject3.domain.profile.UserRepository,
+    private val context: Context
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeState(isLoading = true))
@@ -82,7 +85,9 @@ class HomeViewModel(
             _state.update { it.copy(isLoading = true, error = null) }
 
             try {
-                val genres = UserSession.selectedGenres.ifEmpty { setOf("Фантастика", "Роман") }
+                val genres = UserSession.selectedGenres.ifEmpty {
+                    setOf(context.getString(R.string.genre_fantasy), context.getString(R.string.genre_romance))
+                }
                 val alreadyShownIds = _state.value.books.map { it.id }.distinct()
 
                 val aiResult = aiRepository.getRecommendations(genres, alreadyShownIds)
@@ -102,10 +107,10 @@ class HomeViewModel(
                         _state.update { it.copy(isLoading = false, isExhausted = true) }
                     }
                 } else {
-                    _state.update { it.copy(isLoading = false, error = "Ошибка генерации рекомендаций") }
+                    _state.update { it.copy(isLoading = false, error = context.getString(R.string.error_recommendations_load)) }
                 }
             } catch (e: Exception) {
-                _state.update { it.copy(isLoading = false, error = "Проверьте подключение к сети") }
+                _state.update { it.copy(isLoading = false, error = context.getString(R.string.error_connection_required)) }
             }
         }
     }
@@ -185,7 +190,7 @@ class HomeViewModel(
             genreId = genre,
             rating = displayRating,
             isFavorite = favoriteIds.value.contains(id),
-            description = this.description ?: "Описание отсутствует."
+            description = this.description ?: context.getString(R.string.description_absent)
         )
     }
 }

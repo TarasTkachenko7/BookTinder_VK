@@ -1,5 +1,6 @@
 package com.practicum.vkproject3.presentation.auth
 
+import com.practicum.vkproject3.R
 import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
@@ -7,19 +8,19 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import java.io.IOException
 
-fun Throwable.toUserFriendlyMessage(): String {
+fun Throwable.toUserFriendlyMessageRes(): Int {
     return when (this) {
-        is FirebaseAuthInvalidUserException -> "Неверный email или пароль"
+        is FirebaseAuthInvalidUserException -> R.string.auth_user_not_found
         is FirebaseAuthInvalidCredentialsException -> {
             if (this.errorCode == "ERROR_INVALID_EMAIL") {
-                "Некорректный формат email"
+                R.string.auth_invalid_email
             } else {
-                "Неверный email или пароль"
+                R.string.auth_user_not_found
             }
         }
-        is FirebaseAuthUserCollisionException -> "Пользователь с таким email уже существует"
-        is FirebaseAuthWeakPasswordException -> "Слишком слабый пароль (минимум 6 символов)"
-        is FirebaseNetworkException, is IOException -> "Ошибка сети. Проверьте подключение к интернету"
-        else -> "Произошла неизвестная ошибка. Повторите попытку"
+        is FirebaseAuthUserCollisionException -> R.string.auth_email_exists
+        is FirebaseAuthWeakPasswordException -> R.string.auth_password_too_weak
+        is FirebaseNetworkException, is IOException -> R.string.auth_network_error
+        else -> R.string.auth_unknown_error
     }
 }

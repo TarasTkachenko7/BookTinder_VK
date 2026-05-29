@@ -115,7 +115,7 @@ fun FavoritesScreen(
                     ) {
                         Icon(
                             imageVector = androidx.compose.material.icons.Icons.Default.Clear,
-                            contentDescription = "Очистить поиск",
+                            contentDescription = resources.getString(R.string.favorites_clear_search),
                             tint = Color.Gray
                         )
                     }
@@ -123,23 +123,6 @@ fun FavoritesScreen(
                     Spacer(Modifier.width(16.dp))
                 }
             }
-
-            // Spacer(modifier = Modifier.width(8.dp))
-            // 
-            // Box(
-            //     Modifier
-            //         .size(38.dp)
-            //         .clip(CircleShape)
-            //         .background(androidx.compose.ui.res.colorResource(R.color.icon_gray).copy(alpha = 0.9f))
-            //         .clickable { },
-            //     Alignment.Center
-            // ) {
-            //     Icon(
-            //         imageVector = Icons.Default.Notifications,
-            //         contentDescription = null,
-            //         tint = androidx.compose.ui.res.colorResource(R.color.text_black).copy(alpha = 0.75f)
-            //     )
-            // }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -200,7 +183,7 @@ fun FavoritesScreen(
             if (filteredFavorites.isEmpty()) {
                 item {
                     Text(
-                        "Ничего не найдено",
+                        resources.getString(R.string.favorites_no_results),
                         color = Color.Gray,
                         modifier = Modifier.padding(16.dp)
                     )
@@ -272,7 +255,7 @@ fun FavoriteBookCardItem(book: Book, onClick: (String) -> Unit, onUnlikeClick: (
                         )
                     }
                     Text(
-                        text = String.format(java.util.Locale.US, "%.1f", book.rating),
+                        text = resources.getString(R.string.home_rating_format, book.rating),
                         color = Color.White,
                         fontSize = 12.sp,
                         modifier = Modifier.padding(start = 4.dp)
@@ -297,7 +280,7 @@ fun FavoriteBookCardItem(book: Book, onClick: (String) -> Unit, onUnlikeClick: (
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Favorite,
-                            contentDescription = "Remove from favorites",
+                            contentDescription = resources.getString(R.string.favorites_remove),
                             tint = btnOrange
                         )
                     }

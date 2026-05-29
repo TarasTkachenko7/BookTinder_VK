@@ -48,10 +48,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.practicum.vkproject3.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -93,7 +95,7 @@ fun CreateReviewScreen(
                     .padding(bottom = 16.dp)
             ) {
                 Text(
-                    text = "Выберите книгу",
+                    text = stringResource(R.string.discussion_select_book),
                     style = MaterialTheme.typography.headlineSmall
                 )
 
@@ -104,7 +106,7 @@ fun CreateReviewScreen(
                     onValueChange = { searchQuery = it },
                     modifier = Modifier.fillMaxWidth(),
                     placeholder = {
-                        Text("Поиск по названию или автору")
+                        Text(stringResource(R.string.discussion_search_book))
                     },
                     shape = RoundedCornerShape(16.dp)
                 )
@@ -131,7 +133,7 @@ fun CreateReviewScreen(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = pickerState.error ?: "Ошибка",
+                                text = pickerState.error ?: stringResource(R.string.error_generic),
                                 color = MaterialTheme.colorScheme.error
                             )
 
@@ -140,7 +142,7 @@ fun CreateReviewScreen(
                             TextButton(
                                 onClick = { viewModel.loadBooksForPicker() }
                             ) {
-                                Text("Попробовать снова")
+                                Text(stringResource(R.string.discussion_retry))
                             }
                         }
                     }
@@ -152,7 +154,7 @@ fun CreateReviewScreen(
                                 .padding(24.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text("Книги не найдены")
+                            Text(stringResource(R.string.discussion_books_not_found))
                         }
                     }
 
@@ -212,13 +214,13 @@ fun CreateReviewScreen(
                                             Row(verticalAlignment = Alignment.CenterVertically) {
                                                 Icon(
                                                     imageVector = Icons.Default.Star,
-                                                    contentDescription = "Рейтинг",
+                                                    contentDescription = stringResource(R.string.discussion_rating),
                                                     tint = Color.White,
                                                     modifier = Modifier.size(14.dp)
                                                 )
                                                 Spacer(modifier = Modifier.width(4.dp))
                                                 Text(
-                                                    text = "${book.rating}",
+                                                    text = stringResource(R.string.home_rating_format, book.rating),
                                                     style = MaterialTheme.typography.bodySmall,
                                                     color = Color.White
                                                 )
@@ -256,7 +258,7 @@ fun CreateReviewScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Новая рецензия") },
+                title = { Text(stringResource(R.string.discussion_new_review_title)) },
                 navigationIcon = {
                     IconButton(
                         onClick = {
@@ -266,7 +268,7 @@ fun CreateReviewScreen(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Назад"
+                            contentDescription = stringResource(R.string.placeholder_back)
                         )
                     }
                 }
@@ -292,9 +294,9 @@ fun CreateReviewScreen(
                 ) {
                     Text(
                         text = if (state.isPublishing) {
-                            "Публикуем..."
+                            stringResource(R.string.discussion_publish_in_progress)
                         } else {
-                            "Опубликовать"
+                            stringResource(R.string.discussion_publish)
                         }
                     )
                 }
@@ -327,7 +329,7 @@ fun CreateReviewScreen(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         Text(
-                            text = state.error ?: "Ошибка",
+                            text = state.error ?: stringResource(R.string.error_generic),
                             style = MaterialTheme.typography.bodyLarge
                         )
 
@@ -335,14 +337,14 @@ fun CreateReviewScreen(
                             onClick = { showBookPicker = true },
                             shape = RoundedCornerShape(16.dp)
                         ) {
-                            Text("Выбрать книгу")
+                            Text(stringResource(R.string.discussion_choose_book))
                         }
 
                         if (!bookId.isNullOrBlank()) {
                             TextButton(
                                 onClick = { viewModel.loadBookForReview(bookId) }
                             ) {
-                                Text("Попробовать снова")
+                                Text(stringResource(R.string.discussion_retry))
                             }
                         }
                     }
@@ -369,14 +371,14 @@ fun CreateReviewScreen(
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Text(
-                                    text = "Книга не выбрана",
+                                    text = stringResource(R.string.discussion_book_not_selected),
                                     style = MaterialTheme.typography.titleMedium
                                 )
 
                                 Spacer(modifier = Modifier.height(8.dp))
 
                                 Text(
-                                    text = "Сначала выбери книгу, для которой хочешь написать рецензию",
+                                    text = stringResource(R.string.discussion_choose_book_hint),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = Color.Gray
                                 )
@@ -387,7 +389,7 @@ fun CreateReviewScreen(
                                     onClick = { showBookPicker = true },
                                     shape = RoundedCornerShape(16.dp)
                                 ) {
-                                    Text("Выбрать книгу")
+                                    Text(stringResource(R.string.discussion_choose_book))
                                 }
                             }
                         }
@@ -443,12 +445,12 @@ fun CreateReviewScreen(
                                         Spacer(modifier = Modifier.width(8.dp))
                                         Icon(
                                             imageVector = Icons.Default.Star,
-                                            contentDescription = "Рейтинг",
+                                            contentDescription = stringResource(R.string.discussion_rating),
                                             tint = Color.White,
                                             modifier = Modifier.size(12.dp).offset(y = 1.dp)
                                         )
                                         Text(
-                                            text = " " + String.format(java.util.Locale.US, "%.1f", book.rating),
+                                            text = stringResource(R.string.home_rating_format, book.rating),
                                             fontSize = 11.sp,
                                             color = Color.White
                                         )
@@ -457,12 +459,12 @@ fun CreateReviewScreen(
                                 
                                 Spacer(modifier = Modifier.width(8.dp))
                                 
-                                Icon(
-                                    imageVector = Icons.Default.Edit,
-                                    contentDescription = "Изменить книгу",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(20.dp)
-                                )
+                                        Icon(
+                                            imageVector = Icons.Default.Edit,
+                                            contentDescription = stringResource(R.string.discussion_change_book),
+                                            tint = Color.White,
+                                            modifier = Modifier.size(20.dp)
+                                        )
                             }
                         }
                     }
@@ -476,7 +478,7 @@ fun CreateReviewScreen(
                             .fillMaxWidth()
                             .weight(1f),
                         placeholder = {
-                            Text("Напишите рецензию...")
+                            Text(stringResource(R.string.discussion_write_review))
                         },
                         shape = RoundedCornerShape(16.dp)
                     )
@@ -484,7 +486,7 @@ fun CreateReviewScreen(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = "${state.reviewText.length} символов",
+                        text = stringResource(R.string.discussion_characters_format, state.reviewText.length),
                         modifier = Modifier.align(Alignment.End),
                         style = MaterialTheme.typography.bodySmall,
                         color = Color.Gray

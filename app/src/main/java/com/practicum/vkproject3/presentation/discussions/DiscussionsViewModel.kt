@@ -1,8 +1,10 @@
 package com.practicum.vkproject3.presentation.discussions
 
+import android.content.Context
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.practicum.vkproject3.R
 import com.practicum.vkproject3.domain.books.BookRepository
 import com.practicum.vkproject3.domain.model.Book
 import com.practicum.vkproject3.domain.profile.UserRepository
@@ -29,7 +31,7 @@ data class ReviewComment(
     val id: Int,
     val postId: Int,
     val text: String,
-    val date: String = "только что"
+    val date: String = ""
 )
 
 data class ReviewBookUi(
@@ -68,7 +70,8 @@ data class BookPickerState(
 
 class DiscussionsViewModel(
     private val repository: BookRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val context: Context
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DiscussionsUiState(isLoading = true))
@@ -90,12 +93,7 @@ class DiscussionsViewModel(
 
     private fun loadInitialPosts() {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(
-                    isLoading = true,
-                    error = null
-                )
-            }
+            _uiState.update { it.copy(isLoading = true, error = null) }
 
             try {
                 val (books, _) = repository.getBooks(1)
@@ -112,11 +110,15 @@ class DiscussionsViewModel(
                         membersCount = 4 + index,
                         userNickname = listOf("anna_reads", "booklover", "maria")[index % 3],
                         reviewText = listOf(
-                            "Очень атмосферная книга. Особенно понравился стиль автора и то, как постепенно раскрываются герои.",
-                            "История интересная, но местами показалась немного затянутой. В целом книга оставила хорошее впечатление.",
-                            "Сильная книга, после которой еще долго думаешь о сюжете и персонажах. Мне очень понравилась."
+                            context.getString(R.string.discussion_review_1),
+                            context.getString(R.string.discussion_review_2),
+                            context.getString(R.string.discussion_review_3)
                         )[index % 3],
-                        date = listOf("сегодня", "вчера", "2 дня назад")[index % 3],
+                        date = listOf(
+                            context.getString(R.string.discussion_date_today),
+                            context.getString(R.string.discussion_date_yesterday),
+                            context.getString(R.string.discussion_date_two_days_ago)
+                        )[index % 3],
                         userAvatarColor = listOf(
                             Color(0xFFC26E4B),
                             Color(0xFF6C8EAD),
@@ -125,25 +127,19 @@ class DiscussionsViewModel(
                     )
                 }
 
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        posts = mockPosts,
-                        error = null
-                    )
-                }
+                _uiState.update { it.copy(isLoading = false, posts = mockPosts, error = null) }
 
                 _comments.value = mockPosts.associate { post ->
                     post.id to listOf(
                         ReviewComment(
                             id = 1,
                             postId = post.id,
-                            text = "Согласен, книга правда цепляет."
+                            text = context.getString(R.string.discussion_comment_one)
                         ),
                         ReviewComment(
                             id = 2,
                             postId = post.id,
-                            text = "Мне финал показался спорным, но в целом тоже понравилось."
+                            text = context.getString(R.string.discussion_comment_two)
                         )
                     )
                 }
@@ -152,7 +148,7 @@ class DiscussionsViewModel(
                     it.copy(
                         isLoading = false,
                         posts = emptyList(),
-                        error = "Не удалось загрузить рецензии"
+                        error = context.getString(R.string.discussion_loading_reviews)
                     )
                 }
             }
@@ -165,11 +161,7 @@ class DiscussionsViewModel(
 
         viewModelScope.launch {
             _createReviewState.update {
-                it.copy(
-                    isBookLoading = true,
-                    selectedBook = null,
-                    error = null
-                )
+                it.copy(isBookLoading = true, selectedBook = null, error = null)
             }
 
             try {
@@ -180,25 +172,21 @@ class DiscussionsViewModel(
                         it.copy(
                             isBookLoading = false,
                             selectedBook = null,
-                            error = "Книга не найдена"
+                            error = context.getString(R.string.discussion_book_missing)
                         )
                     }
                     return@launch
                 }
 
                 _createReviewState.update {
-                    it.copy(
-                        isBookLoading = false,
-                        selectedBook = book.toReviewBookUi(),
-                        error = null
-                    )
+                    it.copy(isBookLoading = false, selectedBook = book.toReviewBookUi(), error = null)
                 }
             } catch (e: Exception) {
                 _createReviewState.update {
                     it.copy(
                         isBookLoading = false,
                         selectedBook = null,
-                        error = "Ошибка загрузки книги"
+                        error = context.getString(R.string.discussion_loading_book)
                     )
                 }
             }
@@ -236,7 +224,7 @@ class DiscussionsViewModel(
                     it.copy(
                         isLoading = false,
                         isPaginating = false,
-                        error = "Не удалось загрузить книги"
+                        error = context.getString(R.string.discussion_books_loading_failed)
                     )
                 }
             }
@@ -245,22 +233,16 @@ class DiscussionsViewModel(
 
     fun searchBooksForPicker(query: String): List<ReviewBookUi> {
         val books = _bookPickerState.value.books
-
         if (query.isBlank()) return books
 
         return books.filter { book ->
-            book.title.contains(query, ignoreCase = true) ||
-                    book.author.contains(query, ignoreCase = true)
+            book.title.contains(query, ignoreCase = true) || book.author.contains(query, ignoreCase = true)
         }
     }
 
     fun selectBookForReview(book: ReviewBookUi) {
         _createReviewState.update {
-            it.copy(
-                isBookLoading = false,
-                selectedBook = book,
-                error = null
-            )
+            it.copy(isBookLoading = false, selectedBook = book, error = null)
         }
     }
 
@@ -303,9 +285,7 @@ class DiscussionsViewModel(
     }
 
     fun onReviewTextChanged(text: String) {
-        _createReviewState.update {
-            it.copy(reviewText = text)
-        }
+        _createReviewState.update { it.copy(reviewText = text) }
     }
 
     fun resetCreateReviewState() {
@@ -315,22 +295,18 @@ class DiscussionsViewModel(
     fun publishReview(onSuccess: () -> Unit = {}) {
         val form = _createReviewState.value
         val book = form.selectedBook ?: return
-
         if (!form.canPublish || form.isPublishing) return
 
         viewModelScope.launch {
-            _createReviewState.update {
-                it.copy(isPublishing = true)
-            }
+            _createReviewState.update { it.copy(isPublishing = true) }
 
             val newId = (_uiState.value.posts.maxOfOrNull { it.id } ?: 0) + 1
-
             val userProfile = try {
                 userRepository.getProfile()
             } catch (e: Exception) {
                 null
             }
-            val userName = userProfile?.name?.takeIf { it.isNotBlank() } ?: "Пользователь"
+            val userName = userProfile?.name?.takeIf { it.isNotBlank() } ?: context.getString(R.string.discussion_user)
 
             val newPost = ReviewPost(
                 id = newId,
@@ -342,25 +318,23 @@ class DiscussionsViewModel(
                 membersCount = 1,
                 userNickname = userName,
                 reviewText = form.reviewText.trim(),
-                date = "только что"
+                date = context.getString(R.string.discussion_just_now)
             )
 
             _uiState.update { currentState ->
-                currentState.copy(
-                    posts = listOf(newPost) + currentState.posts
-                )
+                currentState.copy(posts = listOf(newPost) + currentState.posts)
             }
 
             _comments.update { current ->
                 current + (
-                        newId to listOf(
-                            ReviewComment(
-                                id = 1,
-                                postId = newId,
-                                text = "Добро пожаловать в обсуждение!"
-                            )
+                    newId to listOf(
+                        ReviewComment(
+                            id = 1,
+                            postId = newId,
+                            text = context.getString(R.string.discussion_comment_welcome)
                         )
-                        )
+                    )
+                )
             }
 
             _createReviewState.value = CreateReviewState()
@@ -368,13 +342,9 @@ class DiscussionsViewModel(
         }
     }
 
-    fun getPostById(id: Int): ReviewPost? {
-        return _uiState.value.posts.find { it.id == id }
-    }
+    fun getPostById(id: Int): ReviewPost? = _uiState.value.posts.find { it.id == id }
 
-    fun getCommentsForPost(postId: Int): List<ReviewComment> {
-        return _comments.value[postId].orEmpty()
-    }
+    fun getCommentsForPost(postId: Int): List<ReviewComment> = _comments.value[postId].orEmpty()
 
     fun addComment(postId: Int, text: String) {
         val trimmed = text.trim()
@@ -394,9 +364,7 @@ class DiscussionsViewModel(
         }
     }
 
-    private suspend fun findBookById(bookId: String): Book? {
-        return repository.getBookById(bookId)
-    }
+    private suspend fun findBookById(bookId: String): Book? = repository.getBookById(bookId)
 
     private fun Book.toReviewBookUi(): ReviewBookUi {
         return ReviewBookUi(

@@ -1,7 +1,9 @@
 package com.practicum.vkproject3.presentation.books
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.practicum.vkproject3.R
 import com.practicum.vkproject3.domain.books.BookRepository
 import com.practicum.vkproject3.domain.model.Book
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,18 +25,19 @@ data class CatalogState(
 )
 
 class CatalogViewModel(
-    private val repository: BookRepository
+    private val repository: BookRepository,
+    private val context: Context
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(CatalogState())
     val state = _state.asStateFlow()
 
     private val catalogGenresMap = mapOf(
-        "fantasy" to "Фантастика",
-        "detective" to "Детектив",
-        "romance" to "Роман",
-        "adventure" to "Приключения",
-        "drama" to "Драма"
+        "fantasy" to context.getString(R.string.genre_fantasy),
+        "detective" to context.getString(R.string.genre_detective),
+        "romance" to context.getString(R.string.genre_romance),
+        "adventure" to context.getString(R.string.genre_adventure),
+        "drama" to context.getString(R.string.genre_drama)
     )
 
     init {
@@ -60,7 +63,7 @@ class CatalogViewModel(
                     )
                 }
             } catch (e: Exception) {
-                _state.update { it.copy(isLoading = false, error = "Ошибка загрузки") }
+                _state.update { it.copy(isLoading = false, error = context.getString(R.string.error_load_catalog)) }
             }
         }
     }

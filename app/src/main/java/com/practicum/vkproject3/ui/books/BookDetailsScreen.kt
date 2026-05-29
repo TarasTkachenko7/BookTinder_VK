@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -60,10 +61,10 @@ fun BookDetailsScreen(
     if (book == null) {
         Box(Modifier.fillMaxSize().background(BeigeBackground), contentAlignment = Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Книга не найдена", fontSize = 18.sp, color = Color.Black)
+                Text(stringResource(R.string.book_details_not_found), fontSize = 18.sp, color = Color.Black)
                 Spacer(Modifier.height(16.dp))
                 Button(onClick = onBack, colors = ButtonDefaults.buttonColors(containerColor = MainBrown)) {
-                    Text("Вернуться назад", color = Color.White)
+                    Text(stringResource(R.string.book_details_go_back), color = Color.White)
                 }
             }
         }
@@ -108,14 +109,14 @@ fun BookDetailsScreen(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "О книге",
+                    text = stringResource(R.string.book_details_about_book),
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "${book.author} - известный писатель...",
+                    text = stringResource(R.string.book_details_author_prefix, book.author),
                     color = Color.White.copy(alpha = 0.85f),
                     fontSize = 14.sp
                 )
@@ -253,7 +254,7 @@ fun BookDetailsScreen(
                         .height(50.dp)
                 ) {
                     Text(
-                        text = "Написать рецензию",
+                        text = stringResource(R.string.book_details_write_review),
                         fontSize = 16.sp
                     )
                 }

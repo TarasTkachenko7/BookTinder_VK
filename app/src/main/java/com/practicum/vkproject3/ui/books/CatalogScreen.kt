@@ -24,11 +24,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.practicum.vkproject3.R
 import com.practicum.vkproject3.domain.model.Book
 import com.practicum.vkproject3.presentation.books.CatalogViewModel
 import com.practicum.vkproject3.ui.theme.BeigeBackground
@@ -68,7 +70,7 @@ fun CatalogScreen(
             }
         } else if (state.searchQuery.isNotBlank() && state.filteredBooks.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(text = "По вашему запросу ничего не найдено", color = Color.Gray)
+                Text(text = stringResource(R.string.catalog_no_results), color = Color.Gray)
             }
         } else if (state.searchQuery.isNotBlank()) {
             LazyVerticalGrid(
@@ -125,7 +127,7 @@ fun GenreRowSection(
             IconButton(onClick = onGenreArrowClick, modifier = Modifier.size(32.dp)) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    contentDescription = "Смотреть все",
+                    contentDescription = stringResource(R.string.catalog_view_all),
                     tint = Color.Gray
                 )
             }
@@ -222,7 +224,7 @@ fun BookCardContent(book: Book) {
                     modifier = Modifier.size(12.dp).offset(y = 1.dp)
                 )
                 Text(
-                    text = " " + String.format(java.util.Locale.US, "%.1f", book.rating), 
+                    text = stringResource(R.string.home_rating_format, book.rating),
                     color = Color.White, 
                     fontSize = 11.sp
                 )
@@ -269,12 +271,12 @@ fun CatalogSearchBarSection(
             cursorBrush = androidx.compose.ui.graphics.SolidColor(Color.Black),
             modifier = Modifier.weight(1f),
             decorationBox = { innerTextField ->
-                Box(contentAlignment = Alignment.CenterStart) {
-                    if (searchQuery.isEmpty()) {
-                        Text("Поиск", color = Color.Gray, fontSize = 16.sp)
-                    }
-                    innerTextField()
-                }
+                        Box(contentAlignment = Alignment.CenterStart) {
+                            if (searchQuery.isEmpty()) {
+                        Text(stringResource(R.string.catalog_search), color = Color.Gray, fontSize = 16.sp)
+                            }
+                            innerTextField()
+                        }
             }
         )
         
@@ -285,7 +287,7 @@ fun CatalogSearchBarSection(
             ) {
                 Icon(
                     imageVector = androidx.compose.material.icons.Icons.Default.Clear,
-                    contentDescription = "Очистить поиск",
+                    contentDescription = stringResource(R.string.catalog_clear_search),
                     tint = Color.Gray
                 )
             }

@@ -1,7 +1,9 @@
 package com.practicum.vkproject3.presentation.auth
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.practicum.vkproject3.R
 import com.practicum.vkproject3.data.network.model.AuthRequest
 import com.practicum.vkproject3.domain.auth.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,7 +21,8 @@ data class LoginState(
 )
 
 class LoginViewModel(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val context: Context
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(LoginState())
@@ -41,11 +44,11 @@ class LoginViewModel(
         var passwordErr: String? = null
 
         if (currentState.email.isBlank() || !android.util.Patterns.EMAIL_ADDRESS.matcher(currentState.email).matches()) {
-            emailErr = "Некорректный формат email"
+            emailErr = context.getString(R.string.auth_invalid_email)
             hasError = true
         }
         if (currentState.password.isBlank()) {
-            passwordErr = "Введите пароль"
+            passwordErr = context.getString(R.string.auth_enter_password)
             hasError = true
         }
 
@@ -68,11 +71,11 @@ class LoginViewModel(
             } else {
                 val exception = result.exceptionOrNull()
                 if (exception is com.google.firebase.auth.FirebaseAuthInvalidUserException) {
-                    _state.update { it.copy(isLoading = false, emailError = "Такого пользователя не существует", passwordError = null) }
+                    _state.update { it.copy(isLoading = false, emailError = context.getString(R.string.auth_user_not_found), passwordError = null) }
                 } else if (exception is com.google.firebase.auth.FirebaseAuthInvalidCredentialsException) {
-                    _state.update { it.copy(isLoading = false, passwordError = "Неверный пароль", emailError = null) }
+                    _state.update { it.copy(isLoading = false, passwordError = context.getString(R.string.auth_wrong_password), emailError = null) }
                 } else {
-                    val errorMsg = exception?.toUserFriendlyMessage() ?: "Произошла неизвестная ошибка. Повторите попытку"
+                    val errorMsg = exception?.let { context.getString(it.toUserFriendlyMessageRes()) } ?: context.getString(R.string.auth_unknown_error)
                     _state.update { it.copy(isLoading = false, passwordError = errorMsg, emailError = null) }
                 }
             }

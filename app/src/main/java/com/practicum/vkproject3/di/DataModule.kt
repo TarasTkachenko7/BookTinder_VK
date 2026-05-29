@@ -35,6 +35,6 @@ val dataModule = module {
     
     single<UserRepository> { UserRepositoryImpl(androidContext(), get()) }
 
-    single<GigaChatRepository> { GigaChatRepositoryImpl(get()) }
+    single<GigaChatRepository> { GigaChatRepositoryImpl(get(), androidContext()) }
     single<GenreRepository> { GenreRepositoryImpl() }
 }
